@@ -8,7 +8,7 @@
 | [B-002](#b-002-visa-resenärers-allergier-på-en-resa) | Visa resenärers allergier på en resa | Redo | – |
 | [B-003](#b-003-märk-ingredienser-med-allergener) | Märk ingredienser med allergener | Redo | – |
 | [B-004](#b-004-varna-för-allergener-i-måltider) | Varna för allergener i måltider | Redo | – |
-| Gemensam frukost för hela resan | Klar | – |
+| [B-005](#b-005-gemensam-frukost-för-hela-resan) | Gemensam frukost för hela resan | Klar | – |
 
 **Status:** `Idé` → `Diskussion` → `Redo` → `Pågår` → `Klar` (eller `Avfärdad`)
 **Prioritet:** `Hög` / `Medel` / `Låg`
