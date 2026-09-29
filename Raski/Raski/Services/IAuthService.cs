@@ -9,6 +9,9 @@ public interface IAuthService
     /// <summary>True once the initial auth state has been resolved.</summary>
     bool IsInitialized { get; }
 
+    /// <summary>True when the signed in user may create trips and manage other global admins.</summary>
+    bool IsGlobalAdmin => Current?.IsGlobalAdmin == true;
+
     event Action? StateChanged;
 
     Task InitializeAsync(CancellationToken ct = default);

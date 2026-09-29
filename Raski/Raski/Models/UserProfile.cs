@@ -7,6 +7,9 @@ public sealed class UserProfile
     public string Email { get; set; } = "";
     public string PhotoUrl { get; set; } = "";
     public string Theme { get; set; } = ThemeOptions.System;
+
+    /// <summary>Global admins may create trips and promote other global admins.</summary>
+    public bool IsGlobalAdmin { get; set; }
 }
 
 public static class ThemeOptions

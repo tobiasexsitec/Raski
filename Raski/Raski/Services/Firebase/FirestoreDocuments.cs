@@ -32,6 +32,7 @@ internal sealed class UserDocument
     [JsonPropertyName("email")] public string? Email { get; set; }
     [JsonPropertyName("photoUrl")] public string? PhotoUrl { get; set; }
     [JsonPropertyName("theme")] public string? Theme { get; set; }
+    [JsonPropertyName("isGlobalAdmin")] public bool IsGlobalAdmin { get; set; }
 
     public UserProfile ToModel() => new()
     {
@@ -39,7 +40,8 @@ internal sealed class UserDocument
         DisplayName = DisplayName ?? "",
         Email = Email ?? "",
         PhotoUrl = PhotoUrl ?? "",
-        Theme = ThemeOptions.IsValid(Theme) ? Theme! : ThemeOptions.System
+        Theme = ThemeOptions.IsValid(Theme) ? Theme! : ThemeOptions.System,
+        IsGlobalAdmin = IsGlobalAdmin
     };
 }
 

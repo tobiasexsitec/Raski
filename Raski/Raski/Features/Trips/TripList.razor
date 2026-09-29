@@ -1,12 +1,16 @@
 @page "/"
 @inject ITripService TripService
+@inject IAuthService AuthService
 @inject NavigationManager Navigation
 
 <PageTitle>Mina resor – Raski</PageTitle>
 
 <div class="page-header">
     <h1>Mina resor</h1>
-    <a class="btn btn-primary" href="resor/ny">Ny resa</a>
+    @if (AuthService.IsGlobalAdmin)
+    {
+        <a class="btn btn-primary" href="resor/ny">Ny resa</a>
+    }
 </div>
 
 @if (isLoading)
@@ -21,14 +25,45 @@ else if (trips.Count == 0)
 {
     <div class="empty-state card">
         <p><strong>Inga resor än.</strong></p>
-        <p>Skapa din första resa så kan ni börja planera maten tillsammans.</p>
-        <a class="btn btn-primary" href="resor/ny">Skapa resa</a>
+        @if (AuthService.IsGlobalAdmin)
+        {
+            <p>Skapa din första resa så kan ni börja planera maten tillsammans.</p>
+            <a class="btn btn-primary" href="resor/ny">Skapa resa</a>
+        }
+        else
+        {
+            <p>Be en global admin att skapa en resa och bjuda in dig.</p>
+        }
     </div>
 }
 else
 {
-    <ul class="trip-grid">
-        @foreach (var trip in trips)
+    @if (upcomingTrips.Count > 0)
+    {
+        @TripGrid(upcomingTrips)
+    }
+    else
+    {
+        <p class="muted">Inga kommande resor.</p>
+    }
+
+    @if (pastTrips.Count > 0)
+    {
+        <h2 class="section-heading">Tidigare resor</h2>
+        @TripGrid(pastTrips)
+    }
+}
+
+@code {
+    private List<Trip> trips = [];
+    private List<Trip> upcomingTrips = [];
+    private List<Trip> pastTrips = [];
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    private RenderFragment<List<Trip>> TripGrid => items =>
+    @<ul class="trip-grid">
+        @foreach (var trip in items)
         {
             <li>
                 <a class="card card-interactive trip" href="@($"resor/{trip.Id}")">
@@ -42,19 +77,17 @@ else
                 </a>
             </li>
         }
-    </ul>
-}
-
-@code {
-    private List<Trip> trips = [];
-    private bool isLoading = true;
-    private string? errorMessage;
+    </ul>;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             trips = [.. await TripService.GetMyTripsAsync()];
+
+            var today = DateOnly.FromDateTime(DateTime.Now);
+            upcomingTrips = [.. trips.Where(t => t.EndDate >= today).OrderBy(t => t.StartDate)];
+            pastTrips = [.. trips.Where(t => t.EndDate < today).OrderByDescending(t => t.StartDate)];
         }
         catch (Exception ex)
         {

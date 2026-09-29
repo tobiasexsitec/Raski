@@ -1,0 +1,115 @@
+@page "/admin/anvandare"
+@inject IUserService UserService
+@inject IAuthService AuthService
+
+<PageTitle>Användare – Raski</PageTitle>
+
+<div class="page-header">
+    <div>
+        <h1>Användare</h1>
+        <p class="muted">Globala admins kan skapa resor och utse fler admins.</p>
+    </div>
+</div>
+
+@if (!AuthService.IsGlobalAdmin)
+{
+    <div class="empty-state card">
+        <p><strong>Du saknar behörighet.</strong></p>
+        <p>Bara globala admins kan hantera användare.</p>
+        <a class="btn btn-secondary" href="">Till mina resor</a>
+    </div>
+}
+else
+{
+    @if (errorMessage is not null)
+    {
+        <div class="error-banner">@errorMessage</div>
+    }
+
+    @if (isLoading)
+    {
+        <p class="muted">Hämtar användare…</p>
+    }
+    else
+    {
+        <ul class="user-list">
+            @foreach (var user in users)
+            {
+                <li class="card user">
+                    <div class="identity">
+                        <span class="name">@(string.IsNullOrWhiteSpace(user.DisplayName) ? user.Email : user.DisplayName)</span>
+                        <span class="muted">@user.Email</span>
+                    </div>
+
+                    @if (user.IsGlobalAdmin)
+                    {
+                        <span class="tag tag-accent">Global admin</span>
+                    }
+
+                    <button type="button"
+                            class="btn btn-sm @(user.IsGlobalAdmin ? "btn-danger" : "btn-secondary")"
+                            disabled="@(savingUid == user.Uid || user.Uid == AuthService.Current?.Uid)"
+                            @onclick="() => ToggleAsync(user)">
+                        @(user.IsGlobalAdmin ? "Ta bort admin" : "Gör till admin")
+                    </button>
+                </li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    private List<UserProfile> users = [];
+    private bool isLoading = true;
+    private string? savingUid;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthService.IsGlobalAdmin)
+        {
+            isLoading = false;
+            return;
+        }
+
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        isLoading = true;
+
+        try
+        {
+            users = [.. await UserService.GetAllAsync()];
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Kunde inte hämta användarna. {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ToggleAsync(UserProfile user)
+    {
+        errorMessage = null;
+        savingUid = user.Uid;
+
+        try
+        {
+            await UserService.SetGlobalAdminAsync(user.Uid, !user.IsGlobalAdmin);
+            user.IsGlobalAdmin = !user.IsGlobalAdmin;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Kunde inte uppdatera behörigheten. {ex.Message}";
+        }
+        finally
+        {
+            savingUid = null;
+        }
+    }
+}

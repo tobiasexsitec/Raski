@@ -11,6 +11,11 @@
     margin-bottom: var(--space-1);
 }
 
+.section-heading {
+    margin-top: var(--space-5);
+    margin-bottom: var(--space-3);
+}
+
 .destination {
     margin-bottom: var(--space-1);
 }

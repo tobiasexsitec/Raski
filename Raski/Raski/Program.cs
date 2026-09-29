@@ -15,6 +15,7 @@ builder.Services.AddSingleton(firebaseOptions);
 builder.Services.AddSingleton<FirebaseInterop>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<IThemeService, ThemeService>();
+builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddSingleton<ITripService, TripService>();
 builder.Services.AddSingleton<IIngredientService, IngredientService>();
 builder.Services.AddSingleton<IMealService, MealService>();
