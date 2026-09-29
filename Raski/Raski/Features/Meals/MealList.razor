@@ -1,0 +1,244 @@
+@implements IAsyncDisposable
+@inject IMealService MealService
+@inject ITripService TripService
+
+<Confetti @ref="confetti" />
+
+<section class="meals">
+    <div class="page-header">
+        <h2>Måltider</h2>
+        @if (errorMessage is not null)
+        {
+            <span class="muted">@errorMessage</span>
+        }
+    </div>
+
+    @foreach (var day in Trip.Days())
+    {
+        var dayMeals = meals.Where(m => m.Date == day).OrderBy(m => m.Type).ToList();
+
+        <div class="day">
+            <div class="day-header">
+                <h3>@FormatDay(day)</h3>
+                <button type="button" class="btn btn-secondary btn-sm" @onclick="() => StartCreate(day)">
+                    + Måltid
+                </button>
+            </div>
+
+            @if (editingDate == day && editingMeal is null)
+            {
+                <MealForm Trip="Trip"
+                          Members="members"
+                          InitialDate="day"
+                          OnSaved="OnMealCreatedAsync"
+                          OnCancel="StopEditing" />
+            }
+
+            @if (dayMeals.Count == 0 && editingDate != day)
+            {
+                <p class="muted no-meals">Inget planerat än.</p>
+            }
+
+            @foreach (var meal in dayMeals)
+            {
+                @if (editingMeal?.Id == meal.Id)
+                {
+                    <MealForm Trip="Trip"
+                              Members="members"
+                              Meal="meal"
+                              OnSaved="StopEditing"
+                              OnCancel="StopEditing" />
+                }
+                else
+                {
+                    <article class="card meal"
+                             role="button"
+                             tabindex="0"
+                             @onclick="() => ShowDetail(meal)">
+                        <div class="meal-head">
+                            <span class="tag tag-accent">@meal.Type.ToSwedish()</span>
+                            <h4>@meal.Title</h4>
+                            @if (!string.IsNullOrWhiteSpace(meal.RecipeUrl))
+                            {
+                                <span class="tag" title="Recept finns">Recept</span>
+                            }
+                            <div class="spacer"></div>
+                            <button type="button"
+                                    class="btn btn-secondary btn-sm"
+                                    @onclick="() => StartEdit(meal)"
+                                    @onclick:stopPropagation="true">
+                                Redigera
+                            </button>
+                            <button type="button"
+                                    class="btn btn-danger btn-sm"
+                                    @onclick="() => DeleteAsync(meal)"
+                                    @onclick:stopPropagation="true">
+                                Ta bort
+                            </button>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(meal.ResponsibleName))
+                        {
+                            <p class="muted">Ansvarig: @meal.ResponsibleName</p>
+                        }
+
+                        @if (meal.Ingredients.Count > 0)
+                        {
+                            <ul class="ingredient-tags">
+                                @foreach (var ingredient in meal.Ingredients)
+                                {
+                                    <li class="tag">@FormatIngredient(ingredient)</li>
+                                }
+                            </ul>
+                        }
+                    </article>
+                }
+            }
+        </div>
+    }
+</section>
+
+@if (detailMeal is not null)
+{
+    <MealDetail Meal="detailMeal"
+                OnEdit="StartEditFromDetail"
+                OnClose="CloseDetail" />
+}
+
+@code {
+    [Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
+
+    private List<Meal> meals = [];
+    private IReadOnlyList<TripMember> members = [];
+    private CancellationTokenSource? listenerCts;
+    private string? observedTripId;
+    private DateOnly? editingDate;
+    private Meal? editingMeal;
+    private Meal? detailMeal;
+    private string? errorMessage;
+    private Confetti? confetti;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (observedTripId == Trip.Id)
+        {
+            return;
+        }
+
+        observedTripId = Trip.Id;
+        members = await TripService.GetMembersAsync(Trip.Id);
+        await StartListeningAsync();
+    }
+
+    private async Task StartListeningAsync()
+    {
+        await StopListeningAsync();
+
+        listenerCts = new CancellationTokenSource();
+        var token = listenerCts.Token;
+
+        // Runs for the lifetime of the component and re-renders on every snapshot.
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await foreach (var snapshot in MealService.ObserveMeals(Trip.Id, token))
+                {
+                    meals = [.. snapshot];
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception)
+            {
+                errorMessage = "Realtidsuppdateringen bröts.";
+                await InvokeAsync(StateHasChanged);
+            }
+        }, token);
+    }
+
+    private void StartCreate(DateOnly day)
+    {
+        detailMeal = null;
+        editingMeal = null;
+        editingDate = day;
+    }
+
+    private void StartEdit(Meal meal)
+    {
+        detailMeal = null;
+        editingDate = null;
+        editingMeal = meal;
+    }
+
+    private void ShowDetail(Meal meal) => detailMeal = meal;
+
+    private void StartEditFromDetail()
+    {
+        if (detailMeal is not null)
+        {
+            StartEdit(detailMeal);
+        }
+    }
+
+    private void CloseDetail() => detailMeal = null;
+
+    private void StopEditing()
+    {
+        editingDate = null;
+        editingMeal = null;
+    }
+
+    private async Task OnMealCreatedAsync()
+    {
+        StopEditing();
+
+        if (confetti is not null)
+        {
+            await confetti.CelebrateAsync();
+        }
+    }
+
+    private async Task DeleteAsync(Meal meal)
+    {
+        try
+        {
+            await MealService.DeleteAsync(Trip.Id, meal.Id);
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte ta bort måltiden.";
+        }
+    }
+
+    private static string FormatIngredient(MealIngredient ingredient) =>
+        ingredient.Amount > 0
+            ? $"{ingredient.Name} {Format(ingredient.Amount)} {ingredient.Unit}".TrimEnd()
+            : ingredient.Name;
+
+    private static string Format(decimal value) =>
+        value == decimal.Truncate(value)
+            ? ((long)value).ToString()
+            : value.ToString("0.##");
+
+    private static string FormatDay(DateOnly day) =>
+        day.ToDateTime(TimeOnly.MinValue).ToString("dddd d MMMM",
+            System.Globalization.CultureInfo.GetCultureInfo("sv-SE"));
+
+    private async Task StopListeningAsync()
+    {
+        if (listenerCts is not null)
+        {
+            await listenerCts.CancelAsync();
+            listenerCts.Dispose();
+            listenerCts = null;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await StopListeningAsync();
+    }
+}

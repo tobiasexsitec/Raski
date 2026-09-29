@@ -1,0 +1,267 @@
+@inject IIngredientService IngredientService
+@inject IMealService MealService
+
+<div class="meal-form card">
+    <h3>@(IsNew ? "Ny måltid" : "Redigera måltid")</h3>
+
+    <div class="grid">
+        <div class="field">
+            <label for="meal-date">Datum</label>
+            <select id="meal-date" @bind="selectedDate">
+                @foreach (var day in Trip.Days())
+                {
+                    <option value="@day.ToString("yyyy-MM-dd")">@FormatDay(day)</option>
+                }
+            </select>
+        </div>
+
+        <div class="field">
+            <label for="meal-type">Typ</label>
+            <select id="meal-type" @bind="mealType">
+                <option value="@MealType.Lunch">Lunch</option>
+                <option value="@MealType.Dinner">Middag</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="field">
+        <label for="meal-title">Rätt</label>
+        <input id="meal-title" type="text" placeholder="Köttbullar med potatismos" @bind="title" @bind:event="oninput" />
+    </div>
+
+    <div class="field">
+        <label for="meal-responsible">Ansvarig</label>
+        <select id="meal-responsible" @bind="responsibleUid">
+            <option value="">Välj ansvarig</option>
+            @foreach (var member in Members)
+            {
+                <option value="@member.Uid">@member.DisplayName</option>
+            }
+        </select>
+    </div>
+
+    <div class="field">
+        <label for="meal-recipe">Receptlänk (valfritt)</label>
+        <input id="meal-recipe" type="url" inputmode="url" placeholder="https://…" @bind="recipeUrl" @bind:event="oninput" />
+    </div>
+
+    <fieldset class="ingredients">
+        <legend>Ingredienser</legend>
+
+        @for (var index = 0; index < rows.Count; index++)
+        {
+            var row = rows[index];
+            var rowNumber = index + 1;
+
+            <div class="ingredient-row">
+                <div class="field name">
+                    <AutoComplete TItem="Ingredient"
+                                  Value="@row.Name"
+                                  ValueChanged="value => row.Name = value"
+                                  SearchFunc="SearchIngredientsAsync"
+                                  DisplaySelector="i => i.Name"
+                                  OnItemSelected="item => OnIngredientSelected(row, item)"
+                                  AriaLabel="@($"Ingrediens {rowNumber}")"
+                                  Placeholder="Ingrediens" />
+                </div>
+
+                <div class="field amount">
+                    <input type="number"
+                           step="any"
+                           min="0"
+                           inputmode="decimal"
+                           aria-label="@($"Mängd {rowNumber}")"
+                           placeholder="Mängd"
+                           @bind="row.Amount"
+                           @bind:event="oninput" />
+                </div>
+
+                <div class="field unit">
+                    <AutoComplete TItem="string"
+                                  Value="@row.Unit"
+                                  ValueChanged="value => row.Unit = value"
+                                  SearchFunc="SearchUnitsAsync"
+                                  DisplaySelector="u => u"
+                                  MinimumLength="1"
+                                  AriaLabel="@($"Enhet {rowNumber}")"
+                                  Placeholder="Enhet" />
+                </div>
+
+                <button type="button"
+                        class="btn btn-icon remove"
+                        aria-label="@($"Ta bort ingrediens {rowNumber}")"
+                        @onclick="() => rows.Remove(row)">
+                    ✕
+                </button>
+            </div>
+        }
+
+        <button type="button" class="btn btn-secondary btn-sm" @onclick="AddRow">+ Lägg till ingrediens</button>
+    </fieldset>
+
+    @if (errorMessage is not null)
+    {
+        <div class="error-banner">@errorMessage</div>
+    }
+
+    <div class="row-inline actions">
+        <button type="button" class="btn btn-primary" disabled="@isSaving" @onclick="SaveAsync">
+            @(isSaving ? "Sparar…" : "Spara måltid")
+        </button>
+        <button type="button" class="btn btn-secondary" @onclick="OnCancel">Avbryt</button>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
+    [Parameter, EditorRequired] public IReadOnlyList<TripMember> Members { get; set; } = [];
+    [Parameter] public Meal? Meal { get; set; }
+    [Parameter] public DateOnly? InitialDate { get; set; }
+    [Parameter] public EventCallback OnSaved { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private sealed class IngredientRow
+    {
+        public string IngredientId { get; set; } = "";
+        public string Name { get; set; } = "";
+        public decimal? Amount { get; set; }
+        public string Unit { get; set; } = "";
+    }
+
+    private readonly List<IngredientRow> rows = [];
+    private string selectedDate = "";
+    private MealType mealType = MealType.Dinner;
+    private string title = "";
+    private string responsibleUid = "";
+    private string recipeUrl = "";
+    private bool isSaving;
+    private string? errorMessage;
+
+    private bool IsNew => Meal is null || string.IsNullOrEmpty(Meal.Id);
+
+    protected override void OnInitialized()
+    {
+        if (Meal is not null)
+        {
+            selectedDate = Meal.Date.ToString("yyyy-MM-dd");
+            mealType = Meal.Type;
+            title = Meal.Title;
+            responsibleUid = Meal.ResponsibleUid;
+            recipeUrl = Meal.RecipeUrl;
+
+            foreach (var ingredient in Meal.Ingredients)
+            {
+                rows.Add(new IngredientRow
+                {
+                    IngredientId = ingredient.IngredientId,
+                    Name = ingredient.Name,
+                    Amount = ingredient.Amount,
+                    Unit = ingredient.Unit
+                });
+            }
+        }
+        else
+        {
+            selectedDate = (InitialDate ?? Trip.StartDate).ToString("yyyy-MM-dd");
+        }
+
+        if (rows.Count == 0)
+        {
+            AddRow();
+        }
+    }
+
+    private void AddRow() => rows.Add(new IngredientRow());
+
+    private Task<IReadOnlyList<Ingredient>> SearchIngredientsAsync(string term) =>
+        IngredientService.SearchAsync(term);
+
+    private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
+        IngredientService.SearchUnitsAsync(term);
+
+    /// <summary>Reusing the registry entry keeps the shopping list free of duplicates.</summary>
+    private void OnIngredientSelected(IngredientRow row, Ingredient ingredient)
+    {
+        row.IngredientId = ingredient.Id;
+        row.Name = ingredient.Name;
+
+        if (string.IsNullOrWhiteSpace(row.Unit) && !string.IsNullOrWhiteSpace(ingredient.DefaultUnit))
+        {
+            row.Unit = ingredient.DefaultUnit!;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        errorMessage = null;
+
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            errorMessage = "Ange vad ni ska äta.";
+            return;
+        }
+
+        var trimmedRecipeUrl = recipeUrl.Trim();
+
+        if (trimmedRecipeUrl.Length > 0 && !IsHttpUrl(trimmedRecipeUrl))
+        {
+            errorMessage = "Receptlänken måste börja med http:// eller https://.";
+            return;
+        }
+
+        isSaving = true;
+
+        try
+        {
+            var ingredients = new List<MealIngredient>();
+
+            foreach (var row in rows.Where(r => !string.IsNullOrWhiteSpace(r.Name)))
+            {
+                // Resolves free text to a registry entry, creating it when needed,
+                // so every meal points at the same shared ingredient.
+                var ingredient = await IngredientService.GetOrCreateAsync(row.Name, row.Unit);
+
+                ingredients.Add(new MealIngredient
+                {
+                    IngredientId = ingredient.Id,
+                    Name = ingredient.Name,
+                    Amount = row.Amount ?? 0,
+                    Unit = row.Unit.Trim()
+                });
+            }
+
+            var responsible = Members.FirstOrDefault(m => m.Uid == responsibleUid);
+
+            await MealService.SaveAsync(new Meal
+            {
+                Id = Meal?.Id ?? "",
+                TripId = Trip.Id,
+                Date = DateOnly.Parse(selectedDate),
+                Type = mealType,
+                Title = title.Trim(),
+                ResponsibleUid = responsible?.Uid ?? "",
+                ResponsibleName = responsible?.DisplayName ?? "",
+                RecipeUrl = trimmedRecipeUrl,
+                Ingredients = ingredients
+            });
+
+            await OnSaved.InvokeAsync();
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte spara måltiden.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private static bool IsHttpUrl(string value) =>
+        Uri.TryCreate(value, UriKind.Absolute, out var uri)
+        && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+
+    private static string FormatDay(DateOnly day) =>
+        day.ToDateTime(TimeOnly.MinValue).ToString("dddd d MMMM",
+            System.Globalization.CultureInfo.GetCultureInfo("sv-SE"));
+}

@@ -1,0 +1,32 @@
+.trip-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: 1fr;
+}
+
+.trip h2 {
+    margin-bottom: var(--space-1);
+}
+
+.destination {
+    margin-bottom: var(--space-1);
+}
+
+.dates {
+    margin-bottom: var(--space-3);
+}
+
+@media (min-width: 40rem) {
+    .trip-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 64rem) {
+    .trip-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

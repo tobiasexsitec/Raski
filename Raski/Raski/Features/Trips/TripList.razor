@@ -1,0 +1,74 @@
+@page "/"
+@inject ITripService TripService
+@inject NavigationManager Navigation
+
+<PageTitle>Mina resor – Raski</PageTitle>
+
+<div class="page-header">
+    <h1>Mina resor</h1>
+    <a class="btn btn-primary" href="resor/ny">Ny resa</a>
+</div>
+
+@if (isLoading)
+{
+    <p class="muted">Hämtar resor…</p>
+}
+else if (errorMessage is not null)
+{
+    <div class="error-banner">@errorMessage</div>
+}
+else if (trips.Count == 0)
+{
+    <div class="empty-state card">
+        <p><strong>Inga resor än.</strong></p>
+        <p>Skapa din första resa så kan ni börja planera maten tillsammans.</p>
+        <a class="btn btn-primary" href="resor/ny">Skapa resa</a>
+    </div>
+}
+else
+{
+    <ul class="trip-grid">
+        @foreach (var trip in trips)
+        {
+            <li>
+                <a class="card card-interactive trip" href="@($"resor/{trip.Id}")">
+                    <h2>@trip.Name</h2>
+                    @if (!string.IsNullOrWhiteSpace(trip.Destination))
+                    {
+                        <p class="destination">📍 @trip.Destination</p>
+                    }
+                    <p class="muted dates">@FormatRange(trip)</p>
+                    <span class="tag tag-accent">@trip.MemberUids.Count deltagare</span>
+                </a>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private List<Trip> trips = [];
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            trips = [.. await TripService.GetMyTripsAsync()];
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Kunde inte hämta dina resor. {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private static string FormatRange(Trip trip)
+    {
+        var nights = trip.EndDate.DayNumber - trip.StartDate.DayNumber;
+        return $"{trip.StartDate:yyyy-MM-dd} – {trip.EndDate:yyyy-MM-dd} ({nights + 1} dagar)";
+    }
+}

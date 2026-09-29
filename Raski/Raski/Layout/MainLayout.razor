@@ -1,0 +1,105 @@
+﻿@inherits LayoutComponentBase
+@implements IDisposable
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="shell">
+    <a class="skip-link" href="#main">Hoppa till innehållet</a>
+
+    <header class="app-bar">
+        <a class="brand" href="">
+            <span class="brand-mark" aria-hidden="true">🥕</span>
+            <span class="brand-name">Raski</span>
+        </a>
+
+        <div class="spacer"></div>
+
+        <ThemeToggle />
+
+        @if (AuthService.Current is { } user)
+        {
+            <div class="user-menu">
+                <button type="button"
+                        class="avatar-btn"
+                        aria-haspopup="true"
+                        aria-expanded="@menuOpen"
+                        title="@user.DisplayName"
+                        @onclick="ToggleMenu">
+                    @if (!string.IsNullOrEmpty(user.PhotoUrl))
+                    {
+                        <img src="@user.PhotoUrl" alt="" />
+                    }
+                    else
+                    {
+                        <span class="avatar-fallback" aria-hidden="true">@Initial(user.DisplayName)</span>
+                    }
+                </button>
+
+                @if (menuOpen)
+                {
+                    <div class="menu-popover" @onkeydown="OnMenuKeyDown">
+                        <div class="menu-user">
+                            <strong>@user.DisplayName</strong>
+                            <span class="muted">@user.Email</span>
+                        </div>
+                        <button type="button" class="menu-item" @onclick="SignOutAsync">Logga ut</button>
+                    </div>
+                }
+            </div>
+        }
+    </header>
+
+    <main class="content" id="main" tabindex="-1">
+        <AuthGuard>
+            @Body
+        </AuthGuard>
+    </main>
+
+    <NavMenu />
+</div>
+
+@code {
+    private bool menuOpen;
+
+    protected override void OnInitialized()
+    {
+        AuthService.StateChanged += OnStateChanged;
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    private void ToggleMenu() => menuOpen = !menuOpen;
+
+    private void OnMenuKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            menuOpen = false;
+        }
+    }
+
+    private async Task SignOutAsync()
+    {
+        menuOpen = false;
+        await AuthService.SignOutAsync();
+    }
+
+    private static string Initial(string name) =>
+        string.IsNullOrWhiteSpace(name) ? "?" : name.Trim()[..1].ToUpperInvariant();
+
+    private void OnStateChanged() => StateHasChanged();
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        if (menuOpen)
+        {
+            menuOpen = false;
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        AuthService.StateChanged -= OnStateChanged;
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
+}

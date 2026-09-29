@@ -1,0 +1,71 @@
+.progress-text {
+    color: var(--text-muted);
+    margin: 0 0 var(--space-4) 0;
+}
+
+.group {
+    margin-bottom: var(--space-5);
+}
+
+.group h2 {
+    margin: 0 0 var(--space-2) 0;
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: var(--space-2);
+}
+
+.items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.item {
+    border-bottom: 1px solid var(--border);
+}
+
+.item label {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-1);
+    cursor: pointer;
+    /* Comfortable touch target on phones. */
+    min-height: 44px;
+}
+
+.item input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.15rem;
+    flex: none;
+    accent-color: var(--accent);
+}
+
+.item-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.item-name {
+    font-weight: 600;
+}
+
+.item-amount {
+    color: var(--text-muted);
+}
+
+.item-meals {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.item.is-checked .item-name,
+.item.is-checked .item-amount {
+    text-decoration: line-through;
+    opacity: 0.6;
+}

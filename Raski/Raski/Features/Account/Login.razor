@@ -1,0 +1,102 @@
+@page "/login"
+@layout EmptyLayout
+@implements IDisposable
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject FirebaseOptions FirebaseOptions
+
+<PageTitle>Logga in – Raski</PageTitle>
+
+<div class="login-page">
+    <div class="login-card">
+        <div class="brand" aria-hidden="true">🥕</div>
+        <h1>Raski</h1>
+        <p class="tagline">Planera maten och inköpen för resan – tillsammans.</p>
+
+        @if (!FirebaseOptions.IsConfigured)
+        {
+            <div class="error-banner">
+                Firebase är inte konfigurerat. Fyll i <code>wwwroot/appsettings.json</code>.
+            </div>
+        }
+        else
+        {
+            @if (errorMessage is not null)
+            {
+                <div class="error-banner">@errorMessage</div>
+            }
+
+            <button class="btn btn-primary google-btn" @onclick="SignInAsync" disabled="@isSigningIn">
+                @if (isSigningIn)
+                {
+                    <span>Loggar in…</span>
+                }
+                else
+                {
+                    <span class="google-mark" aria-hidden="true">G</span>
+                    <span>Fortsätt med Google</span>
+                }
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string? ReturnUrl { get; set; }
+
+    private bool isSigningIn;
+    private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+        AuthService.StateChanged += OnStateChanged;
+    }
+
+    protected override void OnParametersSet()
+    {
+        RedirectIfSignedIn();
+    }
+
+    private void OnStateChanged()
+    {
+        isSigningIn = false;
+        RedirectIfSignedIn();
+        StateHasChanged();
+    }
+
+    private void RedirectIfSignedIn()
+    {
+        if (AuthService.Current is null)
+        {
+            return;
+        }
+
+        var target = string.IsNullOrWhiteSpace(ReturnUrl) || ReturnUrl.StartsWith("login", StringComparison.OrdinalIgnoreCase)
+            ? ""
+            : ReturnUrl;
+
+        Navigation.NavigateTo(target, replace: true);
+    }
+
+    private async Task SignInAsync()
+    {
+        isSigningIn = true;
+        errorMessage = null;
+
+        try
+        {
+            await AuthService.SignInWithGoogleAsync();
+        }
+        catch (Exception)
+        {
+            errorMessage = "Inloggningen misslyckades. Försök igen.";
+            isSigningIn = false;
+        }
+    }
+
+    public void Dispose()
+    {
+        AuthService.StateChanged -= OnStateChanged;
+    }
+}

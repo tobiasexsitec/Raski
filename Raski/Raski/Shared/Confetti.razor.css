@@ -1,0 +1,54 @@
+.confetti {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    /* Decorative only; must never block interaction. */
+    pointer-events: none;
+    z-index: 100;
+}
+
+.piece {
+    position: absolute;
+    top: -12px;
+    width: 9px;
+    height: 14px;
+    border-radius: 2px;
+    opacity: 0;
+    animation-name: fall;
+    animation-timing-function: cubic-bezier(0.25, 0.6, 0.4, 1);
+    animation-fill-mode: forwards;
+}
+
+@keyframes fall {
+    0% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate3d(0, 105vh, 0) rotate(var(--spin, 360deg));
+        opacity: 0;
+    }
+}
+
+/* Users who ask for less motion get a short, static fade instead. */
+@media (prefers-reduced-motion: reduce) {
+    .piece {
+        animation-name: gentle-fade;
+        animation-duration: 600ms !important;
+        animation-delay: 0ms !important;
+        top: 12vh;
+    }
+
+    @keyframes gentle-fade {
+        0% {
+            opacity: 0.8;
+            transform: none;
+        }
+
+        100% {
+            opacity: 0;
+            transform: none;
+        }
+    }
+}

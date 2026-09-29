@@ -1,0 +1,15 @@
+.date-row {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: 1fr;
+}
+
+.actions {
+    margin-top: var(--space-4);
+}
+
+@media (min-width: 30rem) {
+    .date-row {
+        grid-template-columns: 1fr 1fr;
+    }
+}

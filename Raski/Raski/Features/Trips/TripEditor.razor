@@ -1,0 +1,167 @@
+@page "/resor/ny"
+@page "/resor/{TripId}/redigera"
+@inject ITripService TripService
+@inject NavigationManager Navigation
+
+<PageTitle>@(IsNew ? "Ny resa" : "Redigera resa") – Raski</PageTitle>
+
+<div class="page-header">
+    <h1>@(IsNew ? "Ny resa" : "Redigera resa")</h1>
+</div>
+
+@if (isLoading)
+{
+    <p class="muted">Hämtar resan…</p>
+}
+else if (loadError is not null)
+{
+    <div class="error-banner">@loadError</div>
+}
+else
+{
+    <EditForm Model="model" OnValidSubmit="SaveAsync" class="card">
+        <DataAnnotationsValidator />
+
+        <div class="field">
+            <label for="name">Namn</label>
+            <InputText id="name" @bind-Value="model.Name" placeholder="Fjällresan" />
+            <ValidationMessage For="() => model.Name" />
+        </div>
+
+        <div class="field">
+            <label for="destination">Destination</label>
+            <InputText id="destination" @bind-Value="model.Destination" placeholder="Åre" />
+        </div>
+
+        <div class="date-row">
+            <div class="field">
+                <label for="start">Startdatum</label>
+                <InputDate id="start" @bind-Value="model.StartDate" />
+                <ValidationMessage For="() => model.StartDate" />
+            </div>
+
+            <div class="field">
+                <label for="end">Slutdatum</label>
+                <InputDate id="end" @bind-Value="model.EndDate" />
+                <ValidationMessage For="() => model.EndDate" />
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="notes">Övrig info</label>
+            <InputTextArea id="notes" @bind-Value="model.Notes" placeholder="Boende, transport, allergier…" />
+        </div>
+
+        @if (dateError is not null)
+        {
+            <div class="error-banner">@dateError</div>
+        }
+
+        @if (saveError is not null)
+        {
+            <div class="error-banner">@saveError</div>
+        }
+
+        <div class="row-inline actions">
+            <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                @(isSaving ? "Sparar…" : "Spara")
+            </button>
+            <a class="btn btn-secondary" href="@CancelUrl">Avbryt</a>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public string? TripId { get; set; }
+
+    private readonly TripFormModel model = new();
+    private bool isLoading;
+    private bool isSaving;
+    private string? loadError;
+    private string? saveError;
+    private string? dateError;
+
+    private bool IsNew => string.IsNullOrEmpty(TripId);
+
+    private string CancelUrl => IsNew ? "" : $"resor/{TripId}";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsNew)
+        {
+            model.StartDate = DateTime.Today;
+            model.EndDate = DateTime.Today.AddDays(2);
+            return;
+        }
+
+        isLoading = true;
+
+        try
+        {
+            var trip = await TripService.GetAsync(TripId!);
+
+            if (trip is null)
+            {
+                loadError = "Resan hittades inte.";
+                return;
+            }
+
+            model.Name = trip.Name;
+            model.Destination = trip.Destination;
+            model.StartDate = trip.StartDate.ToDateTime(TimeOnly.MinValue);
+            model.EndDate = trip.EndDate.ToDateTime(TimeOnly.MinValue);
+            model.Notes = trip.Notes ?? "";
+        }
+        catch (Exception)
+        {
+            loadError = "Kunde inte hämta resan.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        dateError = null;
+        saveError = null;
+
+        if (model.EndDate < model.StartDate)
+        {
+            dateError = "Slutdatum kan inte vara före startdatum.";
+            return;
+        }
+
+        isSaving = true;
+
+        var trip = new Trip
+        {
+            Id = TripId ?? "",
+            Name = model.Name.Trim(),
+            Destination = model.Destination.Trim(),
+            StartDate = DateOnly.FromDateTime(model.StartDate),
+            EndDate = DateOnly.FromDateTime(model.EndDate),
+            Notes = string.IsNullOrWhiteSpace(model.Notes) ? null : model.Notes.Trim()
+        };
+
+        try
+        {
+            if (IsNew)
+            {
+                var id = await TripService.CreateAsync(trip);
+                Navigation.NavigateTo($"resor/{id}");
+            }
+            else
+            {
+                await TripService.UpdateAsync(trip);
+                Navigation.NavigateTo($"resor/{TripId}");
+            }
+        }
+        catch (Exception)
+        {
+            saveError = "Kunde inte spara resan.";
+            isSaving = false;
+        }
+    }
+}

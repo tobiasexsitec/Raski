@@ -1,0 +1,199 @@
+@page "/resor/{TripId}/inkopslista"
+@implements IAsyncDisposable
+@inject IShoppingListService ShoppingListService
+@inject ITripService TripService
+
+<PageTitle>Inköpslista – Raski</PageTitle>
+
+<Confetti @ref="confetti" />
+
+<div class="page-header">
+    <div>
+        <h1>Inköpslista</h1>
+        @if (trip is not null)
+        {
+            <p class="muted">@trip.Name</p>
+        }
+    </div>
+
+    <a class="btn btn-secondary" href="@($"resor/{TripId}")">Till resan</a>
+</div>
+
+@if (isLoading)
+{
+    <p class="muted">Räknar ihop ingredienser…</p>
+}
+else if (errorMessage is not null)
+{
+    <div class="error-banner">@errorMessage</div>
+}
+else if (groups.Count == 0)
+{
+    <p class="muted">Inga ingredienser än. Lägg till måltider först.</p>
+}
+else
+{
+    <p class="progress-text">@CheckedCount av @TotalCount ihandlade</p>
+
+    @foreach (var group in groups)
+    {
+        <section class="group">
+            <h2>@group.DisplayTag</h2>
+
+            <ul class="items">
+                @foreach (var item in group.Items)
+                {
+                    <li class="item @(item.Checked ? "is-checked" : "")">
+                        <label>
+                            <input type="checkbox"
+                                   checked="@item.Checked"
+                                   @onchange="e => ToggleAsync(item, e)" />
+
+                            <span class="item-body">
+                                <span class="item-name">@item.Name</span>
+                                <span class="item-amount">@FormatAmounts(item)</span>
+                                @if (item.UsedInMeals.Count > 0)
+                                {
+                                    <span class="item-meals">@string.Join(", ", item.UsedInMeals)</span>
+                                }
+                            </span>
+                        </label>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+}
+
+@code {
+    [Parameter] public string TripId { get; set; } = "";
+
+    private Trip? trip;
+    private IReadOnlyList<ShoppingListItem> items = [];
+    private IReadOnlyList<ShoppingListGroup> groups = [];
+    private CancellationTokenSource? listenerCts;
+    private bool isLoading = true;
+    private string? errorMessage;
+    private Confetti? confetti;
+    private bool hasCelebrated;
+
+    private int TotalCount => items.Count;
+    private int CheckedCount => items.Count(i => i.Checked);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            trip = await TripService.GetAsync(TripId);
+            items = await ShoppingListService.BuildAsync(TripId);
+            Regroup();
+            await StartListeningAsync();
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte hämta inköpslistan.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task StartListeningAsync()
+    {
+        await StopListeningAsync();
+
+        listenerCts = new CancellationTokenSource();
+        var token = listenerCts.Token;
+
+        // Only the checked state is streamed; the aggregated rows change far less often.
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await foreach (var state in ShoppingListService.ObserveCheckedState(TripId, token))
+                {
+                    foreach (var item in items)
+                    {
+                        item.Checked = state.TryGetValue(item.IngredientId, out var value) && value;
+                    }
+
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception)
+            {
+                errorMessage = "Realtidsuppdateringen bröts.";
+                await InvokeAsync(StateHasChanged);
+            }
+        }, token);
+    }
+
+    private async Task ToggleAsync(ShoppingListItem item, ChangeEventArgs e)
+    {
+        var isChecked = e.Value is true;
+
+        // Optimistic update; the listener confirms it for everyone else.
+        item.Checked = isChecked;
+
+        try
+        {
+            await ShoppingListService.SetCheckedAsync(TripId, item.IngredientId, isChecked);
+            await CelebrateIfCompleteAsync();
+        }
+        catch (Exception)
+        {
+            item.Checked = !isChecked;
+            errorMessage = "Kunde inte spara avbockningen.";
+        }
+    }
+
+    private void Regroup() => groups = ShoppingListAggregator.GroupByTag(items);
+
+    /// <summary>Celebrates once per completion so unchecking and rechecking can retrigger it.</summary>
+    private async Task CelebrateIfCompleteAsync()
+    {
+        var isComplete = TotalCount > 0 && CheckedCount == TotalCount;
+
+        if (!isComplete)
+        {
+            hasCelebrated = false;
+            return;
+        }
+
+        if (hasCelebrated || confetti is null)
+        {
+            return;
+        }
+
+        hasCelebrated = true;
+        await confetti.CelebrateAsync();
+    }
+
+    private static string FormatAmounts(ShoppingListItem item) =>
+        string.Join(" + ", item.Amounts.Select(a =>
+            string.IsNullOrWhiteSpace(a.Unit)
+                ? Format(a.Amount)
+                : $"{Format(a.Amount)} {a.Unit}"));
+
+    private static string Format(decimal value) =>
+        value == decimal.Truncate(value) ? ((long)value).ToString() : value.ToString("0.##");
+
+    private async Task StopListeningAsync()
+    {
+        if (listenerCts is not null)
+        {
+            await listenerCts.CancelAsync();
+            listenerCts.Dispose();
+            listenerCts = null;
+        }
+    }
+
+    public async ValueTask DisposeAsync() => await StopListeningAsync();
+}

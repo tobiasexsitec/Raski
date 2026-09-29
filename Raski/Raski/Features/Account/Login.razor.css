@@ -1,0 +1,48 @@
+.login-page {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: var(--space-4);
+    background:
+        radial-gradient(circle at 15% 15%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 45%),
+        radial-gradient(circle at 85% 80%, color-mix(in srgb, var(--accent-2) 22%, transparent), transparent 45%),
+        var(--bg);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 24rem;
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--space-6) var(--space-5);
+    box-shadow: var(--shadow-lg);
+}
+
+.brand {
+    font-size: 3rem;
+    line-height: 1;
+    margin-bottom: var(--space-2);
+}
+
+.tagline {
+    color: var(--text-muted);
+    margin-bottom: var(--space-5);
+}
+
+.google-btn {
+    width: 100%;
+    margin-top: var(--space-4);
+}
+
+.google-mark {
+    display: inline-grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--accent-contrast);
+    color: var(--accent);
+    font-weight: 700;
+}

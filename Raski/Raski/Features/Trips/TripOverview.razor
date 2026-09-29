@@ -1,0 +1,85 @@
+@page "/resor/{TripId}"
+@inject ITripService TripService
+
+<PageTitle>@(trip?.Name ?? "Resa") – Raski</PageTitle>
+
+@if (isLoading)
+{
+    <p class="muted">Hämtar resan…</p>
+}
+else if (errorMessage is not null)
+{
+    <div class="error-banner">@errorMessage</div>
+}
+else if (trip is not null)
+{
+    <div class="page-header">
+        <div>
+            <h1>@trip.Name</h1>
+            <p class="muted">
+                @if (!string.IsNullOrWhiteSpace(trip.Destination))
+                {
+                    <span>📍 @trip.Destination · </span>
+                }
+                <span>@trip.StartDate.ToString("yyyy-MM-dd") – @trip.EndDate.ToString("yyyy-MM-dd")</span>
+            </p>
+        </div>
+
+        <div class="row-inline">
+            <a class="btn btn-secondary" href="@($"resor/{TripId}/inkopslista")">Inköpslista</a>
+            @if (IsAdmin)
+            {
+                <a class="btn btn-secondary" href="@($"resor/{TripId}/redigera")">Redigera</a>
+            }
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(trip.Notes))
+    {
+        <section class="card notes">
+            <h2>Övrig info</h2>
+            <p>@trip.Notes</p>
+        </section>
+    }
+
+    <MealList Trip="trip" />
+
+    <MembersPanel TripId="@TripId" IsAdmin="IsAdmin" />
+}
+
+@code {
+    [Parameter] public string TripId { get; set; } = "";
+
+    [CascadingParameter(Name = "CurrentUser")]
+    private UserProfile? CurrentUser { get; set; }
+
+    private Trip? trip;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    private bool IsAdmin => trip?.IsOwner(CurrentUser?.Uid) == true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            trip = await TripService.GetAsync(TripId);
+
+            if (trip is null)
+            {
+                errorMessage = "Resan hittades inte.";
+            }
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte hämta resan.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

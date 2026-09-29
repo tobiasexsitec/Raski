@@ -1,0 +1,71 @@
+@implements IDisposable
+
+@if (pieces.Count > 0)
+{
+    @* Purely decorative, so it is hidden from assistive technology. *@
+    <div class="confetti" aria-hidden="true">
+        @foreach (var piece in pieces)
+        {
+            <span class="piece"
+                  style="left:@(piece.Left)%; background:@piece.Color; animation-delay:@(piece.Delay)ms; animation-duration:@(piece.Duration)ms; --spin:@(piece.Spin)deg"></span>
+        }
+    </div>
+}
+
+@code {
+    private static readonly string[] Palette =
+    [
+        "var(--accent)", "var(--success)", "#ffd43b", "#4dabf7", "#e599f7"
+    ];
+
+    private readonly List<Piece> pieces = [];
+    private CancellationTokenSource? cts;
+
+    /// <summary>Number of pieces per burst. Kept low to stay cheap on phones.</summary>
+    [Parameter] public int Count { get; set; } = 28;
+
+    /// <summary>Fires a burst. Repeated calls restart the current burst.</summary>
+    public async Task CelebrateAsync()
+    {
+        cts?.Cancel();
+        cts?.Dispose();
+        cts = new CancellationTokenSource();
+        var token = cts.Token;
+
+        var random = Random.Shared;
+
+        pieces.Clear();
+
+        for (var i = 0; i < Count; i++)
+        {
+            pieces.Add(new Piece(
+                random.Next(0, 100),
+                Palette[random.Next(Palette.Length)],
+                random.Next(0, 400),
+                random.Next(1400, 2400),
+                random.Next(-540, 540)));
+        }
+
+        StateHasChanged();
+
+        try
+        {
+            await Task.Delay(2800, token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        pieces.Clear();
+        StateHasChanged();
+    }
+
+    private sealed record Piece(int Left, string Color, int Delay, int Duration, int Spin);
+
+    public void Dispose()
+    {
+        cts?.Cancel();
+        cts?.Dispose();
+    }
+}

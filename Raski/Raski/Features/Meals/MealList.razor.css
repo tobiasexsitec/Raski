@@ -1,0 +1,56 @@
+.meals {
+    margin-bottom: var(--space-5);
+}
+
+.day {
+    margin-bottom: var(--space-5);
+}
+
+.day-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--border);
+}
+
+.day-header h3 {
+    margin: 0;
+    text-transform: capitalize;
+}
+
+.no-meals {
+    margin: 0 0 var(--space-3) 0;
+}
+
+.meal {
+    margin-bottom: var(--space-3);
+    cursor: pointer;
+}
+
+.meal-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.meal-head h4 {
+    margin: 0;
+}
+
+.spacer {
+    flex: 1 1 auto;
+}
+
+.ingredient-tags {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: var(--space-2) 0 0 0;
+    padding: 0;
+}

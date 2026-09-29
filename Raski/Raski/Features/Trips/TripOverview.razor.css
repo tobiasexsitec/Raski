@@ -1,0 +1,4 @@
+.notes {
+    margin-bottom: var(--space-4);
+    white-space: pre-wrap;
+}

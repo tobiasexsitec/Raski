@@ -1,0 +1,26 @@
+﻿@inject IAuthService AuthService
+@inject IThemeService ThemeService
+
+<Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+</Router>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // Starts the Firebase auth listener once for the whole application.
+        await AuthService.InitializeAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // JS interop is only available after the first render.
+        if (firstRender)
+        {
+            await ThemeService.InitializeAsync();
+        }
+    }
+}

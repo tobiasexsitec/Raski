@@ -1,0 +1,74 @@
+@* Detail view for a single meal: ingredients, amounts and an optional recipe link. *@
+
+<div class="backdrop" @onclick="Close">
+    <div class="dialog card" role="dialog" aria-modal="true" aria-label="@Meal.Title" @onclick:stopPropagation="true">
+        <div class="dialog-head">
+            <span class="tag tag-accent">@Meal.Type.ToSwedish()</span>
+            <h3>@Meal.Title</h3>
+            <div class="spacer"></div>
+            <button type="button" class="btn btn-icon" aria-label="Stäng" @onclick="Close">✕</button>
+        </div>
+
+        <p class="muted">@FormatDay(Meal.Date)</p>
+
+        @if (!string.IsNullOrWhiteSpace(Meal.ResponsibleName))
+        {
+            <p class="muted">Ansvarig: @Meal.ResponsibleName</p>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Meal.RecipeUrl))
+        {
+            <p>
+                <a class="recipe-link" href="@Meal.RecipeUrl" target="_blank" rel="noopener noreferrer">
+                    Öppna receptet
+                </a>
+            </p>
+        }
+
+        <h4>Ingredienser</h4>
+
+        @if (Meal.Ingredients.Count == 0)
+        {
+            <p class="muted">Inga ingredienser registrerade än.</p>
+        }
+        else
+        {
+            <ul class="ingredient-list">
+                @foreach (var ingredient in Meal.Ingredients)
+                {
+                    <li>
+                        <span class="name">@ingredient.Name</span>
+                        <span class="amount muted">@FormatAmount(ingredient)</span>
+                    </li>
+                }
+            </ul>
+        }
+
+        <div class="row-inline actions">
+            <button type="button" class="btn btn-primary" @onclick="OnEdit">Redigera</button>
+            <button type="button" class="btn btn-secondary" @onclick="Close">Stäng</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Meal Meal { get; set; } = default!;
+    [Parameter] public EventCallback OnEdit { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private Task Close() => OnClose.InvokeAsync();
+
+    private static string FormatAmount(MealIngredient ingredient) =>
+        ingredient.Amount > 0
+            ? $"{Format(ingredient.Amount)} {ingredient.Unit}".TrimEnd()
+            : "";
+
+    private static string Format(decimal value) =>
+        value == decimal.Truncate(value)
+            ? ((long)value).ToString()
+            : value.ToString("0.##");
+
+    private static string FormatDay(DateOnly day) =>
+        day.ToDateTime(TimeOnly.MinValue).ToString("dddd d MMMM",
+            System.Globalization.CultureInfo.GetCultureInfo("sv-SE"));
+}

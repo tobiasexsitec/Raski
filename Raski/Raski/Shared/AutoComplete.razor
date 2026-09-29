@@ -1,0 +1,192 @@
+@typeparam TItem
+@implements IAsyncDisposable
+
+<div class="autocomplete">
+    <input type="text"
+           id="@InputId"
+           class="@CssClass"
+           role="combobox"
+           aria-autocomplete="list"
+           aria-expanded="@IsOpen"
+           aria-controls="@ListId"
+           aria-activedescendant="@ActiveDescendantId"
+           autocomplete="off"
+           placeholder="@Placeholder"
+           aria-label="@AriaLabel"
+           value="@Value"
+           @oninput="OnInputAsync"
+           @onkeydown="OnKeyDownAsync"
+           @onfocus="OnFocusAsync"
+           @onblur="OnBlur" />
+
+    @if (IsOpen)
+    {
+        <ul class="suggestions" id="@ListId" role="listbox">
+            @for (var index = 0; index < suggestions.Count; index++)
+            {
+                var itemIndex = index;
+                var item = suggestions[itemIndex];
+
+                <li id="@OptionId(itemIndex)"
+                    class="suggestion @(itemIndex == activeIndex ? "is-active" : null)"
+                    role="option"
+                    aria-selected="@(itemIndex == activeIndex)"
+                    @onmousedown:preventDefault
+                    @onmousedown="() => SelectAsync(item)">
+                    @if (ItemTemplate is not null)
+                    {
+                        @ItemTemplate(item)
+                    }
+                    else
+                    {
+                        @DisplaySelector(item)
+                    }
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    /// <summary>The free text currently in the input.</summary>
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    /// <summary>Returns matching items for the typed text.</summary>
+    [Parameter, EditorRequired] public Func<string, Task<IReadOnlyList<TItem>>> SearchFunc { get; set; } = default!;
+
+    /// <summary>Maps an item to the text written back into the input.</summary>
+    [Parameter, EditorRequired] public Func<TItem, string> DisplaySelector { get; set; } = default!;
+
+    /// <summary>Raised when a suggestion is picked. Free text never raises it.</summary>
+    [Parameter] public EventCallback<TItem> OnItemSelected { get; set; }
+
+    [Parameter] public RenderFragment<TItem>? ItemTemplate { get; set; }
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public string? AriaLabel { get; set; }
+    [Parameter] public string? CssClass { get; set; }
+
+    /// <summary>Number of characters required before searching.</summary>
+    [Parameter] public int MinimumLength { get; set; } = IngredientFilter.MinimumPrefixLength;
+
+    private readonly string InputId = $"ac-{Guid.NewGuid():N}";
+    private string ListId => $"{InputId}-list";
+
+    private List<TItem> suggestions = [];
+    private int activeIndex = -1;
+    private bool isFocused;
+    private CancellationTokenSource? searchCts;
+
+    private bool IsOpen => isFocused && suggestions.Count > 0;
+
+    private string? ActiveDescendantId =>
+        IsOpen && activeIndex >= 0 ? OptionId(activeIndex) : null;
+
+    private string OptionId(int index) => $"{InputId}-option-{index}";
+
+    private async Task OnInputAsync(ChangeEventArgs args)
+    {
+        Value = args.Value?.ToString() ?? "";
+        await ValueChanged.InvokeAsync(Value);
+        await SearchAsync();
+    }
+
+    private Task OnFocusAsync()
+    {
+        isFocused = true;
+        return SearchAsync();
+    }
+
+    private void OnBlur()
+    {
+        // mousedown on a suggestion is handled before blur, so closing here is safe.
+        isFocused = false;
+        activeIndex = -1;
+    }
+
+    private async Task SearchAsync()
+    {
+        if (Value.Trim().Length < MinimumLength)
+        {
+            suggestions = [];
+            activeIndex = -1;
+            return;
+        }
+
+        // Only the latest keystroke may update the list.
+        searchCts?.Cancel();
+        searchCts?.Dispose();
+        searchCts = new CancellationTokenSource();
+        var token = searchCts.Token;
+
+        var results = await SearchFunc(Value);
+
+        if (token.IsCancellationRequested)
+        {
+            return;
+        }
+
+        suggestions = [.. results];
+        activeIndex = suggestions.Count > 0 ? 0 : -1;
+    }
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs args)
+    {
+        if (!IsOpen && args.Key != "ArrowDown")
+        {
+            return;
+        }
+
+        switch (args.Key)
+        {
+            case "ArrowDown":
+                if (!IsOpen)
+                {
+                    await SearchAsync();
+                }
+                else
+                {
+                    activeIndex = (activeIndex + 1) % suggestions.Count;
+                }
+                break;
+
+            case "ArrowUp":
+                activeIndex = activeIndex <= 0 ? suggestions.Count - 1 : activeIndex - 1;
+                break;
+
+            case "Enter":
+                if (activeIndex >= 0 && activeIndex < suggestions.Count)
+                {
+                    await SelectAsync(suggestions[activeIndex]);
+                }
+                break;
+
+            case "Escape":
+                suggestions = [];
+                activeIndex = -1;
+                break;
+
+            case "Tab":
+                suggestions = [];
+                activeIndex = -1;
+                break;
+        }
+    }
+
+    private async Task SelectAsync(TItem item)
+    {
+        Value = DisplaySelector(item);
+        suggestions = [];
+        activeIndex = -1;
+
+        await ValueChanged.InvokeAsync(Value);
+        await OnItemSelected.InvokeAsync(item);
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        searchCts?.Cancel();
+        searchCts?.Dispose();
+        return ValueTask.CompletedTask;
+    }
+}

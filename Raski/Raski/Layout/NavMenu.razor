@@ -1,0 +1,30 @@
+﻿@implements IDisposable
+@inject IAuthService AuthService
+
+@if (AuthService.Current is not null)
+{
+    <nav class="tab-bar" aria-label="Huvudmeny">
+        <NavLink class="tab" href="" Match="NavLinkMatch.All">
+            <span class="tab-icon" aria-hidden="true">🧳</span>
+            <span class="tab-label">Resor</span>
+        </NavLink>
+        <NavLink class="tab" href="ingredienser">
+            <span class="tab-icon" aria-hidden="true">🥬</span>
+            <span class="tab-label">Ingredienser</span>
+        </NavLink>
+    </nav>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        AuthService.StateChanged += OnStateChanged;
+    }
+
+    private void OnStateChanged() => StateHasChanged();
+
+    public void Dispose()
+    {
+        AuthService.StateChanged -= OnStateChanged;
+    }
+}

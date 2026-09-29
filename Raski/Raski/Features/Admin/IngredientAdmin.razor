@@ -1,0 +1,375 @@
+@page "/ingredienser"
+@implements IDisposable
+@inject IIngredientService IngredientService
+
+<PageTitle>Ingredienser – Raski</PageTitle>
+
+<div class="page-header">
+    <div>
+        <h1>Ingredienser</h1>
+        <p class="muted">Gemensamt register för alla resor.</p>
+    </div>
+
+    <button type="button" class="btn btn-primary" @onclick="StartCreate">+ Ny ingrediens</button>
+</div>
+
+@if (errorMessage is not null)
+{
+    <div class="error-banner">@errorMessage</div>
+}
+
+<div class="search-row">
+    <label class="field">
+        <span>Sök</span>
+        <input type="search" value="@searchText" @oninput="OnSearchInput" placeholder="Filtrera på namn" />
+    </label>
+</div>
+
+@if (isLoading)
+{
+    <p class="muted">Hämtar registret…</p>
+}
+else
+{
+    @if (editing is not null)
+    {
+        <section class="card editor">
+            <h2>@(string.IsNullOrEmpty(editing.Id) ? "Ny ingrediens" : "Redigera ingrediens")</h2>
+
+            <label class="field">
+                <span>Namn</span>
+                <input type="text" @bind="editing.Name" @bind:event="oninput" />
+            </label>
+
+            <div class="field">
+                <span>Standardenhet</span>
+                <AutoComplete TItem="string"
+                              Value="@(editing.DefaultUnit ?? "")"
+                              ValueChanged="v => editing.DefaultUnit = v"
+                              SearchFunc="SearchUnitsAsync"
+                              DisplaySelector="u => u"
+                              AriaLabel="Standardenhet"
+                              Placeholder="t.ex. g, dl, st" />
+            </div>
+
+            <fieldset class="tags">
+                <legend>Taggar</legend>
+                @foreach (var tag in availableTags)
+                {
+                    <label class="tag-option">
+                        <input type="checkbox"
+                               checked="@editing.Tags.Contains(tag)"
+                               @onchange="e => ToggleTag(tag, e)" />
+                        <span>@IngredientTags.Display(tag)</span>
+                    </label>
+                }
+
+                <div class="row-inline">
+                    <input type="text"
+                           @bind="newTag"
+                           @bind:event="oninput"
+                           aria-label="Ny tagg"
+                           placeholder="Ny tagg" />
+                    <button type="button"
+                            class="btn btn-secondary btn-sm"
+                            disabled="@(string.IsNullOrWhiteSpace(newTag) || isSaving)"
+                            @onclick="AddTagAsync">
+                        Lägg till tagg
+                    </button>
+                </div>
+            </fieldset>
+
+            <div class="row-inline">
+                <button type="button" class="btn btn-primary" disabled="@isSaving" @onclick="SaveAsync">Spara</button>
+                <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Avbryt</button>
+            </div>
+        </section>
+    }
+
+    @if (merging is not null)
+    {
+        <section class="card editor">
+            <h2>Slå ihop "@merging.Name"</h2>
+            <p class="muted">
+                Ingrediensen pekas om till målingrediensen. Befintliga måltider följer med
+                och inköpslistan summerar dem som en rad.
+            </p>
+
+            <div class="field">
+                <span>Slå ihop med</span>
+                <AutoComplete TItem="Ingredient"
+                              Value="@mergeTargetText"
+                              ValueChanged="v => { mergeTargetText = v; mergeTarget = null; }"
+                              SearchFunc="SearchMergeTargetsAsync"
+                              DisplaySelector="i => i.Name"
+                              OnItemSelected="i => mergeTarget = i"
+                              AriaLabel="Målingrediens"
+                              Placeholder="Sök ingrediens" />
+            </div>
+
+            <div class="row-inline">
+                <button type="button"
+                        class="btn btn-primary"
+                        disabled="@(mergeTarget is null || isSaving)"
+                        @onclick="ConfirmMergeAsync">
+                    Slå ihop
+                </button>
+                <button type="button" class="btn btn-secondary" @onclick="() => merging = null">Avbryt</button>
+            </div>
+        </section>
+    }
+
+    @if (Visible.Count == 0)
+    {
+        <p class="muted">Inga ingredienser matchar.</p>
+    }
+    else
+    {
+        <ul class="list">
+            @foreach (var ingredient in Visible)
+            {
+                <li class="card row">
+                    <div class="row-main">
+                        <span class="name">@ingredient.Name</span>
+                        <span class="meta">
+                            @if (!string.IsNullOrWhiteSpace(ingredient.DefaultUnit))
+                            {
+                                <span class="tag">@ingredient.DefaultUnit</span>
+                            }
+                            @foreach (var tag in ingredient.Tags)
+                            {
+                                <span class="tag tag-accent">@IngredientTags.Display(tag)</span>
+                            }
+                        </span>
+                    </div>
+
+                    <div class="row-inline">
+                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => StartEdit(ingredient)">
+                            Redigera
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => StartMerge(ingredient)">
+                            Slå ihop
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm" @onclick="() => DeleteAsync(ingredient)">
+                            Ta bort
+                        </button>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    private IReadOnlyList<Ingredient> all = [];
+    private IReadOnlyList<string> availableTags = IngredientTags.All;
+    private string newTag = "";
+    private Ingredient? editing;
+    private Ingredient? merging;
+    private Ingredient? mergeTarget;
+    private string mergeTargetText = "";
+    private string searchText = "";
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+
+    /// <summary>Merged duplicates are hidden; they only exist to resolve old references.</summary>
+    private List<Ingredient> Visible =>
+        [.. all
+            .Where(i => !i.IsMerged)
+            .Where(i => searchText.Length == 0
+                        || i.Name.Contains(searchText, StringComparison.CurrentCultureIgnoreCase))
+            .OrderBy(i => i.Name, StringComparer.CurrentCultureIgnoreCase)];
+
+    protected override async Task OnInitializedAsync()
+    {
+        IngredientService.Changed += OnRegistryChanged;
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        isLoading = true;
+
+        try
+        {
+            all = await IngredientService.GetAllAsync();
+            availableTags = await IngredientService.GetTagsAsync();
+            errorMessage = null;
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte hämta ingrediensregistret.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void OnSearchInput(ChangeEventArgs e) => searchText = e.Value?.ToString() ?? "";
+
+    private void StartCreate()
+    {
+        merging = null;
+        editing = new Ingredient();
+    }
+
+    private void StartEdit(Ingredient ingredient)
+    {
+        merging = null;
+
+        // Edit a copy so cancelling leaves the cached instance untouched.
+        editing = new Ingredient
+        {
+            Id = ingredient.Id,
+            Name = ingredient.Name,
+            NameLower = ingredient.NameLower,
+            Tags = [.. ingredient.Tags],
+            DefaultUnit = ingredient.DefaultUnit
+        };
+    }
+
+    private void CancelEdit() => editing = null;
+
+    private void ToggleTag(string tag, ChangeEventArgs e)
+    {
+        if (editing is null)
+        {
+            return;
+        }
+
+        if (e.Value is true)
+        {
+            if (!editing.Tags.Contains(tag))
+            {
+                editing.Tags.Add(tag);
+            }
+        }
+        else
+        {
+            editing.Tags.Remove(tag);
+        }
+    }
+
+    private async Task AddTagAsync()
+    {
+        if (string.IsNullOrWhiteSpace(newTag))
+        {
+            return;
+        }
+
+        try
+        {
+            var tag = await IngredientService.AddTagAsync(newTag);
+            availableTags = await IngredientService.GetTagsAsync();
+            newTag = "";
+
+            if (editing is not null && !editing.Tags.Contains(tag))
+            {
+                editing.Tags.Add(tag);
+            }
+
+            errorMessage = null;
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte spara taggen.";
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (editing is null || string.IsNullOrWhiteSpace(editing.Name))
+        {
+            errorMessage = "Ingrediensen behöver ett namn.";
+            return;
+        }
+
+        isSaving = true;
+
+        try
+        {
+            if (string.IsNullOrEmpty(editing.Id))
+            {
+                var created = await IngredientService.GetOrCreateAsync(editing.Name, editing.DefaultUnit);
+                created.Tags = [.. editing.Tags];
+                await IngredientService.UpdateAsync(created);
+            }
+            else
+            {
+                await IngredientService.UpdateAsync(editing);
+            }
+
+            editing = null;
+            await ReloadAsync();
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte spara ingrediensen.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void StartMerge(Ingredient ingredient)
+    {
+        editing = null;
+        mergeTarget = null;
+        mergeTargetText = "";
+        merging = ingredient;
+    }
+
+    private async Task ConfirmMergeAsync()
+    {
+        if (merging is null || mergeTarget is null)
+        {
+            return;
+        }
+
+        isSaving = true;
+
+        try
+        {
+            await IngredientService.MergeAsync(merging.Id, mergeTarget.Id);
+            merging = null;
+            await ReloadAsync();
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte slå ihop ingredienserna.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task DeleteAsync(Ingredient ingredient)
+    {
+        try
+        {
+            await IngredientService.DeleteAsync(ingredient.Id);
+            await ReloadAsync();
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte ta bort ingrediensen.";
+        }
+    }
+
+    private Task<IReadOnlyList<string>> SearchUnitsAsync(string prefix) =>
+        IngredientService.SearchUnitsAsync(prefix);
+
+    private async Task<IReadOnlyList<Ingredient>> SearchMergeTargetsAsync(string prefix)
+    {
+        var matches = await IngredientService.SearchAsync(prefix);
+        return [.. matches.Where(i => i.Id != merging?.Id)];
+    }
+
+    private void OnRegistryChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => IngredientService.Changed -= OnRegistryChanged;
+}

@@ -1,0 +1,42 @@
+@implements IDisposable
+@inject IThemeService ThemeService
+
+<div class="theme-toggle" role="group" aria-label="Färgtema">
+    @foreach (var option in options)
+    {
+        <button type="button"
+                class="theme-option @(ThemeService.Theme == option.Value ? "is-active" : null)"
+                aria-pressed="@(ThemeService.Theme == option.Value)"
+                title="@option.Label"
+                @onclick="() => SetThemeAsync(option.Value)">
+            <span aria-hidden="true">@option.Icon</span>
+            <span class="visually-hidden">@option.Label</span>
+        </button>
+    }
+</div>
+
+@code {
+    private record ThemeOption(string Value, string Label, string Icon);
+
+    private readonly ThemeOption[] options =
+    [
+        new(ThemeOptions.Light, "Ljust tema", "☀"),
+        new(ThemeOptions.Dark, "Mörkt tema", "☾"),
+        new(ThemeOptions.System, "Följ systemet", "◐")
+    ];
+
+    protected override void OnInitialized()
+    {
+        ThemeService.Changed += OnChanged;
+    }
+
+    private Task SetThemeAsync(string theme) =>
+        ThemeService.SetThemeAsync(theme);
+
+    private void OnChanged() => StateHasChanged();
+
+    public void Dispose()
+    {
+        ThemeService.Changed -= OnChanged;
+    }
+}

@@ -1,0 +1,153 @@
+@inject ITripService TripService
+
+<section class="card">
+    <h2>Deltagare</h2>
+
+    @if (members.Count == 0)
+    {
+        <p class="muted">Inga deltagare ännu.</p>
+    }
+    else
+    {
+        <ul class="member-list">
+            @foreach (var member in members)
+            {
+                <li class="member">
+                    @if (!string.IsNullOrEmpty(member.PhotoUrl))
+                    {
+                        <img class="avatar" src="@member.PhotoUrl" alt="" />
+                    }
+                    else
+                    {
+                        <span class="avatar avatar-fallback" aria-hidden="true">@Initial(member.DisplayName)</span>
+                    }
+
+                    <span class="member-info">
+                        <strong>@member.DisplayName</strong>
+                        <span class="muted">@member.Email</span>
+                    </span>
+
+                    @if (member.IsAdmin)
+                    {
+                        <span class="tag tag-accent">Admin</span>
+                    }
+                    else if (IsAdmin)
+                    {
+                        <button type="button"
+                                class="btn btn-danger btn-sm"
+                                @onclick="() => RemoveAsync(member)">
+                            Ta bort
+                        </button>
+                    }
+                </li>
+            }
+        </ul>
+    }
+
+    @if (IsAdmin)
+    {
+        <form class="invite-form" @onsubmit="AddAsync" @onsubmit:preventDefault>
+            <div class="field">
+                <label for="invite-email">Bjud in via e-post</label>
+                <input id="invite-email"
+                       type="email"
+                       placeholder="kompis@example.com"
+                       required
+                       @bind="inviteEmail"
+                       @bind:event="oninput" />
+            </div>
+            <button type="submit" class="btn btn-primary" disabled="@isAdding">
+                @(isAdding ? "Lägger till…" : "Lägg till")
+            </button>
+        </form>
+
+        @if (statusMessage is not null)
+        {
+            <p class="status" role="status">@statusMessage</p>
+        }
+
+        @if (errorMessage is not null)
+        {
+            <div class="error-banner">@errorMessage</div>
+        }
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public string TripId { get; set; } = "";
+    [Parameter] public bool IsAdmin { get; set; }
+
+    private List<TripMember> members = [];
+    private string inviteEmail = "";
+    private bool isAdding;
+    private string? statusMessage;
+    private string? errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            var loaded = await TripService.GetMembersAsync(TripId);
+            members = [.. loaded.OrderByDescending(m => m.IsAdmin).ThenBy(m => m.DisplayName)];
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte hämta deltagarna.";
+        }
+    }
+
+    private async Task AddAsync()
+    {
+        if (string.IsNullOrWhiteSpace(inviteEmail))
+        {
+            return;
+        }
+
+        isAdding = true;
+        statusMessage = null;
+        errorMessage = null;
+
+        try
+        {
+            var added = await TripService.AddMemberAsync(TripId, inviteEmail);
+
+            statusMessage = added
+                ? $"{inviteEmail} lades till i resan."
+                : $"{inviteEmail} har inget konto än – inbjudan sparad och kopplas vid första inloggningen.";
+
+            inviteEmail = "";
+            await ReloadAsync();
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte lägga till deltagaren.";
+        }
+        finally
+        {
+            isAdding = false;
+        }
+    }
+
+    private async Task RemoveAsync(TripMember member)
+    {
+        errorMessage = null;
+
+        try
+        {
+            await TripService.RemoveMemberAsync(TripId, member.Uid);
+            members.Remove(member);
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte ta bort deltagaren.";
+        }
+    }
+
+    private static string Initial(string name) =>
+        string.IsNullOrWhiteSpace(name) ? "?" : name.Trim()[..1].ToUpperInvariant();
+}

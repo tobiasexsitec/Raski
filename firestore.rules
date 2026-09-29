@@ -1,0 +1,87 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+	function isSignedIn() {
+	  return request.auth != null;
+	}
+
+	function myEmail() {
+	  return request.auth.token.email.lower();
+	}
+
+	function tripData(tripId) {
+	  return get(/databases/$(database)/documents/trips/$(tripId)).data;
+	}
+
+	function isTripMember(tripId) {
+	  return isSignedIn() && request.auth.uid in tripData(tripId).memberUids;
+	}
+
+	function isTripOwner(tripId) {
+	  return isSignedIn() && request.auth.uid == tripData(tripId).ownerUid;
+	}
+
+	// Users own their profile document. Other signed-in users may read it so
+	// participant lists can show names and avatars.
+	match /users/{uid} {
+	  allow read: if isSignedIn();
+	  allow create, update: if isSignedIn() && request.auth.uid == uid;
+	  allow delete: if false;
+	}
+
+	// Trips are readable and writable by their members; only the owner may
+	// change membership or delete the trip.
+	match /trips/{tripId} {
+	  allow read: if isSignedIn() && request.auth.uid in resource.data.memberUids;
+
+	  allow create: if isSignedIn()
+					&& request.resource.data.ownerUid == request.auth.uid
+					&& request.auth.uid in request.resource.data.memberUids;
+
+	  allow update: if isTripMember(tripId)
+					&& (isTripOwner(tripId)
+						|| request.resource.data.memberUids == resource.data.memberUids);
+
+	  allow delete: if isTripOwner(tripId);
+
+	  // Denormalized participant info.
+	  match /members/{memberUid} {
+		allow read: if isTripMember(tripId);
+		allow write: if isTripOwner(tripId);
+	  }
+
+	  // Meals are collaborative: any member may plan, edit and remove them.
+	  match /meals/{mealId} {
+		allow read, write: if isTripMember(tripId);
+	  }
+
+	  // Shared check-off state for the shopping list.
+	  match /shoppingState/{ingredientId} {
+		allow read, write: if isTripMember(tripId);
+	  }
+	}
+
+	// The global ingredient and unit registries are shared by all trips.
+	// Deletion is restricted because meals embed ingredient ids; duplicates
+	// should be merged via mergedIntoId instead.
+	match /ingredients/{ingredientId} {
+	  allow read, create, update: if isSignedIn();
+	  allow delete: if isSignedIn();
+	}
+
+	match /units/{unitId} {
+	  allow read, create, update: if isSignedIn();
+	  allow delete: if false;
+	}
+
+	// Invitations are keyed by the lowercased email address. A trip owner can
+	// write one, and only the invited user can read and consume it, because
+	// Firestore cannot resolve an email to a uid at rule evaluation time.
+	match /invites/{email}/trips/{tripId} {
+	  allow read, delete: if isSignedIn() && myEmail() == email;
+	  allow create, update: if isTripOwner(tripId);
+	}
+  }
+}

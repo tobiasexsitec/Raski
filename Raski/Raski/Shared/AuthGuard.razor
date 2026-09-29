@@ -1,0 +1,65 @@
+@implements IDisposable
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+@if (!AuthService.IsInitialized)
+{
+    <div class="auth-pending" role="status" aria-live="polite">
+        <span class="spinner" aria-hidden="true"></span>
+        <span>Loggar in…</span>
+    </div>
+}
+else if (AuthService.Current is not null)
+{
+    <CascadingValue Value="AuthService.Current" Name="CurrentUser">
+        @ChildContent
+    </CascadingValue>
+}
+else if (AllowAnonymous)
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Set on the login page so it can render without a signed in user.</summary>
+    [Parameter] public bool AllowAnonymous { get; set; }
+
+    protected override void OnInitialized()
+    {
+        AuthService.StateChanged += OnStateChanged;
+    }
+
+    protected override void OnParametersSet()
+    {
+        RedirectIfNeeded();
+    }
+
+    private void OnStateChanged()
+    {
+        RedirectIfNeeded();
+        StateHasChanged();
+    }
+
+    private void RedirectIfNeeded()
+    {
+        if (!AuthService.IsInitialized || AllowAnonymous)
+        {
+            return;
+        }
+
+        if (AuthService.Current is null)
+        {
+            var returnUrl = Uri.EscapeDataString(
+                Navigation.ToBaseRelativePath(Navigation.Uri));
+
+            Navigation.NavigateTo($"login?returnUrl={returnUrl}", replace: true);
+        }
+    }
+
+    public void Dispose()
+    {
+        AuthService.StateChanged -= OnStateChanged;
+    }
+}
