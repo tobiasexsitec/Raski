@@ -1,0 +1,261 @@
+@inject IBreakfastService BreakfastService
+@inject IIngredientService IngredientService
+
+<section class="card breakfast" aria-labelledby="breakfast-heading">
+    <div class="breakfast-header">
+        <h2 id="breakfast-heading">Frukost</h2>
+        @if (!isEditing && !isLoading)
+        {
+            <button type="button" class="btn btn-secondary btn-sm" @onclick="StartEditing">Redigera</button>
+        }
+    </div>
+    <p class="muted">Samma frukost alla dagar. Avvikande frukost läggs in som en vanlig måltid.</p>
+
+    @if (isLoading)
+    {
+        <p class="muted">Hämtar frukost…</p>
+    }
+    else if (isEditing)
+    {
+        <fieldset class="ingredients">
+            <legend>Ingredienser</legend>
+
+            @for (var index = 0; index < rows.Count; index++)
+            {
+                var row = rows[index];
+                var rowNumber = index + 1;
+
+                <div class="ingredient-row">
+                    <div class="field name">
+                        <AutoComplete TItem="Ingredient"
+                                      Value="@row.Name"
+                                      ValueChanged="value => row.Name = value"
+                                      SearchFunc="SearchIngredientsAsync"
+                                      DisplaySelector="i => i.Name"
+                                      OnItemSelected="item => OnIngredientSelected(row, item)"
+                                      AriaLabel="@($"Ingrediens {rowNumber}")"
+                                      Placeholder="Ingrediens" />
+                    </div>
+
+                    <div class="field amount">
+                        <input type="number"
+                               step="any"
+                               min="0"
+                               inputmode="decimal"
+                               aria-label="@($"Mängd {rowNumber}")"
+                               placeholder="Mängd"
+                               @bind="row.Amount"
+                               @bind:event="oninput" />
+                    </div>
+
+                    <div class="field unit">
+                        <AutoComplete TItem="string"
+                                      Value="@row.Unit"
+                                      ValueChanged="value => row.Unit = value"
+                                      SearchFunc="SearchUnitsAsync"
+                                      DisplaySelector="u => u"
+                                      MinimumLength="1"
+                                      AriaLabel="@($"Enhet {rowNumber}")"
+                                      Placeholder="Enhet" />
+                    </div>
+
+                    <div class="field scope">
+                        <select aria-label="@($"Mängd gäller {rowNumber}")" @bind="row.Scope">
+                            <option value="@BreakfastAmountScope.PerPersonAndDay">Per person och dag</option>
+                            <option value="@BreakfastAmountScope.PerTrip">För hela resan</option>
+                        </select>
+                    </div>
+
+                    <button type="button"
+                            class="btn btn-icon remove"
+                            aria-label="@($"Ta bort ingrediens {rowNumber}")"
+                            @onclick="() => rows.Remove(row)">
+                        ✕
+                    </button>
+                </div>
+            }
+
+            <button type="button" class="btn btn-secondary btn-sm" @onclick="AddRow">+ Lägg till ingrediens</button>
+        </fieldset>
+
+        @if (errorMessage is not null)
+        {
+            <div class="error-banner">@errorMessage</div>
+        }
+
+        <div class="row-inline actions">
+            <button type="button" class="btn btn-primary" disabled="@isSaving" @onclick="SaveAsync">
+                @(isSaving ? "Sparar…" : "Spara frukost")
+            </button>
+            <button type="button" class="btn btn-secondary" @onclick="CancelEditing">Avbryt</button>
+        </div>
+    }
+    else
+    {
+        @if (errorMessage is not null)
+        {
+            <div class="error-banner">@errorMessage</div>
+        }
+
+        @if (breakfast.Ingredients.Count == 0)
+        {
+            <p class="muted">Ingen frukost är planerad än.</p>
+        }
+        else
+        {
+            <p class="muted">Totalt för @Travelers resenärer och @Days dagar:</p>
+            <ul class="breakfast-list">
+                @foreach (var ingredient in breakfast.Ingredients)
+                {
+                    <li>
+                        <span class="name">@ingredient.Name</span>
+                        <span>@FormatTotal(ingredient)</span>
+                        <span class="muted">(@FormatAmount(ingredient.Amount) @ingredient.Unit @ingredient.Scope.ToSwedish())</span>
+                    </li>
+                }
+            </ul>
+        }
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
+
+    private sealed class IngredientRow
+    {
+        public string IngredientId { get; set; } = "";
+        public string Name { get; set; } = "";
+        public decimal? Amount { get; set; }
+        public string Unit { get; set; } = "";
+        public BreakfastAmountScope Scope { get; set; }
+    }
+
+    private static readonly System.Globalization.CultureInfo Swedish =
+        System.Globalization.CultureInfo.GetCultureInfo("sv-SE");
+
+    private readonly List<IngredientRow> rows = [];
+    private Breakfast breakfast = new();
+    private bool isLoading = true;
+    private bool isEditing;
+    private bool isSaving;
+    private string? errorMessage;
+
+    private int Travelers => Trip.MemberUids.Count;
+    private int Days => Trip.Days().Count();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            breakfast = await BreakfastService.GetAsync(Trip.Id);
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte hämta frukosten.";
+            breakfast = new Breakfast { TripId = Trip.Id };
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void StartEditing()
+    {
+        rows.Clear();
+        errorMessage = null;
+
+        foreach (var ingredient in breakfast.Ingredients)
+        {
+            rows.Add(new IngredientRow
+            {
+                IngredientId = ingredient.IngredientId,
+                Name = ingredient.Name,
+                Amount = ingredient.Amount,
+                Unit = ingredient.Unit,
+                Scope = ingredient.Scope
+            });
+        }
+
+        if (rows.Count == 0)
+        {
+            AddRow();
+        }
+
+        isEditing = true;
+    }
+
+    private void CancelEditing()
+    {
+        errorMessage = null;
+        isEditing = false;
+    }
+
+    private void AddRow() => rows.Add(new IngredientRow());
+
+    private Task<IReadOnlyList<Ingredient>> SearchIngredientsAsync(string term) =>
+        IngredientService.SearchAsync(term);
+
+    private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
+        IngredientService.SearchUnitsAsync(term);
+
+    private void OnIngredientSelected(IngredientRow row, Ingredient ingredient)
+    {
+        row.IngredientId = ingredient.Id;
+        row.Name = ingredient.Name;
+
+        if (string.IsNullOrWhiteSpace(row.Unit) && !string.IsNullOrWhiteSpace(ingredient.DefaultUnit))
+        {
+            row.Unit = ingredient.DefaultUnit!;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        errorMessage = null;
+        isSaving = true;
+
+        try
+        {
+            var ingredients = new List<BreakfastIngredient>();
+
+            foreach (var row in rows.Where(r => !string.IsNullOrWhiteSpace(r.Name)))
+            {
+                // Shares the ingredient registry with meals so the shopping list merges rows.
+                var ingredient = await IngredientService.GetOrCreateAsync(row.Name, row.Unit);
+
+                ingredients.Add(new BreakfastIngredient
+                {
+                    IngredientId = ingredient.Id,
+                    Name = ingredient.Name,
+                    Amount = row.Amount ?? 0,
+                    Unit = row.Unit.Trim(),
+                    Scope = row.Scope
+                });
+            }
+
+            var updated = new Breakfast { TripId = Trip.Id, Ingredients = ingredients };
+            await BreakfastService.SaveAsync(updated);
+
+            breakfast = updated;
+            isEditing = false;
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte spara frukosten.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private string FormatTotal(BreakfastIngredient ingredient) =>
+        $"{FormatAmount(ingredient.TotalAmount(Travelers, Days))} {ingredient.Unit}".Trim();
+
+    private static string FormatAmount(decimal amount) =>
+        amount.ToString("0.##", Swedish);
+}

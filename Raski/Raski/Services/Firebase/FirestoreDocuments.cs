@@ -128,6 +128,36 @@ internal sealed class MealIngredientDocument
     };
 }
 
+internal sealed class BreakfastDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("ingredients")] public List<BreakfastIngredientDocument>? Ingredients { get; set; }
+
+    public Breakfast ToModel(string tripId) => new()
+    {
+        TripId = tripId,
+        Ingredients = Ingredients?.Select(i => i.ToModel()).ToList() ?? []
+    };
+}
+
+internal sealed class BreakfastIngredientDocument
+{
+    [JsonPropertyName("ingredientId")] public string? IngredientId { get; set; }
+    [JsonPropertyName("name")] public string? Name { get; set; }
+    [JsonPropertyName("amount")] public double Amount { get; set; }
+    [JsonPropertyName("unit")] public string? Unit { get; set; }
+    [JsonPropertyName("scope")] public string? Scope { get; set; }
+
+    public BreakfastIngredient ToModel() => new()
+    {
+        IngredientId = IngredientId ?? "",
+        Name = Name ?? "",
+        Amount = (decimal)Amount,
+        Unit = Unit ?? "",
+        Scope = BreakfastAmountScopeExtensions.ParseBreakfastAmountScope(Scope)
+    };
+}
+
 internal sealed class IngredientDocument
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";

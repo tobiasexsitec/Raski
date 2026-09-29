@@ -78,6 +78,11 @@ service cloud.firestore {
 		allow read, write: if isTripMember(tripId);
 	  }
 
+	  // The shared breakfast for the whole trip, edited by any member.
+	  match /breakfast/{breakfastId} {
+		allow read, write: if isTripMember(tripId);
+	  }
+
 	  // Shared check-off state for the shopping list.
 	  match /shoppingState/{ingredientId} {
 		allow read, write: if isTripMember(tripId);

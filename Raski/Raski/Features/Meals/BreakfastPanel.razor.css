@@ -1,0 +1,70 @@
+.breakfast {
+    margin-bottom: var(--space-4);
+}
+
+.breakfast-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+
+.breakfast-list {
+    margin: 0;
+    padding-left: var(--space-4);
+}
+
+.breakfast-list .name {
+    font-weight: 600;
+}
+
+.ingredients {
+    margin: var(--space-4) 0 0 0;
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+legend {
+    padding: 0 var(--space-2);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.ingredient-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: var(--space-2);
+    align-items: start;
+    margin-bottom: var(--space-3);
+}
+
+.ingredient-row .field {
+    margin-bottom: 0;
+    min-width: 0;
+}
+
+.ingredient-row .name,
+.ingredient-row .scope {
+    grid-column: 1 / -1;
+}
+
+.remove {
+    align-self: start;
+}
+
+.actions {
+    margin-top: var(--space-4);
+}
+
+@media (min-width: 40rem) {
+    .ingredient-row {
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr) auto;
+    }
+
+    .ingredient-row .name,
+    .ingredient-row .scope {
+        grid-column: auto;
+    }
+}

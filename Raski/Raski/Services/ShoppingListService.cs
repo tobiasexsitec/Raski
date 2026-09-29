@@ -9,6 +9,8 @@ namespace Raski.Services;
 public sealed class ShoppingListService(
     FirebaseInterop interop,
     IMealService mealService,
+    IBreakfastService breakfastService,
+    ITripService tripService,
     IIngredientService ingredientService,
     IAuthService authService) : IShoppingListService
 {
@@ -16,7 +18,14 @@ public sealed class ShoppingListService(
 
     public async Task<IReadOnlyList<ShoppingListItem>> BuildAsync(string tripId, CancellationToken ct = default)
     {
-        var meals = await mealService.GetMealsAsync(tripId, ct);
+        var meals = (await mealService.GetMealsAsync(tripId, ct)).ToList();
+        var trip = await tripService.GetAsync(tripId, ct);
+        var breakfast = await breakfastService.GetAsync(tripId, ct);
+
+        if (trip is not null && breakfast.Ingredients.Count > 0)
+        {
+            meals.Add(breakfast.ToMeal(trip.MemberUids.Count, trip.Days().Count()));
+        }
         var ingredients = await ingredientService.GetAllAsync(ct);
         var state = await interop.QueryAsync<ShoppingStateDocument>(StatePath(tripId), new FirestoreQuery(), ct);
 
