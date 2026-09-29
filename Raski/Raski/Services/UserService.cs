@@ -14,6 +14,12 @@ public sealed class UserService(FirebaseInterop interop) : IUserService
             .OrderBy(u => u.DisplayName, StringComparer.CurrentCultureIgnoreCase)];
     }
 
+    public async Task<UserProfile?> GetAsync(string uid, CancellationToken ct = default)
+    {
+        var document = await interop.GetDocumentAsync<UserDocument>($"users/{uid}", ct);
+        return document?.ToModel();
+    }
+
     public Task SetGlobalAdminAsync(string uid, bool isGlobalAdmin, CancellationToken ct = default) =>
         interop.UpdateDocumentAsync($"users/{uid}", new
         {

@@ -5,7 +5,7 @@
 | ID | Titel | Status | Prioritet |
 | --- | --- | --- | --- |
 | [B-001](#b-001-profilsida-med-allergier-och-kostpreferenser) | Profilsida med allergier och kostpreferenser | Klar | – |
-| [B-002](#b-002-visa-resenärers-allergier-på-en-resa) | Visa resenärers allergier på en resa | Redo | – |
+Visa resenärers allergier på en resa | Klar |
 | [B-003](#b-003-märk-ingredienser-med-allergener) | Märk ingredienser med allergener | Redo | – |
 | [B-004](#b-004-varna-för-allergener-i-måltider) | Varna för allergener i måltider | Redo | – |
 | [B-005](#b-005-gemensam-frukost-för-hela-resan) | Gemensam frukost för hela resan | Klar | – |
@@ -93,7 +93,7 @@ att de som planerar måltider vet vad de behöver ta hänsyn till.
 
 ## B-002: Visa resenärers allergier på en resa
 
-- **Status:** Redo
+- **Status:** Klar
 - **Prioritet:** –
 - **Beroenden:** B-001
 
@@ -108,6 +108,9 @@ måltider som alla kan äta.
 
 ### Tekniska noteringar
 - `firestore.rules`: resemedlemmar får läsa varandras allergier.
+
+### Beslut
+- Synlighet begränsas i UI:t, inte på databasnivå – alla inloggade kan läsa profiler.
 
 ---
 

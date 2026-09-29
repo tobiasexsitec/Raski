@@ -1,4 +1,5 @@
 @inject ITripService TripService
+@inject IUserService UserService
 
 <section class="card">
     <h2>Deltagare</h2>
@@ -25,6 +26,15 @@
                     <span class="member-info">
                         <strong>@member.DisplayName</strong>
                         <span class="muted">@member.Email</span>
+                        @if (AllergiesOf(member) is { Count: > 0 } memberAllergies)
+                        {
+                            <span class="allergy-tags" aria-label="Allergier och kostpreferenser för @member.DisplayName">
+                                @foreach (var allergy in memberAllergies)
+                                {
+                                    <span class="tag">@allergy</span>
+                                }
+                            </span>
+                        }
                     </span>
 
                     @if (member.IsAdmin)
@@ -42,6 +52,23 @@
                 </li>
             }
         </ul>
+
+        <div class="allergy-summary">
+            <h3>Allergier och kostpreferenser på resan</h3>
+            @if (allAllergies.Count == 0)
+            {
+                <p class="muted">Inga registrerade allergier.</p>
+            }
+            else
+            {
+                <ul class="allergy-tags" aria-label="Alla allergier och kostpreferenser på resan">
+                    @foreach (var allergy in allAllergies)
+                    {
+                        <li class="tag tag-accent">@allergy</li>
+                    }
+                </ul>
+            }
+        </div>
     }
 
     @if (IsAdmin)
@@ -78,6 +105,8 @@
     [Parameter] public bool IsAdmin { get; set; }
 
     private List<TripMember> members = [];
+    private Dictionary<string, List<string>> allergiesByUid = [];
+    private List<string> allAllergies = [];
     private string inviteEmail = "";
     private bool isAdding;
     private string? statusMessage;
@@ -98,8 +127,42 @@
         catch (Exception)
         {
             errorMessage = "Kunde inte hämta deltagarna.";
+            return;
+        }
+
+        await LoadAllergiesAsync();
+    }
+
+    private async Task LoadAllergiesAsync()
+    {
+        try
+        {
+            var profiles = await Task.WhenAll(members.Select(m => UserService.GetAsync(m.Uid)));
+
+            allergiesByUid = profiles
+                .Where(p => p is not null)
+                .ToDictionary(
+                    p => p!.Uid,
+                    p => p!.Allergies
+                        .Where(a => !string.IsNullOrWhiteSpace(a))
+                        .Select(a => a.Trim())
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(a => a, StringComparer.CurrentCultureIgnoreCase)
+                        .ToList());
+
+            allAllergies = [.. allergiesByUid.Values
+                .SelectMany(a => a)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(a => a, StringComparer.CurrentCultureIgnoreCase)];
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte hämta deltagarnas allergier.";
         }
     }
+
+    private List<string>? AllergiesOf(TripMember member) =>
+        allergiesByUid.GetValueOrDefault(member.Uid);
 
     private async Task AddAsync()
     {
@@ -141,6 +204,11 @@
         {
             await TripService.RemoveMemberAsync(TripId, member.Uid);
             members.Remove(member);
+            allergiesByUid.Remove(member.Uid);
+            allAllergies = [.. allergiesByUid.Values
+                .SelectMany(a => a)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(a => a, StringComparer.CurrentCultureIgnoreCase)];
         }
         catch (Exception)
         {

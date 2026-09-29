@@ -40,8 +40,26 @@
     overflow-wrap: anywhere;
 }
 
-.invite-form {
+.allergy-tags {
     display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1, 0.25rem);
+    margin: var(--space-1, 0.25rem) 0 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.allergy-summary {
+    margin-bottom: var(--space-4);
+}
+
+.allergy-summary h3 {
+    font-size: 1rem;
+    margin: 0 0 var(--space-2) 0;
+}
+
+.invite-form {
+    display
     flex-wrap: wrap;
     align-items: flex-end;
     gap: var(--space-3);
