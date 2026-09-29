@@ -8,7 +8,7 @@
 | [B-002](#b-002-visa-resenärers-allergier-på-en-resa) | Visa resenärers allergier på en resa | Redo | – |
 | [B-003](#b-003-märk-ingredienser-med-allergener) | Märk ingredienser med allergener | Redo | – |
 | [B-004](#b-004-varna-för-allergener-i-måltider) | Varna för allergener i måltider | Redo | – |
-| Gemensam frukost för hela resan | Pågår | – |
+| Gemensam frukost för hela resan | Klar | – |
 
 **Status:** `Idé` → `Diskussion` → `Redo` → `Pågår` → `Klar` (eller `Avfärdad`)
 **Prioritet:** `Hög` / `Medel` / `Låg`
@@ -156,7 +156,7 @@ en resenär inte tål, så att jag kan välja något annat.
 
 ## B-005: Gemensam frukost för hela resan
 
-- **Status:** Pågår
+- **Status:** Klar
 - **Prioritet:** –
 
 ### Beskrivning
