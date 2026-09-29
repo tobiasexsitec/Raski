@@ -1,0 +1,51 @@
+h2 {
+    margin: 0;
+}
+
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.allergy {
+    font-size: 0.9rem;
+    padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+}
+
+.remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.remove:hover:not(:disabled),
+.remove:focus-visible {
+    background: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+.remove:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.add-form .row-inline {
+    flex-wrap: nowrap;
+}
+
+.add-form .input {
+    flex: 1 1 auto;
+    min-width: 0;
+}

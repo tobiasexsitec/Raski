@@ -10,6 +10,9 @@ public sealed class UserProfile
 
     /// <summary>Global admins may create trips and promote other global admins.</summary>
     public bool IsGlobalAdmin { get; set; }
+
+    /// <summary>Allergies and dietary preferences, stored normalized (trimmed, lowercase).</summary>
+    public List<string> Allergies { get; set; } = [];
 }
 
 public static class ThemeOptions

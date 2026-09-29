@@ -33,6 +33,7 @@ internal sealed class UserDocument
     [JsonPropertyName("photoUrl")] public string? PhotoUrl { get; set; }
     [JsonPropertyName("theme")] public string? Theme { get; set; }
     [JsonPropertyName("isGlobalAdmin")] public bool IsGlobalAdmin { get; set; }
+    [JsonPropertyName("allergies")] public List<string>? Allergies { get; set; }
 
     public UserProfile ToModel() => new()
     {
@@ -41,7 +42,8 @@ internal sealed class UserDocument
         Email = Email ?? "",
         PhotoUrl = PhotoUrl ?? "",
         Theme = ThemeOptions.IsValid(Theme) ? Theme! : ThemeOptions.System,
-        IsGlobalAdmin = IsGlobalAdmin
+        IsGlobalAdmin = IsGlobalAdmin,
+        Allergies = AllergyNames.Distinct(Allergies)
     };
 }
 
@@ -186,6 +188,13 @@ internal sealed class UnitDocument
 }
 
 internal sealed class TagDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("name")] public string? Name { get; set; }
+    [JsonPropertyName("nameLower")] public string? NameLower { get; set; }
+}
+
+internal sealed class AllergyDocument
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";
     [JsonPropertyName("name")] public string? Name { get; set; }

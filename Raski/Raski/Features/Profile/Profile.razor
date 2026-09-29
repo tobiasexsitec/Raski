@@ -1,0 +1,164 @@
+@page "/profil"
+@inject IAllergyService AllergyService
+@inject IAuthService AuthService
+
+<PageTitle>Profil – Raski</PageTitle>
+
+<div class="page-header">
+    <div>
+        <h1>Profil</h1>
+        <p class="muted">Allergier och kostpreferenser syns för dem som planerar måltider.</p>
+    </div>
+</div>
+
+@if (AuthService.Current is null)
+{
+    <p class="muted">Du behöver logga in.</p>
+}
+else
+{
+    @if (errorMessage is not null)
+    {
+        <div class="error-banner" role="alert">@errorMessage</div>
+    }
+
+    <section class="card stack">
+        <h2 id="allergies-heading">Allergier och kostpreferenser</h2>
+
+        @if (allergies.Count == 0)
+        {
+            <p class="muted">Inga allergier registrerade.</p>
+        }
+        else
+        {
+            <ul class="tag-list" aria-labelledby="allergies-heading">
+                @foreach (var allergy in allergies)
+                {
+                    <li class="tag tag-accent allergy">
+                        <span>@allergy</span>
+                        <button type="button"
+                                class="remove"
+                                aria-label="@($"Ta bort {allergy}")"
+                                disabled="@isSaving"
+                                @onclick="() => RemoveAsync(allergy)">
+                            ✕
+                        </button>
+                    </li>
+                }
+            </ul>
+        }
+
+        <form class="add-form" @onsubmit="AddAsync">
+            <span class="field-label">Lägg till</span>
+            <div class="row-inline">
+                <div class="input">
+                    <AutoComplete TItem="string"
+                                  @bind-Value="newAllergy"
+                                  SearchFunc="SearchSuggestionsAsync"
+                                  DisplaySelector="s => s"
+                                  OnItemSelected="AddSuggestionAsync"
+                                  MinimumLength="0"
+                                  AriaLabel="Allergi eller kostpreferens"
+                                  Placeholder="t.ex. gluten, laktos" />
+                </div>
+                <button type="submit"
+                        class="btn btn-primary"
+                        disabled="@(isSaving || string.IsNullOrWhiteSpace(newAllergy))">
+                    Lägg till
+                </button>
+            </div>
+        </form>
+    </section>
+}
+
+@code {
+    private List<string> allergies = [];
+    private IReadOnlyList<string> suggestions = [];
+    private string newAllergy = "";
+    private bool isSaving;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        allergies = [.. AuthService.Current?.Allergies ?? []];
+
+        try
+        {
+            suggestions = await AllergyService.GetSuggestionsAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Kunde inte hämta förslag. {ex.Message}";
+        }
+    }
+
+    private Task<IReadOnlyList<string>> SearchSuggestionsAsync(string text)
+    {
+        var query = AllergyNames.Normalize(text);
+
+        IReadOnlyList<string> matches = [.. suggestions
+            .Where(s => !allergies.Contains(s, StringComparer.OrdinalIgnoreCase))
+            .Where(s => s.Contains(query, StringComparison.OrdinalIgnoreCase))];
+
+        return Task.FromResult(matches);
+    }
+
+    private Task AddSuggestionAsync(string suggestion)
+    {
+        newAllergy = suggestion;
+        return AddAsync();
+    }
+
+    private async Task AddAsync()
+    {
+        // Enter on a highlighted suggestion also submits the form.
+        if (isSaving)
+        {
+            return;
+        }
+
+        var value = AllergyNames.Normalize(newAllergy);
+
+        if (value.Length == 0)
+        {
+            return;
+        }
+
+        if (allergies.Contains(value, StringComparer.OrdinalIgnoreCase))
+        {
+            newAllergy = "";
+            return;
+        }
+
+        if (await SaveAsync([.. allergies, value]))
+        {
+            newAllergy = "";
+        }
+    }
+
+    private Task RemoveAsync(string allergy) =>
+        SaveAsync([.. allergies.Where(a => !string.Equals(a, allergy, StringComparison.OrdinalIgnoreCase))]);
+
+    private async Task<bool> SaveAsync(List<string> updated)
+    {
+        errorMessage = null;
+        isSaving = true;
+
+        try
+        {
+            await AllergyService.SaveMyAllergiesAsync(updated);
+            allergies = AllergyNames.Distinct(updated);
+            suggestions = await AllergyService.GetSuggestionsAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Kunde inte spara. {ex.Message}";
+            return false;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+}

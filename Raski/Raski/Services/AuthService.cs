@@ -92,7 +92,8 @@ public sealed class AuthService(FirebaseInterop interop) : IAuthService, IAsyncD
             PhotoUrl = user.PhotoUrl,
             Theme = ThemeOptions.IsValid(existing?.Theme) ? existing!.Theme! : ThemeOptions.System,
             // Only another global admin may set this flag, so it is read-only here.
-            IsGlobalAdmin = existing?.IsGlobalAdmin ?? false
+            IsGlobalAdmin = existing?.IsGlobalAdmin ?? false,
+            Allergies = AllergyNames.Distinct(existing?.Allergies)
         };
 
         // Built as a dictionary so createdAt is only written once; a null value

@@ -35,6 +35,11 @@ service cloud.firestore {
 			 == resource.data.get('isGlobalAdmin', false);
 	}
 
+	function keepsAllergies() {
+	  return request.resource.data.get('allergies', [])
+			 == resource.data.get('allergies', []);
+	}
+
 	// Users own their profile document. Other signed-in users may read it so
 	// participant lists can show names and avatars.
 	match /users/{uid} {
@@ -46,8 +51,10 @@ service cloud.firestore {
 
 	  // A user maintains their own profile but cannot promote themselves;
 	  // only a global admin may change the isGlobalAdmin flag.
+	  // Allergies may only be changed by the user themselves.
 	  allow update: if isSignedIn()
-					&& ((request.auth.uid == uid && keepsAdminFlag()) || isGlobalAdmin());
+					&& ((request.auth.uid == uid && keepsAdminFlag())
+						|| (isGlobalAdmin() && keepsAllergies()));
 
 	  allow delete: if false;
 	}
@@ -98,6 +105,12 @@ service cloud.firestore {
 	}
 
 	match /units/{unitId} {
+	  allow read, create, update: if isSignedIn();
+	  allow delete: if false;
+	}
+
+	// Shared suggestion list for allergies and dietary preferences.
+	match /allergies/{allergyId} {
 	  allow read, create, update: if isSignedIn();
 	  allow delete: if false;
 	}

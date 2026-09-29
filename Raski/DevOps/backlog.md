@@ -4,7 +4,7 @@
 
 | ID | Titel | Status | Prioritet |
 | --- | --- | --- | --- |
-| [B-001](#b-001-profilsida-med-allergier-och-kostpreferenser) | Profilsida med allergier och kostpreferenser | Redo | – |
+| [B-001](#b-001-profilsida-med-allergier-och-kostpreferenser) | Profilsida med allergier och kostpreferenser | Klar | – |
 | [B-002](#b-002-visa-resenärers-allergier-på-en-resa) | Visa resenärers allergier på en resa | Redo | – |
 | [B-003](#b-003-märk-ingredienser-med-allergener) | Märk ingredienser med allergener | Redo | – |
 | [B-004](#b-004-varna-för-allergener-i-måltider) | Varna för allergener i måltider | Redo | – |
@@ -58,7 +58,7 @@ Påverkade modeller, tjänster, Firestore-collections, regler, UI.
 
 ## B-001: Profilsida med allergier och kostpreferenser
 
-- **Status:** Redo
+- **Status:** Klar
 - **Prioritet:** –
 
 ### Beskrivning
