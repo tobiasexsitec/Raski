@@ -1,0 +1,356 @@
+@page "/on-boarding"
+@layout EmptyLayout
+@implements IDisposable
+@inject IAuthService AuthService
+@inject IUserService UserService
+@inject IAllergyService AllergyService
+@inject NavigationManager Navigation
+
+<PageTitle>Välkommen – Raski</PageTitle>
+
+<AuthGuard>
+    <div class="onboarding @($"step-{step}") @(finished ? "finished" : "")">
+        <div class="aurora" aria-hidden="true">
+            <span class="blob b1"></span>
+            <span class="blob b2"></span>
+            <span class="blob b3"></span>
+            <span class="blob b4"></span>
+        </div>
+
+        <div class="stars" aria-hidden="true">
+            @foreach (var star in stars)
+            {
+                <span class="star" style="left:@(star.Left)%; top:@(star.Top)%; animation-delay:@(star.Delay)ms; --size:@(star.Size)px"></span>
+            }
+        </div>
+
+        <div class="floaters" aria-hidden="true">
+            @foreach (var floater in floaters)
+            {
+                <span class="floater" style="left:@(floater.Left)%; animation-delay:@(floater.Delay)ms; animation-duration:@(floater.Duration)ms">@floater.Emoji</span>
+            }
+        </div>
+
+        @if (!finished)
+        {
+            <div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="@(step + 1)" aria-label="Steg @(step + 1) av 3">
+                <div class="progress-fill" style="width:@(((step + 1) * 100) / 3)%"></div>
+                @for (var i = 0; i < 3; i++)
+                {
+                    <span class="progress-dot @(i <= step ? "done" : "")" style="left:@((i * 100) / 2)%"></span>
+                }
+            </div>
+        }
+
+        <main class="stage" aria-live="polite">
+            @if (finished)
+            {
+                <section class="card-3d finale" @key="@("finale")">
+                    <div class="rays" aria-hidden="true"></div>
+                    <div class="rings" aria-hidden="true">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="trophy" aria-hidden="true">🎉</div>
+                    <h1 class="shimmer">Du är redo!</h1>
+                    <p class="lead">Välkommen till Raski, @FirstName. Nu kan resan börja.</p>
+                    <div class="fireworks" aria-hidden="true">
+                        @for (var i = 0; i < 5; i++)
+                        {
+                            <span class="firework" style="--i:@i"></span>
+                        }
+                    </div>
+                </section>
+            }
+            else if (step == 0)
+            {
+                <section class="card-3d" @key="@("step-0")">
+                    <div class="hero-emoji wave" aria-hidden="true">👋</div>
+                    <h1 class="shimmer">Hej @FirstName!</h1>
+                    <p class="lead">Välkommen till Raski. Innan vi drar igång behöver vi veta två saker om dig.</p>
+                    <ul class="teaser">
+                        <li style="--d:0">📞 Hur man når dig</li>
+                        <li style="--d:1">🥜 Vad du inte tål</li>
+                    </ul>
+                    <button type="button" class="btn btn-primary mega" @onclick="Next">
+                        <span>Kör igång</span> <span class="arrow" aria-hidden="true">🚀</span>
+                    </button>
+                </section>
+            }
+            else if (step == 1)
+            {
+                <section class="card-3d" @key="@("step-1")">
+                    <div class="hero-emoji ring" aria-hidden="true">📱</div>
+                    <h1 class="shimmer">Ditt telefonnummer</h1>
+                    <p class="lead">Så att resesällskapet kan nå dig när det gäller.</p>
+
+                    @if (errorMessage is not null)
+                    {
+                        <div class="error-banner shake" role="alert">@errorMessage</div>
+                    }
+
+                    <form class="stack" @onsubmit="SavePhoneAsync">
+                        <label class="field-label" for="onboarding-phone">Telefonnummer</label>
+                        <div class="glow-input">
+                            <input id="onboarding-phone"
+                                   type="tel"
+                                   autocomplete="tel"
+                                   placeholder="070-123 45 67"
+                                   @bind="phone"
+                                   @bind:event="oninput" />
+                        </div>
+                        <div class="actions">
+                            <button type="button" class="btn btn-secondary" @onclick="Back" disabled="@isSaving">Tillbaka</button>
+                            <button type="submit" class="btn btn-primary mega" disabled="@isSaving">
+                                @(string.IsNullOrWhiteSpace(phone) ? "Hoppa över" : "Nästa")
+                                <span class="arrow" aria-hidden="true">✨</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+            }
+            else
+            {
+                <section class="card-3d" @key="@("step-2")">
+                    <div class="hero-emoji wobble" aria-hidden="true">🥗</div>
+                    <h1 class="shimmer">Allergier och kostpreferenser</h1>
+                    <p class="lead">Tryck på det som gäller dig, eller skriv in något eget.</p>
+
+                    @if (errorMessage is not null)
+                    {
+                        <div class="error-banner shake" role="alert">@errorMessage</div>
+                    }
+
+                    <ul class="chips" aria-label="Förslag">
+                        @foreach (var (suggestion, index) in suggestions.Select((s, i) => (s, i)))
+                        {
+                            var selected = allergies.Contains(suggestion, StringComparer.OrdinalIgnoreCase);
+                            <li style="--d:@index">
+                                <button type="button"
+                                        class="chip @(selected ? "selected" : "")"
+                                        aria-pressed="@(selected ? "true" : "false")"
+                                        @onclick="() => Toggle(suggestion)">
+                                    @suggestion
+                                </button>
+                            </li>
+                        }
+                        @foreach (var custom in allergies.Where(a => !suggestions.Contains(a, StringComparer.OrdinalIgnoreCase)))
+                        {
+                            <li>
+                                <button type="button"
+                                        class="chip selected"
+                                        aria-pressed="true"
+                                        aria-label="@($"Ta bort {custom}")"
+                                        @onclick="() => Toggle(custom)">
+                                    @custom ✕
+                                </button>
+                            </li>
+                        }
+                    </ul>
+
+                    <form class="row-inline add" @onsubmit="AddCustom">
+                        <div class="glow-input grow">
+                            <input type="text"
+                                   aria-label="Egen allergi eller kostpreferens"
+                                   placeholder="Något annat?"
+                                   @bind="newAllergy"
+                                   @bind:event="oninput" />
+                        </div>
+                        <button type="submit" class="btn btn-secondary" disabled="@string.IsNullOrWhiteSpace(newAllergy)">Lägg till</button>
+                    </form>
+
+                    <div class="actions">
+                        <button type="button" class="btn btn-secondary" @onclick="Back" disabled="@isSaving">Tillbaka</button>
+                        <button type="button" class="btn btn-primary mega" @onclick="FinishAsync" disabled="@isSaving">
+                            @(isSaving ? "Sparar…" : "Klar!")
+                            <span class="arrow" aria-hidden="true">🎊</span>
+                        </button>
+                    </div>
+                </section>
+            }
+        </main>
+
+        <Confetti @ref="confetti" Count="160" />
+    </div>
+</AuthGuard>
+
+@code {
+    private static readonly string[] FloaterEmojis = ["🥕", "🍕", "🥑", "🏕️", "🍓", "🧀", "🌮", "🥐", "🍉", "🎒"];
+
+    private int step;
+    private bool finished;
+    private bool isSaving;
+    private string phone = "";
+    private string newAllergy = "";
+    private string? errorMessage;
+    private List<string> allergies = [];
+    private IReadOnlyList<string> suggestions = AllergyNames.Standard;
+    private Confetti? confetti;
+    private CancellationTokenSource? cts;
+
+    private readonly List<Star> stars = [];
+    private readonly List<Floater> floaters = [];
+
+    private string FirstName =>
+        (AuthService.Current?.DisplayName ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var random = Random.Shared;
+
+        for (var i = 0; i < 40; i++)
+        {
+            stars.Add(new Star(random.Next(0, 100), random.Next(0, 100), random.Next(0, 4000), random.Next(2, 5)));
+        }
+
+        for (var i = 0; i < 14; i++)
+        {
+            floaters.Add(new Floater(
+                random.Next(0, 95),
+                FloaterEmojis[random.Next(FloaterEmojis.Length)],
+                random.Next(0, 12000),
+                random.Next(9000, 16000)));
+        }
+
+        phone = AuthService.Current?.Phone ?? "";
+        allergies = [.. AuthService.Current?.Allergies ?? []];
+
+        try
+        {
+            suggestions = await AllergyService.GetSuggestionsAsync();
+        }
+        catch (Exception)
+        {
+            // The standard list is good enough to finish onboarding.
+        }
+    }
+
+    private void Next()
+    {
+        errorMessage = null;
+        step++;
+    }
+
+    private void Back()
+    {
+        errorMessage = null;
+        step = Math.Max(0, step - 1);
+    }
+
+    private async Task SavePhoneAsync()
+    {
+        if (isSaving)
+        {
+            return;
+        }
+
+        errorMessage = null;
+
+        if (phone.Trim() == (AuthService.Current?.Phone ?? ""))
+        {
+            step++;
+            return;
+        }
+
+        isSaving = true;
+
+        try
+        {
+            await UserService.SaveMyPhoneAsync(phone);
+            step++;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Kunde inte spara telefonnumret. {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Toggle(string allergy)
+    {
+        var existing = allergies.FirstOrDefault(a => string.Equals(a, allergy, StringComparison.OrdinalIgnoreCase));
+
+        if (existing is not null)
+        {
+            allergies.Remove(existing);
+        }
+        else
+        {
+            allergies.Add(AllergyNames.Normalize(allergy));
+        }
+    }
+
+    private void AddCustom()
+    {
+        var value = AllergyNames.Normalize(newAllergy);
+
+        if (value.Length > 0 && !allergies.Contains(value, StringComparer.OrdinalIgnoreCase))
+        {
+            allergies.Add(value);
+        }
+
+        newAllergy = "";
+    }
+
+    private async Task FinishAsync()
+    {
+        if (isSaving)
+        {
+            return;
+        }
+
+        errorMessage = null;
+        isSaving = true;
+
+        try
+        {
+            await AllergyService.SaveMyAllergiesAsync(allergies);
+            await UserService.CompleteOnboardingAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Kunde inte spara. {ex.Message}";
+            isSaving = false;
+            return;
+        }
+
+        finished = true;
+        isSaving = false;
+        StateHasChanged();
+
+        cts = new CancellationTokenSource();
+        var token = cts.Token;
+
+        try
+        {
+            if (confetti is not null)
+            {
+                _ = confetti.CelebrateAsync();
+                await Task.Delay(900, token);
+                _ = confetti.CelebrateAsync();
+                await Task.Delay(900, token);
+                _ = confetti.CelebrateAsync();
+            }
+
+            await Task.Delay(2600, token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        Navigation.NavigateTo("", replace: true);
+    }
+
+    private sealed record Star(int Left, int Top, int Delay, int Size);
+
+    private sealed record Floater(int Left, string Emoji, int Delay, int Duration);
+
+    public void Dispose()
+    {
+        cts?.Cancel();
+        cts?.Dispose();
+    }
+}

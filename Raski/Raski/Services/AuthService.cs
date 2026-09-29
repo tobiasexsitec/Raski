@@ -94,7 +94,8 @@ public sealed class AuthService(FirebaseInterop interop) : IAuthService, IAsyncD
             // Only another global admin may set this flag, so it is read-only here.
             IsGlobalAdmin = existing?.IsGlobalAdmin ?? false,
             Allergies = AllergyNames.Distinct(existing?.Allergies),
-            Phone = existing?.Phone ?? ""
+            Phone = existing?.Phone ?? "",
+            OnboardingCompleted = existing is not null && (existing.OnboardingCompleted ?? true)
         };
 
         // Built as a dictionary so createdAt is only written once; a null value
@@ -111,6 +112,7 @@ public sealed class AuthService(FirebaseInterop interop) : IAuthService, IAsyncD
         if (existing is null)
         {
             data["createdAt"] = FirestoreFormat.UtcNow();
+            data["onboardingCompleted"] = false;
         }
 
         await interop.SetDocumentAsync($"users/{user.Uid}", data);

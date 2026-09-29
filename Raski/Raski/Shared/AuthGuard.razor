@@ -56,7 +56,15 @@ else if (AllowAnonymous)
 
             Navigation.NavigateTo($"login?returnUrl={returnUrl}", replace: true);
         }
+        else if (!AuthService.Current.OnboardingCompleted && !IsOnboardingPage())
+        {
+            Navigation.NavigateTo("on-boarding", replace: true);
+        }
     }
+
+    private bool IsOnboardingPage() =>
+        Navigation.ToBaseRelativePath(Navigation.Uri)
+            .StartsWith("on-boarding", StringComparison.OrdinalIgnoreCase);
 
     public void Dispose()
     {

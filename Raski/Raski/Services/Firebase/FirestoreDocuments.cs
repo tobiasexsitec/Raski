@@ -36,6 +36,9 @@ internal sealed class UserDocument
     [JsonPropertyName("allergies")] public List<string>? Allergies { get; set; }
     [JsonPropertyName("phone")] public string? Phone { get; set; }
 
+    // Missing on users created before onboarding existed; they count as onboarded.
+    [JsonPropertyName("onboardingCompleted")] public bool? OnboardingCompleted { get; set; }
+
     public UserProfile ToModel() => new()
     {
         Uid = Id,
@@ -45,7 +48,8 @@ internal sealed class UserDocument
         Phone = Phone ?? "",
         Theme = ThemeOptions.IsValid(Theme) ? Theme! : ThemeOptions.System,
         IsGlobalAdmin = IsGlobalAdmin,
-        Allergies = AllergyNames.Distinct(Allergies)
+        Allergies = AllergyNames.Distinct(Allergies),
+        OnboardingCompleted = OnboardingCompleted ?? true
     };
 }
 

@@ -12,5 +12,8 @@ public interface IUserService
     /// <summary>Updates the signed-in user's phone number.</summary>
     Task SaveMyPhoneAsync(string phone, CancellationToken ct = default);
 
+    /// <summary>Marks onboarding as done so the signed-in user is no longer redirected to it.</summary>
+    Task CompleteOnboardingAsync(CancellationToken ct = default);
+
     Task SetGlobalAdminAsync(string uid, bool isGlobalAdmin, CancellationToken ct = default);
 }

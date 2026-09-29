@@ -37,6 +37,7 @@ Raski/                        # repo-rot
 | --- | --- |
 | `/` | `Features/Trips/TripList.razor` |
 | `/login` | `Features/Account/Login.razor` |
+| `/on-boarding` | `Features/Onboarding/Onboarding.razor` |
 | `/resor/ny`, `/resor/{TripId}/redigera` | `Features/Trips/TripEditor.razor` |
 | `/resor/{TripId}` | `Features/Trips/TripOverview.razor` |
 | `/resor/{TripId}/inkopslista` | `Features/ShoppingList/ShoppingListView.razor` |

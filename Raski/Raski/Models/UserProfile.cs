@@ -14,6 +14,9 @@ public sealed class UserProfile
 
     /// <summary>Allergies and dietary preferences, stored normalized (trimmed, lowercase).</summary>
     public List<string> Allergies { get; set; } = [];
+
+    /// <summary>New users are sent through onboarding until this is set.</summary>
+    public bool OnboardingCompleted { get; set; } = true;
 }
 
 public static class ThemeOptions
