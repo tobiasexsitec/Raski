@@ -1,0 +1,345 @@
+@inject IBringItemService BringItemService
+@inject ITripService TripService
+
+<section class="card" aria-labelledby="bring-heading">
+    <h2 id="bring-heading">Vem tar med</h2>
+    <p class="muted">Gemensamma saker som alla har nytta av på resan.</p>
+
+    @if (errorMessage is not null)
+    {
+        <div class="error-banner" role="alert">@errorMessage</div>
+    }
+
+    @if (isLoading)
+    {
+        <p class="muted">Hämtar listan…</p>
+    }
+    else
+    {
+        @if (items.Count == 0)
+        {
+            <p class="muted">Inga saker tillagda än.</p>
+        }
+        else
+        {
+            <ul class="bring-list">
+                @foreach (var item in items)
+                {
+                    <li class="bring-item @(item.HasResponsible ? "" : "unassigned")">
+                        @if (editing is not null && editing.Id == item.Id)
+                        {
+                            @EditorFields(editing, $"edit-{item.Id}")
+                            <div class="row-inline actions">
+                                <button type="button" class="btn btn-primary btn-sm" disabled="@isSaving" @onclick="SaveEditAsync">
+                                    @(isSaving ? "Sparar…" : "Spara")
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-sm" @onclick="CancelEdit">Avbryt</button>
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="bring-info">
+                                <strong>@item.Name</strong>
+                                @if (item.Quantity > 1)
+                                {
+                                    <span class="muted"> × @item.Quantity</span>
+                                }
+                                @if (item.HasResponsible)
+                                {
+                                    <span class="muted">Ansvarig: @ResponsibleDisplay(item)</span>
+                                }
+                                else
+                                {
+                                    <span class="tag tag-accent">Ingen ansvarig</span>
+                                }
+                            </span>
+
+                            <span class="row-inline bring-actions">
+                                @if (CurrentUser is not null && item.ResponsibleUid != CurrentUser.Uid)
+                                {
+                                    <button type="button"
+                                            class="btn btn-secondary btn-sm"
+                                            aria-label="@($"Jag tar med {item.Name}")"
+                                            disabled="@isSaving"
+                                            @onclick="() => TakeAsync(item)">
+                                        Jag tar med
+                                    </button>
+                                }
+                                <button type="button"
+                                        class="btn btn-secondary btn-sm"
+                                        aria-label="@($"Redigera {item.Name}")"
+                                        @onclick="() => StartEdit(item)">
+                                    Redigera
+                                </button>
+                                <button type="button"
+                                        class="btn btn-danger btn-sm"
+                                        aria-label="@($"Ta bort {item.Name}")"
+                                        disabled="@isSaving"
+                                        @onclick="() => DeleteAsync(item)">
+                                    Ta bort
+                                </button>
+                            </span>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+
+        <form class="bring-form" @onsubmit="AddAsync" @onsubmit:preventDefault>
+            <h3>Lägg till sak</h3>
+            @EditorFields(draft, "new")
+            <button type="submit" class="btn btn-primary" disabled="@(isSaving || string.IsNullOrWhiteSpace(draft.Name))">
+                @(isSaving ? "Sparar…" : "Lägg till")
+            </button>
+        </form>
+    }
+</section>
+
+@code {
+    private const string OtherOption = "__other";
+
+    [Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
+
+    [CascadingParameter(Name = "CurrentUser")]
+    private UserProfile? CurrentUser { get; set; }
+
+    private sealed class ItemForm
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public int Quantity { get; set; } = 1;
+        public string ResponsibleChoice { get; set; } = "";
+        public string FreeTextName { get; set; } = "";
+    }
+
+    private List<BringItem> items = [];
+    private List<TripMember> members = [];
+    private ItemForm draft = new();
+    private ItemForm? editing;
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+    private string? loadedTripId;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (loadedTripId == Trip.Id)
+        {
+            return;
+        }
+
+        loadedTripId = Trip.Id;
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var membersTask = TripService.GetMembersAsync(Trip.Id);
+            var itemsTask = BringItemService.GetAsync(Trip.Id);
+
+            members = [.. (await membersTask).OrderBy(m => m.DisplayName, StringComparer.CurrentCultureIgnoreCase)];
+            items = [.. await itemsTask];
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte hämta listan.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private RenderFragment EditorFields(ItemForm form, string idPrefix) => __builder =>
+    {
+        <div class="bring-fields">
+            <div class="field name">
+                <label for="@($"{idPrefix}-name")">Sak</label>
+                <input id="@($"{idPrefix}-name")"
+                       placeholder="T.ex. högtalare"
+                       required
+                       @bind="form.Name"
+                       @bind:event="oninput" />
+            </div>
+
+            <div class="field quantity">
+                <label for="@($"{idPrefix}-quantity")">Antal</label>
+                <input id="@($"{idPrefix}-quantity")"
+                       type="number"
+                       min="1"
+                       step="1"
+                       inputmode="numeric"
+                       @bind="form.Quantity" />
+            </div>
+
+            <div class="field responsible">
+                <label for="@($"{idPrefix}-responsible")">Ansvarig</label>
+                <select id="@($"{idPrefix}-responsible")" @bind="form.ResponsibleChoice">
+                    <option value="">Ingen ansvarig</option>
+                    @foreach (var member in members)
+                    {
+                        <option value="@member.Uid">@member.DisplayName</option>
+                    }
+                    <option value="@OtherOption">Annan (skriv namn)</option>
+                </select>
+            </div>
+
+            @if (form.ResponsibleChoice == OtherOption)
+            {
+                <div class="field free-text">
+                    <label for="@($"{idPrefix}-other")">Namn</label>
+                    <input id="@($"{idPrefix}-other")"
+                           placeholder="Namn på ansvarig"
+                           @bind="form.FreeTextName"
+                           @bind:event="oninput" />
+                </div>
+            }
+        </div>
+    };
+
+    private string ResponsibleDisplay(BringItem item)
+    {
+        if (!string.IsNullOrEmpty(item.ResponsibleUid))
+        {
+            var member = members.FirstOrDefault(m => m.Uid == item.ResponsibleUid);
+            if (member is not null && !string.IsNullOrWhiteSpace(member.DisplayName))
+            {
+                return member.DisplayName;
+            }
+        }
+
+        return item.ResponsibleName;
+    }
+
+    private BringItem ToItem(ItemForm form)
+    {
+        var item = new BringItem
+        {
+            Id = form.Id,
+            TripId = Trip.Id,
+            Name = form.Name.Trim(),
+            Quantity = form.Quantity < 1 ? 1 : form.Quantity
+        };
+
+        if (form.ResponsibleChoice == OtherOption)
+        {
+            item.ResponsibleName = form.FreeTextName.Trim();
+        }
+        else if (!string.IsNullOrEmpty(form.ResponsibleChoice))
+        {
+            var member = members.FirstOrDefault(m => m.Uid == form.ResponsibleChoice);
+            item.ResponsibleUid = form.ResponsibleChoice;
+            item.ResponsibleName = member?.DisplayName ?? "";
+        }
+
+        return item;
+    }
+
+    private void StartEdit(BringItem item)
+    {
+        errorMessage = null;
+        var isMember = !string.IsNullOrEmpty(item.ResponsibleUid);
+
+        editing = new ItemForm
+        {
+            Id = item.Id,
+            Name = item.Name,
+            Quantity = item.Quantity,
+            ResponsibleChoice = isMember
+                ? item.ResponsibleUid
+                : string.IsNullOrWhiteSpace(item.ResponsibleName) ? "" : OtherOption,
+            FreeTextName = isMember ? "" : item.ResponsibleName
+        };
+    }
+
+    private void CancelEdit() => editing = null;
+
+    private async Task AddAsync()
+    {
+        if (string.IsNullOrWhiteSpace(draft.Name))
+        {
+            return;
+        }
+
+        var item = ToItem(draft);
+        if (await SaveAsync(item))
+        {
+            draft = new ItemForm();
+        }
+    }
+
+    private async Task SaveEditAsync()
+    {
+        if (editing is null || string.IsNullOrWhiteSpace(editing.Name))
+        {
+            return;
+        }
+
+        if (await SaveAsync(ToItem(editing)))
+        {
+            editing = null;
+        }
+    }
+
+    private Task TakeAsync(BringItem item)
+    {
+        if (CurrentUser is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        return SaveAsync(new BringItem
+        {
+            Id = item.Id,
+            TripId = Trip.Id,
+            Name = item.Name,
+            Quantity = item.Quantity,
+            ResponsibleUid = CurrentUser.Uid,
+            ResponsibleName = CurrentUser.DisplayName
+        });
+    }
+
+    private async Task<bool> SaveAsync(BringItem item)
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            item.Id = await BringItemService.SaveAsync(item);
+            items.RemoveAll(i => i.Id == item.Id);
+            items.Add(item);
+            items.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.CurrentCultureIgnoreCase));
+            return true;
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte spara.";
+            return false;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task DeleteAsync(BringItem item)
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            await BringItemService.DeleteAsync(Trip.Id, item.Id);
+            items.Remove(item);
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte ta bort saken.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+}

@@ -160,6 +160,25 @@ internal sealed class BreakfastIngredientDocument
     };
 }
 
+internal sealed class BringItemDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("name")] public string? Name { get; set; }
+    [JsonPropertyName("quantity")] public int Quantity { get; set; }
+    [JsonPropertyName("responsibleUid")] public string? ResponsibleUid { get; set; }
+    [JsonPropertyName("responsibleName")] public string? ResponsibleName { get; set; }
+
+    public BringItem ToModel(string tripId) => new()
+    {
+        Id = Id,
+        TripId = tripId,
+        Name = Name ?? "",
+        Quantity = Quantity < 1 ? 1 : Quantity,
+        ResponsibleUid = ResponsibleUid ?? "",
+        ResponsibleName = ResponsibleName ?? ""
+    };
+}
+
 internal sealed class IngredientDocument
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";

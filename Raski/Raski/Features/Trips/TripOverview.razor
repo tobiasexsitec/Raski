@@ -1,5 +1,8 @@
 @page "/resor/{TripId}"
+@page "/resor/{TripId}/maltider"
+@page "/resor/{TripId}/vem-tar-med"
 @inject ITripService TripService
+@inject NavigationManager Navigation
 
 <PageTitle>@(trip?.Name ?? "Resa") – Raski</PageTitle>
 
@@ -42,11 +45,35 @@ else if (trip is not null)
         </section>
     }
 
-    <BreakfastPanel Trip="trip" />
+    <nav class="trip-tabs" role="tablist" aria-label="Resans flikar">
+        <a class="trip-tab @(IsBringTab ? "" : "active")"
+           role="tab"
+           id="tab-meals"
+           aria-selected="@(!IsBringTab ? "true" : "false")"
+           aria-controls="tabpanel"
+           href="@($"resor/{TripId}/maltider")">Måltider</a>
+        <a class="trip-tab @(IsBringTab ? "active" : "")"
+           role="tab"
+           id="tab-bring"
+           aria-selected="@(IsBringTab ? "true" : "false")"
+           aria-controls="tabpanel"
+           href="@($"resor/{TripId}/vem-tar-med")">Vem tar med</a>
+    </nav>
 
-    <MealList Trip="trip" />
+    <div id="tabpanel" role="tabpanel" aria-labelledby="@(IsBringTab ? "tab-bring" : "tab-meals")">
+        @if (IsBringTab)
+        {
+            <BringList Trip="trip" />
+        }
+        else
+        {
+            <BreakfastPanel Trip="trip" />
 
-    <MembersPanel TripId="@TripId" IsAdmin="IsAdmin" />
+            <MealList Trip="trip" />
+
+            <MembersPanel TripId="@TripId" IsAdmin="IsAdmin" />
+        }
+    </div>
 }
 
 @code {
@@ -61,8 +88,18 @@ else if (trip is not null)
 
     private bool IsAdmin => trip?.IsOwner(CurrentUser?.Uid) == true;
 
+    private bool IsBringTab =>
+        Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0]
+            .EndsWith("/vem-tar-med", StringComparison.OrdinalIgnoreCase);
+
     protected override async Task OnParametersSetAsync()
     {
+        // Switching tabs re-renders the same page; only reload when the trip changes.
+        if (trip is not null && trip.Id == TripId)
+        {
+            return;
+        }
+
         isLoading = true;
         errorMessage = null;
 

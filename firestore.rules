@@ -90,6 +90,11 @@ service cloud.firestore {
 		allow read, write: if isTripMember(tripId);
 	  }
 
+	  // Shared "who brings what" list, edited by any member.
+	  match /bringItems/{itemId} {
+		allow read, write: if isTripMember(tripId);
+	  }
+
 	  // Shared check-off state for the shopping list.
 	  match /shoppingState/{ingredientId} {
 		allow read, write: if isTripMember(tripId);

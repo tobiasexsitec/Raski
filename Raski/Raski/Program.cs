@@ -21,6 +21,7 @@ builder.Services.AddSingleton<ITripService, TripService>();
 builder.Services.AddSingleton<IIngredientService, IngredientService>();
 builder.Services.AddSingleton<IMealService, MealService>();
 builder.Services.AddSingleton<IBreakfastService, BreakfastService>();
+builder.Services.AddSingleton<IBringItemService, BringItemService>();
 builder.Services.AddSingleton<IShoppingListService, ShoppingListService>();
 
 await builder.Build().RunAsync();
