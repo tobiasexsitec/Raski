@@ -1,4 +1,5 @@
 @page "/resor/{TripId}"
+@page "/resor/{TripId}/oversikt"
 @page "/resor/{TripId}/maltider"
 @page "/resor/{TripId}/vem-tar-med"
 @inject ITripService TripService
@@ -19,13 +20,6 @@ else if (trip is not null)
     <div class="page-header">
         <div>
             <h1>@trip.Name</h1>
-            <p class="muted">
-                @if (!string.IsNullOrWhiteSpace(trip.Destination))
-                {
-                    <span>📍 @trip.Destination · </span>
-                }
-                <span>@trip.StartDate.ToString("yyyy-MM-dd") – @trip.EndDate.ToString("yyyy-MM-dd")</span>
-            </p>
         </div>
 
         <div class="row-inline">
@@ -37,31 +31,48 @@ else if (trip is not null)
         </div>
     </div>
 
-    @if (!string.IsNullOrWhiteSpace(trip.Notes))
-    {
-        <section class="card notes">
-            <h2>Övrig info</h2>
-            <p>@trip.Notes</p>
-        </section>
-    }
-
     <nav class="trip-tabs" role="tablist" aria-label="Resans flikar">
-        <a class="trip-tab @(IsBringTab ? "" : "active")"
+        <a class="trip-tab @(CurrentTab == Tab.Overview ? "active" : "")"
+           role="tab"
+           id="tab-overview"
+           aria-selected="@(CurrentTab == Tab.Overview ? "true" : "false")"
+           aria-controls="tabpanel"
+           href="@($"resor/{TripId}/oversikt")">Översikt</a>
+        <a class="trip-tab @(CurrentTab == Tab.Meals ? "active" : "")"
            role="tab"
            id="tab-meals"
-           aria-selected="@(!IsBringTab ? "true" : "false")"
+           aria-selected="@(CurrentTab == Tab.Meals ? "true" : "false")"
            aria-controls="tabpanel"
            href="@($"resor/{TripId}/maltider")">Måltider</a>
-        <a class="trip-tab @(IsBringTab ? "active" : "")"
+        <a class="trip-tab @(CurrentTab == Tab.Bring ? "active" : "")"
            role="tab"
            id="tab-bring"
-           aria-selected="@(IsBringTab ? "true" : "false")"
+           aria-selected="@(CurrentTab == Tab.Bring ? "true" : "false")"
            aria-controls="tabpanel"
            href="@($"resor/{TripId}/vem-tar-med")">Vem tar med</a>
     </nav>
 
-    <div id="tabpanel" role="tabpanel" aria-labelledby="@(IsBringTab ? "tab-bring" : "tab-meals")">
-        @if (IsBringTab)
+    <div id="tabpanel" role="tabpanel" aria-labelledby="@TabId">
+        @if (CurrentTab == Tab.Overview)
+        {
+            <section class="card">
+                <h2>Översikt</h2>
+                @if (!string.IsNullOrWhiteSpace(trip.Destination))
+                {
+                    <p>📍 @trip.Destination</p>
+                }
+                <p>📅 @trip.StartDate.ToString("yyyy-MM-dd") – @trip.EndDate.ToString("yyyy-MM-dd")</p>
+            </section>
+
+            @if (!string.IsNullOrWhiteSpace(trip.Notes))
+            {
+                <section class="card notes">
+                    <h2>Övrig info</h2>
+                    <p>@trip.Notes</p>
+                </section>
+            }
+        }
+        else if (CurrentTab == Tab.Bring)
         {
             <BringList Trip="trip" />
         }
@@ -88,9 +99,25 @@ else if (trip is not null)
 
     private bool IsAdmin => trip?.IsOwner(CurrentUser?.Uid) == true;
 
-    private bool IsBringTab =>
-        Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0]
-            .EndsWith("/vem-tar-med", StringComparison.OrdinalIgnoreCase);
+    private enum Tab { Overview, Meals, Bring }
+
+    private Tab CurrentTab
+    {
+        get
+        {
+            var path = Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0];
+            if (path.EndsWith("/vem-tar-med", StringComparison.OrdinalIgnoreCase)) return Tab.Bring;
+            if (path.EndsWith("/maltider", StringComparison.OrdinalIgnoreCase)) return Tab.Meals;
+            return Tab.Overview;
+        }
+    }
+
+    private string TabId => CurrentTab switch
+    {
+        Tab.Bring => "tab-bring",
+        Tab.Meals => "tab-meals",
+        _ => "tab-overview"
+    };
 
     protected override async Task OnParametersSetAsync()
     {
