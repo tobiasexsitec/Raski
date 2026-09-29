@@ -1,6 +1,7 @@
 @page "/ingredienser"
 @implements IDisposable
 @inject IIngredientService IngredientService
+@inject IAuthService AuthService
 
 <PageTitle>Ingredienser – Raski</PageTitle>
 
@@ -119,6 +120,33 @@ else
         </section>
     }
 
+    @if (deleting is not null)
+    {
+        <div class="backdrop" @onclick="CancelDelete">
+            <div class="dialog card"
+                 role="alertdialog"
+                 aria-modal="true"
+                 aria-labelledby="delete-title"
+                 @onclick:stopPropagation="true"
+                 @onkeydown="OnDeleteDialogKeyDown">
+                <h2 id="delete-title">Ta bort "@deleting.Name"?</h2>
+                <p class="muted">
+                    Ingrediensen tas bort från registret. Detta går inte att ångra.
+                </p>
+
+                <div class="row-inline">
+                    <button type="button"
+                            class="btn btn-danger"
+                            disabled="@isSaving"
+                            @onclick="ConfirmDeleteAsync">
+                        Ta bort
+                    </button>
+                    <button type="button" class="btn btn-secondary" @ref="cancelDeleteButton" @onclick="CancelDelete">Avbryt</button>
+                </div>
+            </div>
+        </div>
+    }
+
     @if (Visible.Count == 0)
     {
         <p class="muted">Inga ingredienser matchar.</p>
@@ -147,12 +175,15 @@ else
                         <button type="button" class="btn btn-secondary btn-sm" @onclick="() => StartEdit(ingredient)">
                             Redigera
                         </button>
-                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => StartMerge(ingredient)">
-                            Slå ihop
-                        </button>
-                        <button type="button" class="btn btn-danger btn-sm" @onclick="() => DeleteAsync(ingredient)">
-                            Ta bort
-                        </button>
+                        @if (AuthService.IsGlobalAdmin)
+                        {
+                            <button type="button" class="btn btn-secondary btn-sm" @onclick="() => StartMerge(ingredient)">
+                                Slå ihop
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm" @onclick="() => StartDelete(ingredient)">
+                                Ta bort
+                            </button>
+                        }
                     </div>
                 </li>
             }
@@ -166,6 +197,9 @@ else
     private string newTag = "";
     private Ingredient? editing;
     private Ingredient? merging;
+    private Ingredient? deleting;
+    private ElementReference cancelDeleteButton;
+    private bool focusDeleteDialog;
     private Ingredient? mergeTarget;
     private string mergeTargetText = "";
     private string searchText = "";
@@ -212,12 +246,14 @@ else
     private void StartCreate()
     {
         merging = null;
+        deleting = null;
         editing = new Ingredient();
     }
 
     private void StartEdit(Ingredient ingredient)
     {
         merging = null;
+        deleting = null;
 
         // Edit a copy so cancelling leaves the cached instance untouched.
         editing = new Ingredient
@@ -317,6 +353,7 @@ else
     private void StartMerge(Ingredient ingredient)
     {
         editing = null;
+        deleting = null;
         mergeTarget = null;
         mergeTargetText = "";
         merging = ingredient;
@@ -347,16 +384,62 @@ else
         }
     }
 
-    private async Task DeleteAsync(Ingredient ingredient)
+    private void StartDelete(Ingredient ingredient)
     {
+        editing = null;
+        merging = null;
+        deleting = ingredient;
+        focusDeleteDialog = true;
+    }
+
+    private void CancelDelete()
+    {
+        if (!isSaving)
+        {
+            deleting = null;
+        }
+    }
+
+    private void OnDeleteDialogKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            CancelDelete();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Focus the safe choice so keyboard users land inside the dialog.
+        if (focusDeleteDialog && deleting is not null)
+        {
+            focusDeleteDialog = false;
+            await cancelDeleteButton.FocusAsync();
+        }
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (deleting is null)
+        {
+            return;
+        }
+
+        isSaving = true;
+
         try
         {
-            await IngredientService.DeleteAsync(ingredient.Id);
+            await IngredientService.DeleteAsync(deleting.Id);
+            deleting = null;
             await ReloadAsync();
         }
         catch (Exception)
         {
             errorMessage = "Kunde inte ta bort ingrediensen.";
+        }
+        finally
+        {
+            isSaving = false;
         }
     }
 

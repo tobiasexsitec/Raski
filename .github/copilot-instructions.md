@@ -77,6 +77,7 @@ Mönstret finns i `MealService.ObserveMeals` / `ShoppingListService`: en bounded
   - Scoped CSS ska bara innehålla komponentspecifik layout.
 - Mobil först. Tillgänglighet är ett krav: `aria-label` på ikonknappar, `role`/`tabindex` på klickbara ytor, `aria-modal` på dialoger.
 - Formulär i appen är oftast handrullade (`@bind` + manuell validering med ett `errorMessage`-fält som visas i en `error-banner`) snarare än `EditForm`. Följ omgivande fils stil.
+- Bekräftelsepromptar (t.ex. radera) ska visas som modaldialoger med en bakgrund, inte som inline-sektioner på sidan.
 
 ## Kodstil
 
@@ -95,4 +96,4 @@ Mönstret finns i `MealService.ObserveMeals` / `ShoppingListService`: en bounded
 - När en funktion diskuteras, lägg till den i `Raski/DevOps/backlog.md` enligt följande struktur: översiktstabell, ID B-XXX, status, beskrivning, användarberättelse, acceptanskriterier, öppna frågor, tekniska anteckningar, beslut. Skriv på svenska.
 - Markera backlog-objekt i `Raski/DevOps/backlog.md` som "Klar" först efter att användaren har godkänt att pusha. 
 - När du begär att åta dig och pusha ändringar av ett backlog-objekt, sätt även statusen för det objektet till "Klar" i `Raski/DevOps/backlog.md` (både i översiktstabellen och i objektsektionen) som en del av pushen.
-- När du redigerar en rad i översiktstabellen i `Raski/DevOps/backlog.md`, ersätt alltid hela raden inklusive ID-länkskolumnen (t.ex. "| [B-005](#anchor) | Titel | Status | Prioritet |"), aldrig bara den avslutande delen, så att ID-kolumnen inte går förlorad. Verifiera raden efter redigering.
+- När du redigerar en rad i översiktstabellen i `Raski/DevOps/backlog.md`, ersätt alltid hela raden inklusive ID-länkskolumnen (t.ex. "| [B-005](#anchor) | Titel | Status | Prioritet |") och verifiera raden efter redigering.

@@ -97,11 +97,20 @@ service cloud.firestore {
 	}
 
 	// The global ingredient and unit registries are shared by all trips.
-	// Deletion is restricted because meals embed ingredient ids; duplicates
-	// should be merged via mergedIntoId instead.
+	// Any signed-in user may create and edit ingredients, but only global
+	// admins may merge (change mergedIntoId) or delete them.
+	function keepsMergedIntoId() {
+	  return request.resource.data.get('mergedIntoId', '')
+			 == resource.data.get('mergedIntoId', '');
+	}
+
 	match /ingredients/{ingredientId} {
-	  allow read, create, update: if isSignedIn();
-	  allow delete: if isSignedIn();
+	  allow read: if isSignedIn();
+	  allow create: if isSignedIn()
+					&& (request.resource.data.get('mergedIntoId', '') == ''
+						|| isGlobalAdmin());
+	  allow update: if isSignedIn() && (keepsMergedIntoId() || isGlobalAdmin());
+	  allow delete: if isGlobalAdmin();
 	}
 
 	match /units/{unitId} {
