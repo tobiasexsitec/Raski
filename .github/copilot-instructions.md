@@ -93,7 +93,7 @@ Mönstret finns i `MealService.ObserveMeals` / `ShoppingListService`: en bounded
 - Nya tjänster registreras som singleton i `Program.cs`.
 - Nya feature-namespace läggs till i `_Imports.razor`.
 - Hemligheter: `wwwroot/appsettings.json` innehåller Firebase-konfiguration – lägg aldrig till andra hemligheter i repot.
-- För varje ny funktion, lägg till ett backlog-objekt i `Raski/DevOps/backlog.md` (enligt mallen och tabellreglerna i början av filen) innan eller samtidigt som du implementerar den.
+- För varje ny funktion eller ändring, lägg alltid till ett backlog-objekt i `Raski/DevOps/backlog.md` (enligt mallen och tabellreglerna i början av filen) innan eller samtidigt som du implementerar den.
 - När en funktion diskuteras, lägg till den i `Raski/DevOps/backlog.md` enligt följande struktur: översiktstabell, ID B-XXX, status, beskrivning, användarberättelse, acceptanskriterier, öppna frågor, tekniska anteckningar, beslut. Skriv på svenska.
 - Markera backlog-objekt i `Raski/DevOps/backlog.md` som "Klar" först efter att användaren har godkänt att pusha. 
 - När du begär att åta dig och pusha ändringar av ett backlog-objekt, sätt även statusen för det objektet till "Klar" i `Raski/DevOps/backlog.md` (både i översiktstabellen och i objektsektionen) som en del av pushen.

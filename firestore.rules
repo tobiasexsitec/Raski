@@ -40,6 +40,11 @@ service cloud.firestore {
 			 == resource.data.get('allergies', []);
 	}
 
+	function keepsPhone() {
+	  return request.resource.data.get('phone', '')
+			 == resource.data.get('phone', '');
+	}
+
 	// Users own their profile document. Other signed-in users may read it so
 	// participant lists can show names and avatars.
 	match /users/{uid} {
@@ -51,10 +56,10 @@ service cloud.firestore {
 
 	  // A user maintains their own profile but cannot promote themselves;
 	  // only a global admin may change the isGlobalAdmin flag.
-	  // Allergies may only be changed by the user themselves.
+	  // Allergies and phone may only be changed by the user themselves.
 	  allow update: if isSignedIn()
 					&& ((request.auth.uid == uid && keepsAdminFlag())
-						|| (isGlobalAdmin() && keepsAllergies()));
+						|| (isGlobalAdmin() && keepsAllergies() && keepsPhone()));
 
 	  allow delete: if false;
 	}

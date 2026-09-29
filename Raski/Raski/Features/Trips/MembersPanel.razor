@@ -26,6 +26,10 @@
                     <span class="member-info">
                         <strong>@member.DisplayName</strong>
                         <span class="muted">@member.Email</span>
+                        @if (PhoneOf(member) is { Length: > 0 } phone)
+                        {
+                            <a class="muted" href="@($"tel:{phone}")">📞 @phone</a>
+                        }
                         @if (AllergiesOf(member) is { Count: > 0 } memberAllergies)
                         {
                             <span class="allergy-tags" aria-label="Allergier och kostpreferenser för @member.DisplayName">
@@ -106,6 +110,7 @@
 
     private List<TripMember> members = [];
     private Dictionary<string, List<string>> allergiesByUid = [];
+    private Dictionary<string, string> phoneByUid = [];
     private List<string> allAllergies = [];
     private string inviteEmail = "";
     private bool isAdding;
@@ -150,6 +155,10 @@
                         .OrderBy(a => a, StringComparer.CurrentCultureIgnoreCase)
                         .ToList());
 
+            phoneByUid = profiles
+                .Where(p => p is not null && !string.IsNullOrWhiteSpace(p.Phone))
+                .ToDictionary(p => p!.Uid, p => p!.Phone.Trim());
+
             allAllergies = [.. allergiesByUid.Values
                 .SelectMany(a => a)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -163,6 +172,9 @@
 
     private List<string>? AllergiesOf(TripMember member) =>
         allergiesByUid.GetValueOrDefault(member.Uid);
+
+    private string? PhoneOf(TripMember member) =>
+        phoneByUid.GetValueOrDefault(member.Uid);
 
     private async Task AddAsync()
     {
@@ -205,6 +217,7 @@
             await TripService.RemoveMemberAsync(TripId, member.Uid);
             members.Remove(member);
             allergiesByUid.Remove(member.Uid);
+            phoneByUid.Remove(member.Uid);
             allAllergies = [.. allergiesByUid.Values
                 .SelectMany(a => a)
                 .Distinct(StringComparer.OrdinalIgnoreCase)

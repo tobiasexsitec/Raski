@@ -1,6 +1,7 @@
 @page "/profil"
 @inject IAllergyService AllergyService
 @inject IAuthService AuthService
+@inject IUserService UserService
 
 <PageTitle>Profil – Raski</PageTitle>
 
@@ -21,6 +22,26 @@ else
     {
         <div class="error-banner" role="alert">@errorMessage</div>
     }
+
+    <section class="card stack">
+        <h2>Telefonnummer</h2>
+        <form class="add-form" @onsubmit="SavePhoneAsync">
+            <label class="field-label" for="phone">Syns för deltagarna på dina resor</label>
+            <div class="row-inline">
+                <input id="phone"
+                       type="tel"
+                       autocomplete="tel"
+                       placeholder="070-123 45 67"
+                       @bind="phone"
+                       @bind:event="oninput" />
+                <button type="submit"
+                        class="btn btn-primary"
+                        disabled="@(isSaving || phone.Trim() == (AuthService.Current?.Phone ?? ""))">
+                    Spara
+                </button>
+            </div>
+        </form>
+    </section>
 
     <section class="card stack">
         <h2 id="allergies-heading">Allergier och kostpreferenser</h2>
@@ -75,12 +96,14 @@ else
     private List<string> allergies = [];
     private IReadOnlyList<string> suggestions = [];
     private string newAllergy = "";
+    private string phone = "";
     private bool isSaving;
     private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
         allergies = [.. AuthService.Current?.Allergies ?? []];
+        phone = AuthService.Current?.Phone ?? "";
 
         try
         {
@@ -133,6 +156,31 @@ else
         if (await SaveAsync([.. allergies, value]))
         {
             newAllergy = "";
+        }
+    }
+
+    private async Task SavePhoneAsync()
+    {
+        if (isSaving)
+        {
+            return;
+        }
+
+        errorMessage = null;
+        isSaving = true;
+
+        try
+        {
+            await UserService.SaveMyPhoneAsync(phone);
+            phone = phone.Trim();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Kunde inte spara telefonnumret. {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
         }
     }
 

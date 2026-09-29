@@ -9,5 +9,8 @@ public interface IUserService
 
     Task<UserProfile?> GetAsync(string uid, CancellationToken ct = default);
 
+    /// <summary>Updates the signed-in user's phone number.</summary>
+    Task SaveMyPhoneAsync(string phone, CancellationToken ct = default);
+
     Task SetGlobalAdminAsync(string uid, bool isGlobalAdmin, CancellationToken ct = default);
 }

@@ -34,6 +34,7 @@ internal sealed class UserDocument
     [JsonPropertyName("theme")] public string? Theme { get; set; }
     [JsonPropertyName("isGlobalAdmin")] public bool IsGlobalAdmin { get; set; }
     [JsonPropertyName("allergies")] public List<string>? Allergies { get; set; }
+    [JsonPropertyName("phone")] public string? Phone { get; set; }
 
     public UserProfile ToModel() => new()
     {
@@ -41,6 +42,7 @@ internal sealed class UserDocument
         DisplayName = DisplayName ?? "",
         Email = Email ?? "",
         PhotoUrl = PhotoUrl ?? "",
+        Phone = Phone ?? "",
         Theme = ThemeOptions.IsValid(Theme) ? Theme! : ThemeOptions.System,
         IsGlobalAdmin = IsGlobalAdmin,
         Allergies = AllergyNames.Distinct(Allergies)

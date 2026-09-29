@@ -3,8 +3,22 @@ using Raski.Services.Firebase;
 
 namespace Raski.Services;
 
-public sealed class UserService(FirebaseInterop interop) : IUserService
+public sealed class UserService(FirebaseInterop interop, IAuthService authService) : IUserService
 {
+    public async Task SaveMyPhoneAsync(string phone, CancellationToken ct = default)
+    {
+        var uid = authService.Current?.Uid ?? throw new InvalidOperationException("Ingen inloggad användare.");
+        var normalized = phone.Trim();
+
+        await interop.UpdateDocumentAsync($"users/{uid}", new
+        {
+            phone = normalized,
+            updatedAt = FirestoreFormat.UtcNow()
+        }, ct);
+
+        authService.UpdateCachedProfile(p => p.Phone = normalized);
+    }
+
     public async Task<IReadOnlyList<UserProfile>> GetAllAsync(CancellationToken ct = default)
     {
         var documents = await interop.QueryAsync<UserDocument>("users", null, ct);
