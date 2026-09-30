@@ -8,6 +8,7 @@ import {
     signInWithPopup,
     signInWithRedirect,
     getRedirectResult,
+    signInWithCredential,
     onAuthStateChanged,
     signOut as fbSignOut
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
@@ -99,12 +100,67 @@ export async function signInWithGoogle() {
     }
 }
 
+// Google Identity Services signs in directly against accounts.google.com and hands back
+// an ID token. Unlike popup/redirect via authDomain this needs no third-party storage,
+// which WebKit (all iOS browsers) blocks.
+let gisLoader = null;
+
+function loadGoogleIdentityServices() {
+    if (window.google?.accounts?.id) {
+        return Promise.resolve();
+    }
+
+    gisLoader ??= new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "https://accounts.google.com/gsi/client";
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => {
+            gisLoader = null;
+            reject(new Error("Kunde inte ladda Google-inloggningen."));
+        };
+        document.head.appendChild(script);
+    });
+
+    return gisLoader;
+}
+
+export async function renderGoogleButton(element, clientId, dotNetRef) {
+    await loadGoogleIdentityServices();
+
+    window.google.accounts.id.initialize({
+        client_id: clientId,
+        ux_mode: "popup",
+        callback: async response => {
+            try {
+                const credential = GoogleAuthProvider.credential(response.credential);
+                await signInWithCredential(auth, credential);
+            } catch (error) {
+                dotNetRef.invokeMethodAsync("OnGoogleSignInFailed", error?.code ?? error?.message ?? "");
+            }
+        }
+    });
+
+    const width = Math.min(Math.max(element.clientWidth || 280, 200), 400);
+
+    window.google.accounts.id.renderButton(element, {
+        type: "standard",
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+        shape: "pill",
+        locale: "sv",
+        width
+    });
+}
+
 export async function completeRedirectSignIn() {
     const result = await getRedirectResult(auth);
     return mapUser(result?.user);
 }
 
 export function signOut() {
+    window.google?.accounts?.id?.disableAutoSelect();
     return fbSignOut(auth);
 }
 

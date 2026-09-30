@@ -61,6 +61,9 @@ public sealed class AuthService(FirebaseInterop interop) : IAuthService, IAsyncD
     public Task SignInWithGoogleAsync() =>
         interop.InvokeAsync<FirebaseUser?>("signInWithGoogle", CancellationToken.None);
 
+    public Task RenderGoogleButtonAsync(Microsoft.AspNetCore.Components.ElementReference element, object callbackTarget) =>
+        interop.InvokeVoidAsync("renderGoogleButton", CancellationToken.None, element, interop.Options.GoogleClientId, callbackTarget);
+
     public async Task SignOutAsync()
     {
         await interop.InvokeVoidAsync("signOut", CancellationToken.None);

@@ -28,6 +28,13 @@ public sealed class FirebaseOptions
     [JsonPropertyName("appId")]
     public string AppId { get; set; } = "";
 
+    /// <summary>OAuth Web Client ID used by Google Identity Services for sign-in.</summary>
+    [JsonPropertyName("googleClientId")]
+    public string GoogleClientId { get; set; } = "";
+
+    public bool HasGoogleClientId =>
+        !string.IsNullOrWhiteSpace(GoogleClientId) && !GoogleClientId.StartsWith("REPLACE_WITH", StringComparison.Ordinal);
+
     public bool IsConfigured =>
         !string.IsNullOrWhiteSpace(ApiKey) && !ApiKey.StartsWith("REPLACE_WITH", StringComparison.Ordinal);
 }

@@ -16,6 +16,9 @@ public interface IAuthService
 
     Task InitializeAsync(CancellationToken ct = default);
     Task SignInWithGoogleAsync();
+
+    /// <summary>Renders the Google Identity Services button; errors are reported to <paramref name="callbackTarget"/>.</summary>
+    Task RenderGoogleButtonAsync(Microsoft.AspNetCore.Components.ElementReference element, object callbackTarget);
     Task SignOutAsync();
 
     /// <summary>Updates the cached profile after a local change such as a theme switch.</summary>

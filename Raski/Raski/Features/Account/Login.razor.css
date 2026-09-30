@@ -31,6 +31,13 @@
     margin-bottom: var(--space-5);
 }
 
+.google-gis-btn {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+}
+
 .google-btn {
     width: 100%;
     margin-top: var(--space-4);
