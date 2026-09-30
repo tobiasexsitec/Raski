@@ -16,6 +16,7 @@
 | [B-010](#b-010-onboarding-för-nya-användare) | Onboarding för nya användare | Klar | – |
 | [B-011](#b-011-google-inloggning-som-fungerar-på-ios) | Google-inloggning som fungerar på iOS | Klar | – |
 | [B-012](#b-012-versionsnummer-synligt-i-appen) | Versionsnummer synligt i appen | Klar | – |
+| [B-013](#b-013-höj-versionsnumret-vid-varje-release) | Höj versionsnumret vid varje release | Klar | – |
 
 > **KRAV vid varje ändring i backloggen (gäller även AI-assistenter):**
 > 1. Läs översiktstabellen **före** ändringen.
@@ -497,3 +498,35 @@ om jag har den senaste versionen.
 
 ### Beslut
 - Versionen visas i sidhuvudet i stället för på profilsidan.
+
+---
+
+## B-013: Höj versionsnumret vid varje release
+
+- **Status:** Klar
+- **Prioritet:** –
+- **Beroenden:** B-012
+
+### Beskrivning
+Versionsnumret som visas i appen (B-012) ska uppdateras vid varje release, dvs.
+varje gång ett backlog-objekt slutförs, så att versionen speglar vad som är levererat.
+
+### User story
+Som användare vill jag att versionsnumret ändras när ny funktionalitet släpps så
+att jag kan se att jag kör den senaste versionen.
+
+### Acceptanskriterier
+- [x] Minor-versionen i `Raski.csproj` höjs när ett backlog-objekt markeras Klar.
+- [x] Höjningen görs i samma commit som statusändringen till Klar.
+- [x] Regeln finns dokumenterad i `.github/copilot-instructions.md`.
+- [x] Släppt version anges under **Beslut** i respektive backlog-objekt.
+
+### Tekniska noteringar
+- Semantisk version `MAJOR.MINOR.PATCH` i `<Version>` i `Raski/Raski/Raski.csproj`.
+- Minor = nytt backlog-objekt klart, patch = buggfix utan backlog-objekt
+  (nollställs vid minor-höjning), major höjs manuellt vid behov.
+- Ingen ändring i GitHub Actions – versionen läses från projektfilen vid publicering.
+
+### Beslut
+- Manuell
+- Släppt i version 1.1.0.

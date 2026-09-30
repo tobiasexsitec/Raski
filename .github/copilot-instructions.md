@@ -94,8 +94,10 @@ Mönstret finns i `MealService.ObserveMeals` / `ShoppingListService`: en bounded
 - Nya tjänster registreras som singleton i `Program.cs`.
 - Nya feature-namespace läggs till i `_Imports.razor`.
 - Hemligheter: `wwwroot/appsettings.json` innehåller Firebase-konfiguration – lägg aldrig till andra hemligheter i repot.
+- När en funktion diskuteras eller en ändring begärs, lägg alltid till ett backlog-objekt i `Raski/DevOps/backlog.md` (enligt mallen och tabellreglerna i början av filen) innan eller samtidigt som du implementerar den.
 - För varje ny funktion eller ändring, lägg alltid till ett backlog-objekt i `Raski/DevOps/backlog.md` (enligt mallen och tabellreglerna i början av filen) innan eller samtidigt som du implementerar den.
 - När en funktion diskuteras, lägg till den i `Raski/DevOps/backlog.md` enligt följande struktur: översiktstabell, ID B-XXX, status, beskrivning, användarberättelse, acceptanskriterier, öppna frågor, tekniska anteckningar, beslut. Skriv på svenska.
 - Markera backlog-objekt i `Raski/DevOps/backlog.md` som "Klar" först efter att användaren har godkänt att pusha. 
-- När du begär att åta dig och pusha ändringar av ett backlog-objekt, sätt även statusen för det objektet till "Klar" i `Raski/DevOps/backlog.md` (både i översiktstabellen och i objektsektionen) som en del av pushen.
+som en del av pushen.
+- När ett backlog-objekt sätts till "Klar", höj samtidigt minor-versionen i `<Version>` i `Raski/Raski/Raski.csproj` (t.ex. `1.1.0` → `1.2.0`, patch nollställs) och commita det i samma commit. Ange den nya versionen under **Beslut** i backlog-objektet (t.ex. `- Släppt i version 1.2.0.`). Ändringar utan backlog-objekt (buggfixar) höjer patch-versionen.
 - När du redigerar en rad i översiktstabellen i `Raski/DevOps/backlog.md`, ersätt alltid hela raden inklusive ID-länkskolumnen (t.ex. "| [B-005](#anchor) | Titel | Status | Prioritet |") och verifiera raden efter redigering. **Replacera alltid hela rader av översiktstabellen (aldrig delvis radtext), och läs igenom översiktstabellen efter varje redigering för att verifiera att varje rad börjar med `| [B-XXX](#anchor) |`, har 4 kolumner, alla objekt är listade i ordning, och statusarna matchar objekten.**
