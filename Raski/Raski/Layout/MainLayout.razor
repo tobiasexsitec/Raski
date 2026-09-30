@@ -11,6 +11,7 @@
             <span class="brand-mark" aria-hidden="true">🥕</span>
             <span class="brand-name">Raski</span>
         </a>
+        <span class="app-version" title="Appversion">v@(AppVersion)</span>
 
         <div class="spacer"></div>
 
@@ -59,6 +60,14 @@
 </div>
 
 @code {
+    private static readonly string AppVersion =
+        typeof(MainLayout).Assembly
+            .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
+            .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
+            .FirstOrDefault()?.InformationalVersion
+        ?? typeof(MainLayout).Assembly.GetName().Version?.ToString()
+        ?? "?";
+
     private bool menuOpen;
 
     protected override void OnInitialized()

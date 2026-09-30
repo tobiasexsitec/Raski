@@ -36,6 +36,11 @@
     font-size: 1.3rem;
 }
 
+.app-version {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
 .spacer {
     flex: 1 1 auto;
 }
