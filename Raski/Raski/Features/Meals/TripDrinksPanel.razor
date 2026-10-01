@@ -1,0 +1,341 @@
+﻿@inject ITripDrinkService TripDrinkService
+@inject IIngredientService IngredientService
+
+<section class="card breakfast" aria-labelledby="trip-drinks-heading">
+    <div class="breakfast-header">
+        <h2 id="trip-drinks-heading">Dryck</h2>
+        @if (!isEditing && !isLoading)
+        {
+            <button type="button" class="btn btn-secondary btn-sm" @onclick="StartEditing">Redigera</button>
+        }
+    </div>
+    <p class="muted">Dryck för hela resan. Totalen inkluderar även drycker på måltiderna.</p>
+
+    @if (isLoading)
+    {
+        <p class="muted">Hämtar dryck…</p>
+    }
+    else if (isEditing)
+    {
+        <fieldset class="ingredients">
+            <legend>Drycker</legend>
+
+            @for (var index = 0; index < rows.Count; index++)
+            {
+                var drink = rows[index];
+                var drinkNumber = index + 1;
+
+                <div class="ingredient-row drink-row">
+                    <div class="field name">
+                        <AutoComplete TItem="Ingredient"
+                                      Value="@drink.Name"
+                                      ValueChanged="value => drink.Name = value"
+                                      SearchFunc="SearchIngredientsAsync"
+                                      DisplaySelector="i => i.Name"
+                                      OnItemSelected="item => OnDrinkSelected(drink, item)"
+                                      AriaLabel="@($"Dryck {drinkNumber}")"
+                                      Placeholder="Dryck" />
+                    </div>
+
+                    <div class="field amount">
+                        <input type="text"
+                               aria-label="@($"Mängd för dryck {drinkNumber}")"
+                               placeholder="Mängd"
+                               @bind="drink.Quantity"
+                               @bind:event="oninput" />
+                    </div>
+
+                    <div class="field unit">
+                        <AutoComplete TItem="string"
+                                      Value="@drink.Unit"
+                                      ValueChanged="value => drink.Unit = value"
+                                      SearchFunc="SearchUnitsAsync"
+                                      DisplaySelector="u => u"
+                                      MinimumLength="1"
+                                      AriaLabel="@($"Enhet för dryck {drinkNumber}")"
+                                      Placeholder="Enhet" />
+                    </div>
+
+                    <button type="button"
+                            class="btn btn-icon remove"
+                            aria-label="@($"Ta bort dryck {drinkNumber}")"
+                            @onclick="() => rows.Remove(drink)">
+                        ✕
+                    </button>
+
+                    <div class="field url">
+                        <input type="url"
+                               inputmode="url"
+                               aria-label="@($"Länk för dryck {drinkNumber}")"
+                               placeholder="Länk, t.ex. till Systembolaget (valfritt)"
+                               @bind="drink.Url"
+                               @bind:event="oninput" />
+                    </div>
+                </div>
+            }
+
+            <button type="button" class="btn btn-secondary btn-sm" @onclick="() => rows.Add(new MealDrink())">+ Lägg till dryck</button>
+        </fieldset>
+
+        @if (errorMessage is not null)
+        {
+            <div class="error-banner">@errorMessage</div>
+        }
+
+        <div class="row-inline actions">
+            <button type="button" class="btn btn-primary" disabled="@isSaving" @onclick="SaveAsync">
+                @(isSaving ? "Sparar…" : "Spara dryck")
+            </button>
+            <button type="button" class="btn btn-secondary" @onclick="CancelEditing">Avbryt</button>
+        </div>
+    }
+    else
+    {
+        @if (errorMessage is not null)
+        {
+            <div class="error-banner">@errorMessage</div>
+        }
+
+        @if (drinks.Count == 0)
+        {
+            <p class="muted">Ingen dryck för hela resan är planerad än.</p>
+        }
+        else
+        {
+            <ul class="breakfast-list">
+                @foreach (var drink in drinks)
+                {
+                    <li>
+                        <DrinkName Drink="drink" />
+                        <span>@FormatAmount(drink.Quantity, drink.Unit)</span>
+                    </li>
+                }
+            </ul>
+        }
+
+        <h3 class="totals-heading">Totalt för resan</h3>
+        var totals = Totals();
+        @if (totals.Count == 0)
+        {
+            <p class="muted">Inga drycker på resan än.</p>
+        }
+        else
+        {
+            <ul class="breakfast-list">
+                @foreach (var total in totals)
+                {
+                    <li>
+                        <DrinkName Drink="total.Drink" />
+                        <span>@total.Amount</span>
+                        @if (total.MealLabels.Count > 0)
+                        {
+                            <span class="muted">&ndash; till @MealLabelText(total)</span>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
+    [Parameter, EditorRequired] public IReadOnlyList<Meal> Meals { get; set; } = [];
+
+    private sealed record DrinkTotal(MealDrink Drink, string Amount, IReadOnlyList<string> MealLabels);
+
+    private static readonly System.Globalization.CultureInfo Swedish =
+        System.Globalization.CultureInfo.GetCultureInfo("sv-SE");
+
+    private readonly List<MealDrink> rows = [];
+    private List<MealDrink> drinks = [];
+    private string? loadedTripId;
+    private bool isLoading = true;
+    private bool isEditing;
+    private bool isSaving;
+    private string? errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (loadedTripId == Trip.Id)
+        {
+            return;
+        }
+
+        loadedTripId = Trip.Id;
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            drinks = await TripDrinkService.GetAsync(Trip.Id);
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte hämta dryck.";
+            drinks = [];
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void StartEditing()
+    {
+        rows.Clear();
+        errorMessage = null;
+        rows.AddRange(drinks.Select(d => new MealDrink
+        {
+            Name = d.Name,
+            Quantity = d.Quantity,
+            Unit = d.Unit,
+            Url = d.Url
+        }));
+
+        if (rows.Count == 0)
+        {
+            rows.Add(new MealDrink());
+        }
+
+        isEditing = true;
+    }
+
+    private void CancelEditing()
+    {
+        errorMessage = null;
+        isEditing = false;
+    }
+
+    private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
+        IngredientService.SearchUnitsAsync(term);
+
+    private async Task<IReadOnlyList<Ingredient>> SearchIngredientsAsync(string term) =>
+        [.. (await IngredientService.SearchAsync(term, 50))
+            .Where(i => i.Tags.Contains("drycker", StringComparer.OrdinalIgnoreCase))
+            .Take(8)];
+
+    private static void OnDrinkSelected(MealDrink drink, Ingredient ingredient)
+    {
+        drink.IngredientId = ingredient.Id;
+        drink.Name = ingredient.Name;
+
+        if (string.IsNullOrWhiteSpace(drink.Unit) && !string.IsNullOrWhiteSpace(ingredient.DefaultUnit))
+        {
+            drink.Unit = ingredient.DefaultUnit!;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        errorMessage = null;
+
+        var updated = rows
+            .Where(d => !string.IsNullOrWhiteSpace(d.Name))
+            .Select(d => new MealDrink
+            {
+                Name = d.Name.Trim(),
+                Quantity = d.Quantity.Trim(),
+                Unit = d.Unit.Trim(),
+                Url = d.Url.Trim()
+            })
+            .ToList();
+
+        var invalidDrink = updated.FirstOrDefault(d => d.Url.Length > 0 && !IsHttpUrl(d.Url));
+
+        if (invalidDrink is not null)
+        {
+            errorMessage = $"Länken för {invalidDrink.Name} måste börja med http:// eller https://.";
+            return;
+        }
+
+        isSaving = true;
+
+        try
+        {
+            foreach (var drink in updated)
+            {
+                var ingredient = await IngredientService.GetOrCreateAsync(drink.Name, drink.Unit, ["drycker"]);
+                drink.IngredientId = ingredient.Id;
+                drink.Name = ingredient.Name;
+            }
+
+            await TripDrinkService.SaveAsync(Trip.Id, updated);
+            drinks = updated;
+            isEditing = false;
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte spara dryck.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    /// <summary>
+    /// Merges trip drinks and meal drinks with the same name and unit. Numeric
+    /// quantities are summed; drinks without a numeric quantity are listed separately.
+    /// </summary>
+    private List<DrinkTotal> Totals()
+    {
+        var all = drinks.Select(d => (Drink: d, Meal: (string?)null))
+            .Concat(Meals.SelectMany(m => m.Drinks.Select(d => (Drink: d, Meal: (string?)MealLabel(m)))))
+            .Where(x => !string.IsNullOrWhiteSpace(x.Drink.Name))
+            .ToList();
+
+        var result = new List<DrinkTotal>();
+
+        foreach (var tuples in all.GroupBy(x => (Name: x.Drink.Name.Trim().ToLowerInvariant(), Unit: x.Drink.Unit.Trim().ToLowerInvariant())))
+        {
+            var group = tuples.Select(x => x.Drink).ToList();
+            var labels = tuples.Select(x => x.Meal).OfType<string>().Distinct().ToList();
+            var first = group.First();
+            var withUrl = group.FirstOrDefault(d => !string.IsNullOrWhiteSpace(d.Url)) ?? first;
+            var display = new MealDrink { Name = first.Name.Trim(), Unit = first.Unit.Trim(), Url = withUrl.Url };
+
+            decimal sum = 0;
+            var hasNumeric = false;
+
+            foreach (var drink in group)
+            {
+                if (TryParseQuantity(drink.Quantity, out var value))
+                {
+                    sum += value;
+                    hasNumeric = true;
+                }
+                else
+                {
+                    result.Add(new DrinkTotal(display, FormatAmount(drink.Quantity, drink.Unit), labels));
+                }
+            }
+
+            if (hasNumeric)
+            {
+                result.Add(new DrinkTotal(display, FormatAmount(sum.ToString("0.##", Swedish), display.Unit), labels));
+            }
+        }
+
+        return result.OrderBy(t => t.Drink.Name, StringComparer.Create(Swedish, true)).ToList();
+    }
+
+    private static string MealLabel(Meal meal)
+    {
+        var day = meal.Date.ToString("ddd d/M", Swedish);
+        var title = string.IsNullOrWhiteSpace(meal.Title) ? meal.Type.ToSwedish() : meal.Title.Trim();
+        return $"{title} ({day})";
+    }
+
+    private static bool TryParseQuantity(string quantity, out decimal value) =>
+        decimal.TryParse(quantity.Trim().Replace('.', ','), System.Globalization.NumberStyles.Number, Swedish, out value);
+
+    private static string MealLabelText(DrinkTotal total) => string.Join(", ", total.MealLabels);
+
+    private static string FormatAmount(string quantity, string unit) =>
+        $"{quantity} {unit}".Trim();
+
+    private static bool IsHttpUrl(string value) =>
+        Uri.TryCreate(value, UriKind.Absolute, out var uri)
+        && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+}

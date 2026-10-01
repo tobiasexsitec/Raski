@@ -152,6 +152,12 @@ internal sealed class BreakfastDocument
     };
 }
 
+internal sealed class TripDrinksDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("drinks")] public List<MealDrinkPayload>? Drinks { get; set; }
+}
+
 internal sealed class BreakfastIngredientDocument
 {
     [JsonPropertyName("ingredientId")] public string? IngredientId { get; set; }

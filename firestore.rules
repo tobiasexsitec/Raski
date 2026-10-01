@@ -95,6 +95,11 @@ service cloud.firestore {
 		allow read, write: if isTripMember(tripId);
 	  }
 
+	  // The shared drinks for the whole trip, edited by any member.
+	  match /drinks/{drinksId} {
+		allow read, write: if isTripMember(tripId);
+	  }
+
 	  // Shared "who brings what" list, edited by any member.
 	  match /bringItems/{itemId} {
 		allow read, write: if isTripMember(tripId);

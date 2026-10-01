@@ -17,6 +17,9 @@ public interface IIngredientService
     /// <summary>Adds a tag to the register. Returns the normalized tag.</summary>
     Task<string> AddTagAsync(string tag, CancellationToken ct = default);
     Task<Ingredient> GetOrCreateAsync(string name, string? unit, CancellationToken ct = default);
+
+    /// <summary>Like GetOrCreateAsync, but new entries get the given tags.</summary>
+    Task<Ingredient> GetOrCreateAsync(string name, string? unit, IReadOnlyList<string> defaultTags, CancellationToken ct = default);
     Task UpdateAsync(Ingredient ingredient, CancellationToken ct = default);
 
     /// <summary>Removes an ingredient entirely. Prefer merging when it is referenced by meals.</summary>

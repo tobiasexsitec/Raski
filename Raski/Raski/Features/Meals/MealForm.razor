@@ -116,11 +116,14 @@
 
             <div class="ingredient-row drink-row">
                 <div class="field name">
-                    <input type="text"
-                           aria-label="@($"Dryck {drinkNumber}")"
-                           placeholder="Dryck"
-                           @bind="drink.Name"
-                           @bind:event="oninput" />
+                    <AutoComplete TItem="Ingredient"
+                                  Value="@drink.Name"
+                                  ValueChanged="value => drink.Name = value"
+                                  SearchFunc="SearchDrinksAsync"
+                                  DisplaySelector="i => i.Name"
+                                  OnItemSelected="item => OnDrinkSelected(drink, item)"
+                                  AriaLabel="@($"Dryck {drinkNumber}")"
+                                  Placeholder="Dryck" />
                 </div>
 
                 <div class="field amount">
@@ -247,11 +250,28 @@
 
     private void AddRow() => rows.Add(new IngredientRow());
 
-    private Task<IReadOnlyList<Ingredient>> SearchIngredientsAsync(string term) =>
-        IngredientService.SearchAsync(term);
+    private async Task<IReadOnlyList<Ingredient>> SearchIngredientsAsync(string term) =>
+        [.. (await IngredientService.SearchAsync(term, 50)).Where(i => !IsDrink(i)).Take(8)];
+
+    private async Task<IReadOnlyList<Ingredient>> SearchDrinksAsync(string term) =>
+        [.. (await IngredientService.SearchAsync(term, 50)).Where(IsDrink).Take(8)];
+
+    private static bool IsDrink(Ingredient ingredient) =>
+        ingredient.Tags.Contains("drycker", StringComparer.OrdinalIgnoreCase);
 
     private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
         IngredientService.SearchUnitsAsync(term);
+
+    private static void OnDrinkSelected(MealDrink drink, Ingredient ingredient)
+    {
+        drink.IngredientId = ingredient.Id;
+        drink.Name = ingredient.Name;
+
+        if (string.IsNullOrWhiteSpace(drink.Unit) && !string.IsNullOrWhiteSpace(ingredient.DefaultUnit))
+        {
+            drink.Unit = ingredient.DefaultUnit!;
+        }
+    }
 
     /// <summary>Reusing the registry entry keeps the shopping list free of duplicates.</summary>
     private void OnIngredientSelected(IngredientRow row, Ingredient ingredient)
@@ -324,6 +344,13 @@
             }
 
             var responsible = Members.FirstOrDefault(m => m.Uid == responsibleUid);
+
+            foreach (var drink in drinks)
+            {
+                var ingredient = await IngredientService.GetOrCreateAsync(drink.Name, drink.Unit, ["drycker"]);
+                drink.IngredientId = ingredient.Id;
+                drink.Name = ingredient.Name;
+            }
 
             await MealService.SaveAsync(new Meal
             {

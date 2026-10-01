@@ -74,6 +74,7 @@ public sealed class MealService(FirebaseInterop interop, IAuthService authServic
             .Where(d => !string.IsNullOrWhiteSpace(d.Name))
             .Select(d => new
             {
+                ingredientId = d.IngredientId,
                 name = d.Name.Trim(),
                 quantity = d.Quantity.Trim(),
                 unit = d.Unit.Trim(),

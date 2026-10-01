@@ -70,7 +70,10 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
         return IngredientFilter.SearchUnits(_units!, prefix, limit);
     }
 
-    public async Task<Ingredient> GetOrCreateAsync(string name, string? unit, CancellationToken ct = default)
+    public Task<Ingredient> GetOrCreateAsync(string name, string? unit, CancellationToken ct = default) =>
+        GetOrCreateAsync(name, unit, [], ct);
+
+    public async Task<Ingredient> GetOrCreateAsync(string name, string? unit, IReadOnlyList<string> defaultTags, CancellationToken ct = default)
     {
         await EnsureLoadedAsync(ct);
 
@@ -94,7 +97,7 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
         {
             name = trimmed,
             nameLower,
-            tags = Array.Empty<string>(),
+            tags = defaultTags.ToArray(),
             defaultUnit = unit ?? "",
             createdAt = FirestoreFormat.UtcNow()
         }, ct);
@@ -104,6 +107,7 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
             Id = id,
             Name = trimmed,
             NameLower = nameLower,
+            Tags = [.. defaultTags],
             DefaultUnit = unit
         };
 

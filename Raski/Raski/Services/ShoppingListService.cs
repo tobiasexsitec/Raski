@@ -12,6 +12,7 @@ public sealed class ShoppingListService(
     IBreakfastService breakfastService,
     ITripService tripService,
     IIngredientService ingredientService,
+    ITripDrinkService tripDrinkService,
     IAuthService authService) : IShoppingListService
 {
     private static string StatePath(string tripId) => $"trips/{tripId}/shoppingState";
@@ -26,6 +27,20 @@ public sealed class ShoppingListService(
         {
             meals.Add(breakfast.ToMeal(trip.MemberUids.Count, trip.Days().Count()));
         }
+        var tripDrinks = await tripDrinkService.GetAsync(tripId, ct);
+
+        // Drinks are listed on the shopping list like ingredients, so each
+        // meal's drinks and the trip-wide drinks become pseudo meals.
+        var drinkMeals = meals
+            .Where(m => m.Drinks.Count > 0)
+            .Select(m => DrinksAsMeal(m.Title, m.Drinks))
+            .ToList();
+
+        if (tripDrinks.Count > 0)
+        {
+            drinkMeals.Add(DrinksAsMeal("Dryck för resan", tripDrinks));
+        }
+
         var ingredients = await ingredientService.GetAllAsync(ct);
         var state = await interop.QueryAsync<ShoppingStateDocument>(StatePath(tripId), new FirestoreQuery(), ct);
 
@@ -37,8 +52,51 @@ public sealed class ShoppingListService(
             .GroupBy(s => s.Id, StringComparer.Ordinal)
             .ToDictionary(g => g.Key, g => g.First().Checked, StringComparer.Ordinal);
 
-        return ShoppingListAggregator.Aggregate(meals, registry, checkedState);
+        var items = ShoppingListAggregator.Aggregate(meals.Concat(drinkMeals), registry, checkedState);
+
+        var drinkNames = drinkMeals
+            .SelectMany(m => m.Ingredients)
+            .Select(i => i.Name.Trim())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var item in items)
+        {
+            if (drinkNames.Contains(item.Name) && item.PrimaryTag == IngredientTags.Uncategorized)
+            {
+                item.Tags = [DrinkTag];
+            }
+        }
+
+        return items;
     }
+
+    private const string DrinkTag = "drycker";
+
+    private static Meal DrinksAsMeal(string title, IEnumerable<MealDrink> drinks) => new()
+    {
+        Title = title,
+        Ingredients =
+        [
+            .. drinks
+                .Where(d => !string.IsNullOrWhiteSpace(d.Name))
+                .Select(d => new MealIngredient
+                {
+                    IngredientId = d.IngredientId,
+                    Name = d.Name.Trim(),
+                    Amount = ParseQuantity(d.Quantity),
+                    Unit = d.Unit.Trim()
+                })
+        ]
+    };
+
+    private static decimal ParseQuantity(string quantity) =>
+        decimal.TryParse(
+            quantity.Trim().Replace(',', '.'),
+            System.Globalization.NumberStyles.Number,
+            System.Globalization.CultureInfo.InvariantCulture,
+            out var value) && value > 0
+            ? value
+            : 0;
 
     public async IAsyncEnumerable<IReadOnlyDictionary<string, bool>> ObserveCheckedState(
         string tripId,

@@ -1,0 +1,12 @@
+@if (!string.IsNullOrWhiteSpace(Drink.Url))
+{
+    <a class="name" href="@Drink.Url" target="_blank" rel="noopener noreferrer">@Drink.Name</a>
+}
+else
+{
+    <span class="name">@Drink.Name</span>
+}
+
+@code {
+    [Parameter, EditorRequired] public MealDrink Drink { get; set; } = default!;
+}

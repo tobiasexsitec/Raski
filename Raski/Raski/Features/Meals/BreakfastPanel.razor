@@ -1,4 +1,4 @@
-@inject IBreakfastService BreakfastService
+﻿@inject IBreakfastService BreakfastService
 @inject IIngredientService IngredientService
 
 <section class="card breakfast" aria-labelledby="breakfast-heading">
@@ -196,8 +196,10 @@
 
     private void AddRow() => rows.Add(new IngredientRow());
 
-    private Task<IReadOnlyList<Ingredient>> SearchIngredientsAsync(string term) =>
-        IngredientService.SearchAsync(term);
+    private async Task<IReadOnlyList<Ingredient>> SearchIngredientsAsync(string term) =>
+        [.. (await IngredientService.SearchAsync(term, 50))
+            .Where(i => !i.Tags.Contains("drycker", StringComparer.OrdinalIgnoreCase))
+            .Take(8)];
 
     private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
         IngredientService.SearchUnitsAsync(term);

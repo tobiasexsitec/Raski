@@ -38,6 +38,7 @@ public sealed class MealDocumentPayload
 
 public sealed class MealDrinkPayload
 {
+    [JsonPropertyName("ingredientId")] public string? IngredientId { get; set; }
     [JsonPropertyName("name")] public string? Name { get; set; }
     [JsonPropertyName("quantity")] public string? Quantity { get; set; }
     [JsonPropertyName("unit")] public string? Unit { get; set; }
@@ -45,6 +46,7 @@ public sealed class MealDrinkPayload
 
     public MealDrink ToModel() => new()
     {
+        IngredientId = IngredientId ?? "",
         Name = Name ?? "",
         Quantity = Quantity ?? "",
         Unit = Unit ?? "",
