@@ -49,7 +49,30 @@
         <span class="dismiss">🗙</span>
     </div>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
-    <script>navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' });</script>
+    <script>
+        (function () {
+            if (!('serviceWorker' in navigator)) return;
+
+            // Only reload when an existing worker is replaced (not on first install), and only once.
+            var hadController = !!navigator.serviceWorker.controller;
+            var reloading = false;
+            navigator.serviceWorker.addEventListener('controllerchange', function () {
+                if (!hadController || reloading) return;
+                reloading = true;
+                location.reload();
+            });
+
+            navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' }).then(function (registration) {
+                function checkForUpdate() {
+                    if (document.visibilityState === 'visible') {
+                        registration.update().catch(function () { });
+                    }
+                }
+                document.addEventListener('visibilitychange', checkForUpdate);
+                window.addEventListener('focus', checkForUpdate);
+            });
+        })();
+    </script>
 </body>
 
 </html>
