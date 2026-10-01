@@ -3,6 +3,10 @@
     white-space: pre-wrap;
 }
 
+.notes ::deep .formatted-heading {
+    margin: var(--space-3) 0 var(--space-1);
+}
+
 .trip-tabs {
     display: flex;
     gap: var(--space-2);

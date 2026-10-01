@@ -17,7 +17,8 @@
 | [B-011](#b-011-google-inloggning-som-fungerar-på-ios) | Google-inloggning som fungerar på iOS | Klar | – |
 | [B-012](#b-012-versionsnummer-synligt-i-appen) | Versionsnummer synligt i appen | Klar | – |
 | [B-013](#b-013-höj-versionsnumret-vid-varje-release) | Höj versionsnumret vid varje release | Klar | – |
-| Tvinga omladdning vid ny version | Klar | – |
+| [B-014](#b-014-tvinga-omladdning-vid-ny-version) | Tvinga omladdning vid ny version | Klar | – |
+| [B-015](#b-015-rubriker-och-fet-stil-i-övrig-info) | Rubriker och fet stil i Övrig info | Klar | – |
 
 > **KRAV vid varje ändring i backloggen (gäller även AI-assistenter):**
 > 1. Läs översiktstabellen **före** ändringen.
@@ -576,3 +577,37 @@ inte kör en gammal version med inaktuell funktionalitet eller buggar.
   aktiveras direkt (`skipWaiting`/`clients.claim`) och `index.html` laddar om
   en gång vid `controllerchange`. `registration.update()` anropas vid
   `visibilitychange`/`focus`; vid sidladdning sker kontrollen via `register`.
+
+---
+
+## B-015: Rubriker och fet stil i Övrig info
+
+- **Status:** Klar
+- **Prioritet:** –
+
+### Beskrivning
+I fältet Övrig info ska man kunna skapa rubriker i flera nivåer genom att inleda
+en rad med `#`, `##` eller `###`, samt göra text fet med `**text**`.
+
+### User story
+Som resenär vill jag kunna dela upp och framhäva Övrig info med rubriker och fet
+stil så att informationen blir lättare att överblicka.
+
+### Acceptanskriterier
+- [x] En rad som börjar med `# `, `## ` eller `### ` visas som rubrik i motsvarande nivå.
+- [x] `#`-tecknen visas inte i den visade texten.
+- [x] Text inom `**...**` visas i fet stil, även i rubriker; asteriskerna visas inte.
+- [x] Ett ensamt `**` utan avslutning visas som vanlig text.
+- [x] Övriga rader och radbrytningar visas som tidigare.
+- [x] Användarens text renderas säkert – rå HTML körs inte (ingen XSS).
+- [x] Befintlig Övrig info utan markeringar ser ut precis som tidigare.
+
+### Tekniska noteringar
+- Påverkar visningen av Övrig info på resan; lagringen är oförändrad (fritext).
+- Enkel radvis parsning i komponenten räcker, inget nytt bibliotek behövs.
+  Rubriknivåerna bör mappas lägre i sidans hierarki (t.ex. `#` → `h3`).
+
+### Beslut
+- Rubriker i flera nivåer (`#`, `##`, `###`) och fet stil (`**text**`) stöds.
+- Implementerat i `Shared/FormattedText.cs`; `#` → `h3`, `##` → `h4`, `###` → `h5`.
+- Släppt i version 1.3.0.
