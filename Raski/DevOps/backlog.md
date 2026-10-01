@@ -23,6 +23,11 @@
 | [B-017](#b-017-förrätt-efterrätt-och-kommentar-på-måltider) | Förrätt, efterrätt och kommentar på måltider | Klar | – |
 | [B-018](#b-018-drycker-med-länk-på-måltider) | Drycker med länk på måltider | Klar | – |
 | [B-019](#b-019-gemensam-dryck-för-hela-resan) | Gemensam dryck för hela resan | Klar | – |
+| [B-020](#b-020-byt-ikon-bredvid-appnamnet) | Byt ikon bredvid appnamnet | Idé | – |
+| [B-021](#b-021-sök-och-filtrera-i-inköpslistan) | Sök och filtrera i inköpslistan | Idé | – |
+| [B-022](#b-022-övrigt-att-inhandla) | Övrigt att inhandla | Idé | – |
+| [B-023](#b-023-ange-om-man-dricker-alkohol) | Ange om man dricker alkohol | Idé | – |
+| [B-024](#b-024-bestäm-tema-med-omröstning) | Bestäm tema med omröstning | Idé | – |
 
 > **KRAV vid varje ändring i backloggen (gäller även AI-assistenter):**
 > 1. Läs översiktstabellen **före** ändringen.
@@ -794,3 +799,82 @@ handlas.
 - Dryckessektionen och totalen visas längst ner, under alla måltider.
 - Drycker ingår i inköpslistan via ingrediensregistret (taggen `drycker`).
 - Släppt i version 1.6.0.
+
+---
+
+## B-020: Byt ikon bredvid appnamnet
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### Beskrivning
+Ikonen bredvid appnamnet uppe till vänster ska inte vara en morot.
+
+### Acceptanskriterier
+- [ ] Moroten ersätts med en mer passande ikon/logga.
+
+### Öppna frågor
+- Vilken ikon ska användas istället?
+
+---
+
+## B-021: Sök och filtrera i inköpslistan
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### User story
+Som resenär vill jag kunna söka och filtrera i inköpslistan så att jag snabbt
+hittar det jag letar efter.
+
+### Acceptanskriterier
+- [ ] Fritextsökning på namn.
+- [ ] Filtrering på tagg.
+- [ ] Namn- och taggfilter kan kombineras.
+
+---
+
+## B-022: Övrigt att inhandla
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### Beskrivning
+Man måste kunna lägga till övriga saker som ska inhandlas och som inte hör till
+en måltid eller dryck.
+
+### Acceptanskriterier
+- [ ] Ny sektion "Övrigt" placerad under Dryck-sektionen.
+- [ ] Övriga artiklar kan läggas till, redigeras och tas bort.
+- [ ] Övriga artiklar visas på inköpslistan.
+
+---
+
+## B-023: Ange om man dricker alkohol
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### Beskrivning
+På något sätt ska man kunna ange om man dricker alkohol eller inte.
+
+### Öppna frågor
+- Anges det på profilen eller per resa?
+- Ska det påverka dryckesplanering/inköpslista?
+
+---
+
+## B-024: Bestäm tema med omröstning
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### Beskrivning
+Resenärerna ska kunna bestämma tema genom omröstning. Behöver diskuteras och
+funderas på hur det ska se ut.
+
+### Öppna frågor
+- Tema för hela resan eller per måltid/kväll?
+- Vem kan föreslå teman?
+- Hur röstar man (en röst, flera, rangordning)?
+- När stängs omröstningen och hur avgörs lika?
