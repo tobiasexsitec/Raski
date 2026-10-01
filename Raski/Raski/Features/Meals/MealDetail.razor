@@ -25,6 +25,11 @@
             </p>
         }
 
+        @if (!string.IsNullOrWhiteSpace(Meal.Comment))
+        {
+            <p style="white-space: pre-line">@Meal.Comment</p>
+        }
+
         <h4>Ingredienser</h4>
 
         @if (Meal.Ingredients.Count == 0)

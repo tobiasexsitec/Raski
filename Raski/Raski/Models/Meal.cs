@@ -3,19 +3,36 @@ namespace Raski.Models;
 public enum MealType
 {
     Lunch,
-    Dinner
+    Starter,
+    Dinner,
+    Dessert
 }
 
 public static class MealTypeExtensions
 {
-    public static string ToFirestore(this MealType type) =>
-        type == MealType.Lunch ? "lunch" : "dinner";
+    public static string ToFirestore(this MealType type) => type switch
+    {
+        MealType.Lunch => "lunch",
+        MealType.Starter => "starter",
+        MealType.Dessert => "dessert",
+        _ => "dinner"
+    };
 
-    public static MealType ParseMealType(string? value) =>
-        string.Equals(value, "lunch", StringComparison.OrdinalIgnoreCase) ? MealType.Lunch : MealType.Dinner;
+    public static MealType ParseMealType(string? value) => value?.ToLowerInvariant() switch
+    {
+        "lunch" => MealType.Lunch,
+        "starter" => MealType.Starter,
+        "dessert" => MealType.Dessert,
+        _ => MealType.Dinner
+    };
 
-    public static string ToSwedish(this MealType type) =>
-        type == MealType.Lunch ? "Lunch" : "Middag";
+    public static string ToSwedish(this MealType type) => type switch
+    {
+        MealType.Lunch => "Lunch",
+        MealType.Starter => "Förrätt",
+        MealType.Dessert => "Efterrätt",
+        _ => "Middag"
+    };
 }
 
 public sealed class Meal
@@ -28,6 +45,7 @@ public sealed class Meal
     public string ResponsibleUid { get; set; } = "";
     public string ResponsibleName { get; set; } = "";
     public string RecipeUrl { get; set; } = "";
+    public string Comment { get; set; } = "";
     public List<MealIngredient> Ingredients { get; set; } = [];
 }
 

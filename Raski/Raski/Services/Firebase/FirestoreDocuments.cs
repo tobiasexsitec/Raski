@@ -104,6 +104,7 @@ internal sealed class MealDocument
     [JsonPropertyName("responsibleUid")] public string? ResponsibleUid { get; set; }
     [JsonPropertyName("responsibleName")] public string? ResponsibleName { get; set; }
     [JsonPropertyName("recipeUrl")] public string? RecipeUrl { get; set; }
+    [JsonPropertyName("comment")] public string? Comment { get; set; }
     [JsonPropertyName("ingredients")] public List<MealIngredientDocument>? Ingredients { get; set; }
 
     public Meal ToModel(string tripId) => new()
@@ -116,6 +117,7 @@ internal sealed class MealDocument
         ResponsibleUid = ResponsibleUid ?? "",
         ResponsibleName = ResponsibleName ?? "",
         RecipeUrl = RecipeUrl ?? "",
+        Comment = Comment ?? "",
         Ingredients = Ingredients?.Select(i => i.ToModel()).ToList() ?? []
     };
 }

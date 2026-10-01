@@ -19,7 +19,9 @@
             <label for="meal-type">Typ</label>
             <select id="meal-type" @bind="mealType">
                 <option value="@MealType.Lunch">Lunch</option>
+                <option value="@MealType.Starter">Förrätt</option>
                 <option value="@MealType.Dinner">Middag</option>
+                <option value="@MealType.Dessert">Efterrätt</option>
             </select>
         </div>
     </div>
@@ -43,6 +45,11 @@
     <div class="field">
         <label for="meal-recipe">Receptlänk (valfritt)</label>
         <input id="meal-recipe" type="url" inputmode="url" placeholder="https://…" @bind="recipeUrl" @bind:event="oninput" />
+    </div>
+
+    <div class="field">
+        <label for="meal-comment">Kommentar (valfritt)</label>
+        <textarea id="meal-comment" rows="3" @bind="comment" @bind:event="oninput"></textarea>
     </div>
 
     <fieldset class="ingredients">
@@ -134,6 +141,7 @@
     private string title = "";
     private string responsibleUid = "";
     private string recipeUrl = "";
+    private string comment = "";
     private bool isSaving;
     private string? errorMessage;
 
@@ -148,6 +156,7 @@
             title = Meal.Title;
             responsibleUid = Meal.ResponsibleUid;
             recipeUrl = Meal.RecipeUrl;
+            comment = Meal.Comment;
 
             foreach (var ingredient in Meal.Ingredients)
             {
@@ -242,6 +251,7 @@
                 ResponsibleUid = responsible?.Uid ?? "",
                 ResponsibleName = responsible?.DisplayName ?? "",
                 RecipeUrl = trimmedRecipeUrl,
+                Comment = comment.Trim(),
                 Ingredients = ingredients
             });
 

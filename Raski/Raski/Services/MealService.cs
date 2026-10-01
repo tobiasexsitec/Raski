@@ -78,6 +78,7 @@ public sealed class MealService(FirebaseInterop interop, IAuthService authServic
             ["responsibleUid"] = meal.ResponsibleUid,
             ["responsibleName"] = meal.ResponsibleName,
             ["recipeUrl"] = meal.RecipeUrl.Trim(),
+            ["comment"] = meal.Comment.Trim(),
             ["ingredients"] = ingredients
         };
 

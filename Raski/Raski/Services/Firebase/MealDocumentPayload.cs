@@ -16,6 +16,7 @@ public sealed class MealDocumentPayload
     [JsonPropertyName("responsibleUid")] public string? ResponsibleUid { get; set; }
     [JsonPropertyName("responsibleName")] public string? ResponsibleName { get; set; }
     [JsonPropertyName("recipeUrl")] public string? RecipeUrl { get; set; }
+    [JsonPropertyName("comment")] public string? Comment { get; set; }
     [JsonPropertyName("ingredients")] public List<MealIngredientPayload>? Ingredients { get; set; }
 
     public Meal ToMeal(string tripId) => new()
@@ -28,6 +29,7 @@ public sealed class MealDocumentPayload
         ResponsibleUid = ResponsibleUid ?? "",
         ResponsibleName = ResponsibleName ?? "",
         RecipeUrl = RecipeUrl ?? "",
+        Comment = Comment ?? "",
         Ingredients = Ingredients?.Select(i => i.ToModel()).ToList() ?? []
     };
 }

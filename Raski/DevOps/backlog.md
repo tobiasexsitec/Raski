@@ -19,7 +19,8 @@
 | [B-013](#b-013-höj-versionsnumret-vid-varje-release) | Höj versionsnumret vid varje release | Klar | – |
 | [B-014](#b-014-tvinga-omladdning-vid-ny-version) | Tvinga omladdning vid ny version | Klar | – |
 | [B-015](#b-015-rubriker-och-fet-stil-i-övrig-info) | Rubriker och fet stil i Övrig info | Klar | – |
-| Välj befintliga användare vid inbjudan | Klar | – |
+| [B-016](#b-016-välj-befintliga-användare-vid-inbjudan) | Välj befintliga användare vid inbjudan | Klar | – |
+| [B-017](#b-017-förrätt-efterrätt-och-kommentar-på-måltider) | Förrätt, efterrätt och kommentar på måltider | Klar | – |
 
 > **KRAV vid varje ändring i backloggen (gäller även AI-assistenter):**
 > 1. Läs översiktstabellen **före** ändringen.
