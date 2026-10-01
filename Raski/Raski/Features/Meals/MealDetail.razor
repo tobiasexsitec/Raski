@@ -49,6 +49,30 @@
             </ul>
         }
 
+        @if (Meal.Drinks.Count > 0)
+        {
+            <h4>Drycker</h4>
+
+            <ul class="ingredient-list">
+                @foreach (var drink in Meal.Drinks)
+                {
+                    <li>
+                        <span class="name">
+                            @if (!string.IsNullOrWhiteSpace(drink.Url))
+                            {
+                                <a href="@drink.Url" target="_blank" rel="noopener noreferrer">@drink.Name</a>
+                            }
+                            else
+                            {
+                                @drink.Name
+                            }
+                        </span>
+                        <span class="amount muted">@($"{drink.Quantity} {drink.Unit}".Trim())</span>
+                    </li>
+                }
+            </ul>
+        }
+
         <div class="row-inline actions">
             <button type="button" class="btn btn-primary" @onclick="OnEdit">Redigera</button>
             <button type="button" class="btn btn-secondary" @onclick="Close">Stäng</button>

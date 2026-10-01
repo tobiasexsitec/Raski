@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="../firebase.json" />
+    <File Path="../firestore.indexes.json" />
+    <File Path="../firestore.rules" />
+  </Folder>
   <Project Path="DevOps/DevOps.csproj" Id="9bff897a-5a76-429e-a8aa-070f538db10e" />
   <Project Path="Raski/Raski.csproj" />
 </Solution>

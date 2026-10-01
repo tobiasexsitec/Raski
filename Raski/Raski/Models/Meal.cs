@@ -47,6 +47,15 @@ public sealed class Meal
     public string RecipeUrl { get; set; } = "";
     public string Comment { get; set; } = "";
     public List<MealIngredient> Ingredients { get; set; } = [];
+    public List<MealDrink> Drinks { get; set; } = [];
+}
+
+public sealed class MealDrink
+{
+    public string Name { get; set; } = "";
+    public string Quantity { get; set; } = "";
+    public string Unit { get; set; } = "";
+    public string Url { get; set; } = "";
 }
 
 public sealed class MealIngredient

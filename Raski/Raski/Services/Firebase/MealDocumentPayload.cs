@@ -18,6 +18,7 @@ public sealed class MealDocumentPayload
     [JsonPropertyName("recipeUrl")] public string? RecipeUrl { get; set; }
     [JsonPropertyName("comment")] public string? Comment { get; set; }
     [JsonPropertyName("ingredients")] public List<MealIngredientPayload>? Ingredients { get; set; }
+    [JsonPropertyName("drinks")] public List<MealDrinkPayload>? Drinks { get; set; }
 
     public Meal ToMeal(string tripId) => new()
     {
@@ -30,7 +31,24 @@ public sealed class MealDocumentPayload
         ResponsibleName = ResponsibleName ?? "",
         RecipeUrl = RecipeUrl ?? "",
         Comment = Comment ?? "",
-        Ingredients = Ingredients?.Select(i => i.ToModel()).ToList() ?? []
+        Ingredients = Ingredients?.Select(i => i.ToModel()).ToList() ?? [],
+        Drinks = Drinks?.Select(d => d.ToModel()).ToList() ?? []
+    };
+}
+
+public sealed class MealDrinkPayload
+{
+    [JsonPropertyName("name")] public string? Name { get; set; }
+    [JsonPropertyName("quantity")] public string? Quantity { get; set; }
+    [JsonPropertyName("unit")] public string? Unit { get; set; }
+    [JsonPropertyName("url")] public string? Url { get; set; }
+
+    public MealDrink ToModel() => new()
+    {
+        Name = Name ?? "",
+        Quantity = Quantity ?? "",
+        Unit = Unit ?? "",
+        Url = Url ?? ""
     };
 }
 

@@ -82,6 +82,11 @@
                             <p class="muted">Ansvarig: @meal.ResponsibleName</p>
                         }
 
+                        @if (meal.Drinks.Count > 0)
+                        {
+                            <p class="muted">Dryck: @string.Join(", ", meal.Drinks.Select(FormatDrink))</p>
+                        }
+
                         @if (meal.Ingredients.Count > 0)
                         {
                             <ul class="ingredient-tags">
@@ -211,6 +216,12 @@
         {
             errorMessage = "Kunde inte ta bort måltiden.";
         }
+    }
+
+    private static string FormatDrink(MealDrink drink)
+    {
+        var amount = $"{drink.Quantity} {drink.Unit}".Trim();
+        return amount.Length > 0 ? $"{drink.Name} ({amount})" : drink.Name;
     }
 
     private static string FormatIngredient(MealIngredient ingredient) =>

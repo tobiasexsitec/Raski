@@ -70,6 +70,17 @@ public sealed class MealService(FirebaseInterop interop, IAuthService authServic
             })
             .ToArray();
 
+        var drinks = meal.Drinks
+            .Where(d => !string.IsNullOrWhiteSpace(d.Name))
+            .Select(d => new
+            {
+                name = d.Name.Trim(),
+                quantity = d.Quantity.Trim(),
+                unit = d.Unit.Trim(),
+                url = d.Url.Trim()
+            })
+            .ToArray();
+
         var data = new Dictionary<string, object?>
         {
             ["date"] = FirestoreFormat.ToIso(meal.Date),
@@ -79,7 +90,8 @@ public sealed class MealService(FirebaseInterop interop, IAuthService authServic
             ["responsibleName"] = meal.ResponsibleName,
             ["recipeUrl"] = meal.RecipeUrl.Trim(),
             ["comment"] = meal.Comment.Trim(),
-            ["ingredients"] = ingredients
+            ["ingredients"] = ingredients,
+            ["drinks"] = drinks
         };
 
         if (string.IsNullOrEmpty(meal.Id))
