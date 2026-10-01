@@ -79,13 +79,19 @@
     {
         <form class="invite-form" @onsubmit="AddAsync" @onsubmit:preventDefault>
             <div class="field">
-                <label for="invite-email">Bjud in via e-post</label>
-                <input id="invite-email"
-                       type="email"
-                       placeholder="kompis@example.com"
-                       required
-                       @bind="inviteEmail"
-                       @bind:event="oninput" />
+                <label>Bjud in användare eller e-post</label>
+                <AutoComplete TItem="UserProfile"
+                              @bind-Value="inviteEmail"
+                              SearchFunc="SearchUsersAsync"
+                              DisplaySelector="u => u.Email"
+                              MinimumLength="3"
+                              Placeholder="Namn eller kompis@example.com"
+                              AriaLabel="Bjud in användare eller e-post">
+                    <ItemTemplate Context="user">
+                        <strong>@user.DisplayName</strong>
+                        <span class="muted">@user.Email</span>
+                    </ItemTemplate>
+                </AutoComplete>
             </div>
             <button type="submit" class="btn btn-primary" disabled="@isAdding">
                 @(isAdding ? "Lägger till…" : "Lägg till")
@@ -175,6 +181,32 @@
 
     private string? PhoneOf(TripMember member) =>
         phoneByUid.GetValueOrDefault(member.Uid);
+
+    private IReadOnlyList<UserProfile>? allUsers;
+
+    private async Task<IReadOnlyList<UserProfile>> SearchUsersAsync(string text)
+    {
+        var query = text.Trim();
+
+        try
+        {
+            allUsers ??= await UserService.GetAllAsync();
+        }
+        catch (Exception)
+        {
+            return [];
+        }
+
+        var memberUids = members.Select(m => m.Uid).ToHashSet();
+        var memberEmails = members.Select(m => m.Email).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        return [.. allUsers
+            .Where(u => !string.IsNullOrWhiteSpace(u.Email))
+            .Where(u => !memberUids.Contains(u.Uid) && !memberEmails.Contains(u.Email))
+            .Where(u => u.DisplayName.Contains(query, StringComparison.CurrentCultureIgnoreCase)
+                     || u.Email.Contains(query, StringComparison.OrdinalIgnoreCase))
+            .Take(8)];
+    }
 
     private async Task AddAsync()
     {

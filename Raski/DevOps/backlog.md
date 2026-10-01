@@ -19,6 +19,7 @@
 | [B-013](#b-013-höj-versionsnumret-vid-varje-release) | Höj versionsnumret vid varje release | Klar | – |
 | [B-014](#b-014-tvinga-omladdning-vid-ny-version) | Tvinga omladdning vid ny version | Klar | – |
 | [B-015](#b-015-rubriker-och-fet-stil-i-övrig-info) | Rubriker och fet stil i Övrig info | Klar | – |
+| Välj befintliga användare vid inbjudan | Klar | – |
 
 > **KRAV vid varje ändring i backloggen (gäller även AI-assistenter):**
 > 1. Läs översiktstabellen **före** ändringen.
@@ -611,3 +612,45 @@ stil så att informationen blir lättare att överblicka.
 - Rubriker i flera nivåer (`#`, `##`, `###`) och fet stil (`**text**`) stöds.
 - Implementerat i `Shared/FormattedText.cs`; `#` → `h3`, `##` → `h4`, `###` → `h5`.
 - Släppt i version 1.3.0.
+
+---
+
+## B-016: Välj befintliga användare vid inbjudan
+
+- **Status:** Klar
+- **Prioritet:** –
+
+### Beskrivning
+När man bjuder in någon till en resa ska man kunna välja bland användare som
+redan finns i appen, inte bara skriva in en e-postadress.
+
+### User story
+Som resans arrangör vill jag kunna välja en befintlig användare när jag bjuder in
+så att jag slipper komma ihåg och skriva in rätt e-postadress.
+
+### Acceptanskriterier
+- [ ] Inbjudningsfältet har autocomplete som föreslår befintliga användare
+      (namn och e-post).
+- [ ] Förslag visas först när minst 3 tecken har skrivits.
+- [ ] Förslagen filtreras medan man skriver (skiftlägesokänsligt, på namn och e-post).
+- [ ] Alla användare i appen kan föreslås.
+- [ ] Användare som redan är medlemmar eller redan inbjudna i resan visas inte
+      (eller visas som ej valbara).
+- [ ] Det går fortfarande att skriva in en e-postadress till någon som inte finns i appen.
+- [ ] Inbjudan till en vald användare fungerar på samma sätt som inbjudan via e-post.
+- [ ] UI är på svenska och tillgängligt (aria-labels, tangentbordsnavigering).
+
+### Tekniska noteringar
+- Läser användarprofiler från `users`-collection; alla inloggade kan redan läsa
+  profiler (se beslut i B-002).
+- Påverkar inbjudningskomponenten på resan; befintlig inbjudningslogik via
+  e-post återanvänds.
+
+### Beslut
+- Alla användare i appen kan föreslås, inte bara de man delat resa med.
+- Det är ok att visa alla användares e-postadresser i förslagen.
+- Autocomplete med förslag först efter minst 3 tecken.
+- Implementerat i `Features/Trips/MembersPanel.razor` med befintliga
+  `Shared/AutoComplete.razor` och `IUserService.GetAllAsync` (hämtas en gång,
+  max 8 förslag). Befintliga medlemmar filtreras bort; väntande inbjudningar
+  filtreras inte (finns inte i medlemslistan).
