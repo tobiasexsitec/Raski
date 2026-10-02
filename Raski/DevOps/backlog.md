@@ -28,6 +28,10 @@
 | [B-022](#b-022-övrigt-att-inhandla) | Övrigt att inhandla | Idé | – |
 | [B-023](#b-023-ange-om-man-dricker-alkohol) | Ange om man dricker alkohol | Idé | – |
 | [B-024](#b-024-bestäm-tema-med-omröstning) | Bestäm tema med omröstning | Idé | – |
+| [B-025](#b-025-release-notes-i-appen) | Release notes i appen | Idé | – |
+| [B-026](#b-026-lägga-till-feature-requests-i-appen) | Lägga till feature requests i appen | Idé | – |
+| [B-027](#b-027-versionsnummer-0xy-före-släpp) | Versionsnummer 0.x.y före släpp | Idé | – |
+| [B-028](#b-028-egna-sektioner-under-vem-tar-med) | Egna sektioner under "Vem tar med" | Klar | – |
 
 > **KRAV vid varje ändring i backloggen (gäller även AI-assistenter):**
 > 1. Läs översiktstabellen **före** ändringen.
@@ -878,3 +882,106 @@ funderas på hur det ska se ut.
 - Vem kan föreslå teman?
 - Hur röstar man (en röst, flera, rangordning)?
 - När stängs omröstningen och hur avgörs lika?
+
+---
+
+## B-025: Release notes i appen
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### User story
+Som användare vill jag kunna se vad som är nytt i appen så att jag vet vilka
+funktioner som tillkommit eller ändrats.
+
+### Acceptanskriterier
+- [ ] Release notes per version är nåbara i appen.
+- [ ] Senaste versionen visas överst.
+
+### Öppna frågor
+- Ska nyheter visas automatiskt efter en ny version (t.ex. i samband med B-014)?
+- Var ska release notes nås (meny, versionsnumret från B-012)?
+- Var lagras texterna (fil i repot eller Firestore)?
+
+---
+
+## B-026: Lägga till feature requests i appen
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### User story
+Som användare vill jag kunna lämna önskemål om nya funktioner direkt i appen så
+att de kan hamna i backloggen.
+
+### Acceptanskriterier
+- [ ] Inloggad användare kan skicka in en feature request (titel och beskrivning).
+- [ ] Inskickade feature requests sparas och kan läsas av admin.
+
+### Öppna frågor
+- Var lagras de (Firestore, GitHub-issue)?
+- Ska användare kunna se och rösta på andras förslag?
+- Hur förs de över till backloggen?
+
+---
+
+## B-027: Versionsnummer 0.x.y före släpp
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### Beskrivning
+Appen är inte helt släppt ännu och versionsnumret ska därför vara 0.x.y.
+
+### Acceptanskriterier
+- [ ] Versionsnumret ändras till 0.x.y.
+- [ ] Versionsnumret i appen (B-012) och versionshöjningen (B-013) följer det
+      nya schemat.
+- [ ] Tvingad omladdning vid ny version (B-014) fungerar trots att numret blir lägre.
+
+### Öppna frågor
+- Vilken 0.x.y-version ska vi börja på?
+- När släpps 1.0.0?
+
+---
+
+## B-028: Egna sektioner under "Vem tar med"
+
+- **Status:** Klar
+- **Prioritet:** –
+- **Beroenden:** B-007
+
+### Beskrivning
+Under fliken "Vem tar med" ska man kunna skapa nya sektioner för saker som ska
+tas med, t.ex. "Sällskapsspel". Varje sektion visas som ett eget card, likt
+nuvarande "Vem tar med"-cardet.
+
+### User story
+Som resenär vill jag kunna skapa egna sektioner för saker som ska tas med så att
+vi kan organisera även annat än mat och dryck.
+
+### Acceptanskriterier
+- [x] Man kan skapa en ny sektion med valfritt namn.
+- [x] Varje sektion visas som ett eget card under "Vem tar med".
+- [x] I en sektion kan man lägga till saker och ange vem som tar med dem, på
+      samma sätt som i nuvarande "Vem tar med".
+- [x] Sektioner kan byta namn och tas bort.
+- [x] Alla resenärer på resan får skapa, byta namn på och ta bort sektioner.
+- [x] Borttagning kräver bekräftelse i en dialog innan sektionen tas bort.
+- [x] Sektioner kan flyttas upp och ner, och ordningen sparas.
+
+### Tekniska noteringar
+- Ny modell `BringSection` och tjänst `IBringSectionService`; Firestore
+  `trips/{tripId}/bringSections/{sectionId}` med `name` och `order`.
+- `BringItem` har nytt fält `SectionId` (tomt = standardlistan "Vem tar med").
+- `BringList` tar `SectionId`, `Title`, `Description` och `HeaderContent`;
+  `BringSections` renderar standardlistan plus egna sektioner.
+- Borttagning av sektion tar även bort dess saker.
+- `firestore.rules`: resemedlemmar får läsa och skriva `bringSections`.
+
+### Beslut
+- Alla resenärer på resan får skapa och ta bort sektioner.
+- Borttagning bekräftas i en dialog för att undvika misstag.
+- Sektioner kan flyttas upp och ner.
+- Fliken har ett introcard "Vem tar med"; standardsektionen heter "Allmänt".
+- Formuläret för ny sektion visas först efter klick på "+ Skapa sektion".

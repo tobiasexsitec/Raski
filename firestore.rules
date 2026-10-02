@@ -105,6 +105,11 @@ service cloud.firestore {
 		allow read, write: if isTripMember(tripId);
 	  }
 
+	  // Custom "who brings what" sections, managed by any member.
+	  match /bringSections/{sectionId} {
+		allow read, write: if isTripMember(tripId);
+	  }
+
 	  // Shared check-off state for the shopping list.
 	  match /shoppingState/{ingredientId} {
 		allow read, write: if isTripMember(tripId);

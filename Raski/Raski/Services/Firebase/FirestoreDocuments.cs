@@ -183,15 +183,32 @@ internal sealed class BringItemDocument
     [JsonPropertyName("quantity")] public int Quantity { get; set; }
     [JsonPropertyName("responsibleUid")] public string? ResponsibleUid { get; set; }
     [JsonPropertyName("responsibleName")] public string? ResponsibleName { get; set; }
+    [JsonPropertyName("sectionId")] public string? SectionId { get; set; }
 
     public BringItem ToModel(string tripId) => new()
     {
         Id = Id,
         TripId = tripId,
+        SectionId = SectionId ?? "",
         Name = Name ?? "",
         Quantity = Quantity < 1 ? 1 : Quantity,
         ResponsibleUid = ResponsibleUid ?? "",
         ResponsibleName = ResponsibleName ?? ""
+    };
+}
+
+internal sealed class BringSectionDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("name")] public string? Name { get; set; }
+    [JsonPropertyName("order")] public int Order { get; set; }
+
+    public BringSection ToModel(string tripId) => new()
+    {
+        Id = Id,
+        TripId = tripId,
+        Name = Name ?? "",
+        Order = Order
     };
 }
 

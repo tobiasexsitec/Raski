@@ -23,6 +23,7 @@ public sealed class BringItemService(FirebaseInterop interop, IAuthService authS
         var data = new Dictionary<string, object?>
         {
             ["name"] = item.Name.Trim(),
+            ["sectionId"] = item.SectionId,
             ["quantity"] = item.Quantity < 1 ? 1 : item.Quantity,
             ["responsibleUid"] = item.ResponsibleUid,
             ["responsibleName"] = item.ResponsibleName.Trim(),

@@ -23,6 +23,7 @@ builder.Services.AddSingleton<IMealService, MealService>();
 builder.Services.AddSingleton<IBreakfastService, BreakfastService>();
 builder.Services.AddSingleton<ITripDrinkService, TripDrinkService>();
 builder.Services.AddSingleton<IBringItemService, BringItemService>();
+builder.Services.AddSingleton<IBringSectionService, BringSectionService>();
 builder.Services.AddSingleton<IShoppingListService, ShoppingListService>();
 
 await builder.Build().RunAsync();

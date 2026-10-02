@@ -1,0 +1,335 @@
+@inject IBringSectionService BringSectionService
+@inject IBringItemService BringItemService
+
+<section class="card bring-intro" aria-labelledby="bring-intro-heading">
+    <h2 id="bring-intro-heading">Vem tar med</h2>
+    <p class="muted">Gemensamma saker som alla har nytta av på resan.</p>
+</section>
+
+<BringList Trip="Trip" Title="Allmänt" />
+
+@if (errorMessage is not null)
+{
+    <div class="error-banner" role="alert">@errorMessage</div>
+}
+
+@if (!isLoading)
+{
+    @for (var i = 0; i < sections.Count; i++)
+    {
+        var index = i;
+        var section = sections[i];
+
+        <BringList @key="section.Id" Trip="Trip" SectionId="@section.Id" Title="@section.Name">
+            <HeaderContent>
+                @if (renaming is not null && renaming.Id == section.Id)
+                {
+                    <form class="row-inline section-rename" @onsubmit="SaveRenameAsync" @onsubmit:preventDefault>
+                        <input id="@($"rename-{section.Id}")" aria-label="Nytt namn på sektionen" required @bind="renameText" @bind:event="oninput" />
+                        <button type="submit" class="btn btn-primary btn-sm" disabled="@(isSaving || string.IsNullOrWhiteSpace(renameText))">Spara</button>
+                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => renaming = null">Avbryt</button>
+                    </form>
+                }
+                else
+                {
+                    <span class="row-inline section-actions">
+                        <button type="button"
+                                class="btn btn-secondary btn-sm"
+                                aria-label="@($"Flytta upp {section.Name}")"
+                                disabled="@(isSaving || index == 0)"
+                                @onclick="() => MoveAsync(index, -1)">
+                            ↑
+                        </button>
+                        <button type="button"
+                                class="btn btn-secondary btn-sm"
+                                aria-label="@($"Flytta ner {section.Name}")"
+                                disabled="@(isSaving || index == sections.Count - 1)"
+                                @onclick="() => MoveAsync(index, 1)">
+                            ↓
+                        </button>
+                        <button type="button"
+                                class="btn btn-secondary btn-sm"
+                                aria-label="@($"Byt namn på {section.Name}")"
+                                @onclick="() => StartRename(section)">
+                            Byt namn
+                        </button>
+                        <button type="button"
+                                class="btn btn-danger btn-sm"
+                                aria-label="@($"Ta bort sektionen {section.Name}")"
+                                disabled="@isSaving"
+                                @onclick="() => deleting = section">
+                            Ta bort
+                        </button>
+                    </span>
+                }
+            </HeaderContent>
+        </BringList>
+    }
+
+    @if (isCreating)
+    {
+        <section class="card" aria-labelledby="new-section-heading">
+            <h2 id="new-section-heading">Ny sektion</h2>
+            <form class="row-inline section-form" @onsubmit="AddAsync" @onsubmit:preventDefault>
+                <div class="field">
+                    <label for="new-section-name">Namn</label>
+                    <input id="new-section-name"
+                           placeholder="T.ex. Sällskapsspel"
+                           required
+                           @ref="newNameInput"
+                           @bind="newName"
+                           @bind:event="oninput" />
+                </div>
+                <button type="submit" class="btn btn-primary" disabled="@(isSaving || string.IsNullOrWhiteSpace(newName))">
+                    @(isSaving ? "Sparar…" : "Skapa")
+                </button>
+                <button type="button" class="btn btn-secondary" @onclick="CancelCreate">Avbryt</button>
+            </form>
+        </section>
+    }
+    else
+    {
+        <button type="button" class="btn btn-secondary btn-sm" @onclick="StartCreate">
+            + Skapa sektion
+        </button>
+    }
+}
+
+@if (deleting is not null)
+{
+    <div class="backdrop" @onclick="CancelDelete">
+        <div class="dialog card"
+             role="alertdialog"
+             aria-modal="true"
+             aria-labelledby="delete-section-title"
+             @onclick:stopPropagation="true"
+             @onkeydown="OnDeleteDialogKeyDown">
+            <h2 id="delete-section-title">Ta bort "@deleting.Name"?</h2>
+            <p class="muted">
+                Sektionen och alla saker i den tas bort. Detta går inte att ångra.
+            </p>
+
+            <div class="row-inline">
+                <button type="button"
+                        class="btn btn-danger"
+                        disabled="@isSaving"
+                        @onclick="ConfirmDeleteAsync">
+                    Ta bort
+                </button>
+                <button type="button" class="btn btn-secondary" @ref="cancelDeleteButton" @onclick="CancelDelete">Avbryt</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
+
+    private List<BringSection> sections = [];
+    private BringSection? renaming;
+    private BringSection? deleting;
+    private BringSection? focusedDeleting;
+    private ElementReference cancelDeleteButton;
+    private string newName = "";
+    private bool isCreating;
+    private bool focusNewName;
+    private ElementReference newNameInput;
+    private string renameText = "";
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+    private string? loadedTripId;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (loadedTripId == Trip.Id)
+        {
+            return;
+        }
+
+        loadedTripId = Trip.Id;
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            sections = [.. await BringSectionService.GetAsync(Trip.Id)];
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte hämta sektionerna.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusNewName && isCreating)
+        {
+            focusNewName = false;
+            await newNameInput.FocusAsync();
+        }
+
+        if (deleting is not null && focusedDeleting != deleting)
+        {
+            focusedDeleting = deleting;
+            await cancelDeleteButton.FocusAsync();
+        }
+        else if (deleting is null)
+        {
+            focusedDeleting = null;
+        }
+    }
+
+    private void StartCreate()
+    {
+        errorMessage = null;
+        isCreating = true;
+        focusNewName = true;
+    }
+
+    private void CancelCreate()
+    {
+        isCreating = false;
+        newName = "";
+    }
+
+    private async Task AddAsync()
+    {
+        if (string.IsNullOrWhiteSpace(newName))
+        {
+            return;
+        }
+
+        var section = new BringSection
+        {
+            TripId = Trip.Id,
+            Name = newName.Trim(),
+            Order = sections.Count == 0 ? 0 : sections.Max(s => s.Order) + 1
+        };
+
+        if (await RunAsync(async () => section.Id = await BringSectionService.SaveAsync(section), "Kunde inte skapa sektionen."))
+        {
+            sections.Add(section);
+            newName = "";
+            isCreating = false;
+        }
+    }
+
+    private void StartRename(BringSection section)
+    {
+        errorMessage = null;
+        renaming = section;
+        renameText = section.Name;
+    }
+
+    private async Task SaveRenameAsync()
+    {
+        if (renaming is null || string.IsNullOrWhiteSpace(renameText))
+        {
+            return;
+        }
+
+        var section = renaming;
+        var updated = new BringSection { Id = section.Id, TripId = section.TripId, Name = renameText.Trim(), Order = section.Order };
+
+        if (await RunAsync(() => BringSectionService.SaveAsync(updated), "Kunde inte byta namn."))
+        {
+            section.Name = updated.Name;
+            renaming = null;
+        }
+    }
+
+    private async Task MoveAsync(int index, int direction)
+    {
+        var target = index + direction;
+        if (target < 0 || target >= sections.Count)
+        {
+            return;
+        }
+
+        // Renumber so orders are distinct, then swap the two sections.
+        var reordered = sections.ToList();
+        (reordered[index], reordered[target]) = (reordered[target], reordered[index]);
+
+        var changed = reordered
+            .Select((s, i) => (Section: s, Order: i))
+            .Where(x => x.Section.Order != x.Order)
+            .ToList();
+
+        var ok = await RunAsync(
+            () => Task.WhenAll(changed.Select(x => BringSectionService.SaveAsync(
+                new BringSection { Id = x.Section.Id, TripId = x.Section.TripId, Name = x.Section.Name, Order = x.Order }))),
+            "Kunde inte flytta sektionen.");
+
+        if (ok)
+        {
+            foreach (var (section, order) in changed)
+            {
+                section.Order = order;
+            }
+
+            sections = reordered;
+        }
+    }
+
+    private void CancelDelete() => deleting = null;
+
+    private void OnDeleteDialogKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            CancelDelete();
+        }
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (deleting is null)
+        {
+            return;
+        }
+
+        var section = deleting;
+
+        var ok = await RunAsync(async () =>
+        {
+            var items = await BringItemService.GetAsync(Trip.Id);
+            await Task.WhenAll(items
+                .Where(i => i.SectionId == section.Id)
+                .Select(i => BringItemService.DeleteAsync(Trip.Id, i.Id)));
+            await BringSectionService.DeleteAsync(Trip.Id, section.Id);
+        }, "Kunde inte ta bort sektionen.");
+
+        deleting = null;
+
+        if (ok)
+        {
+            sections.Remove(section);
+        }
+    }
+
+    private async Task<bool> RunAsync(Func<Task> action, string error)
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            await action();
+            return true;
+        }
+        catch (Exception)
+        {
+            errorMessage = error;
+            return false;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+}

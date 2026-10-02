@@ -5,6 +5,10 @@ public sealed class BringItem
 {
     public string Id { get; set; } = "";
     public string TripId { get; set; } = "";
+
+    /// <summary>Custom section id, or empty for the default "Vem tar med" list.</summary>
+    public string SectionId { get; set; } = "";
+
     public string Name { get; set; } = "";
     public int Quantity { get; set; } = 1;
 

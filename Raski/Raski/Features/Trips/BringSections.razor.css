@@ -1,0 +1,45 @@
+.bring-intro {
+    margin-bottom: var(--space-3);
+}
+
+.bring-intro h2 {
+    margin: 0 0 var(--space-1) 0;
+}
+
+.bring-intro p {
+    margin: 0;
+}
+
+.section-actions,
+.section-rename {
+    flex-wrap: wrap;
+}
+
+.section-form {
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.section-form .field {
+    flex: 1 1 12rem;
+    margin-bottom: 0;
+}
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3);
+    background: rgb(0 0 0 / 55%);
+}
+
+.dialog {
+    width: min(28rem, 100%);
+}
+
+.dialog h2 {
+    margin-top: 0;
+}

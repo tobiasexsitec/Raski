@@ -1,9 +1,15 @@
 @inject IBringItemService BringItemService
 @inject ITripService TripService
 
-<section class="card" aria-labelledby="bring-heading">
-    <h2 id="bring-heading">Vem tar med</h2>
-    <p class="muted">Gemensamma saker som alla har nytta av på resan.</p>
+<section class="card bring-card" aria-labelledby="@HeadingId">
+    <div class="bring-header">
+        <h2 id="@HeadingId">@Title</h2>
+        @HeaderContent
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Description))
+    {
+        <p class="muted">@Description</p>
+    }
 
     @if (errorMessage is not null)
     {
@@ -87,7 +93,7 @@
 
         <form class="bring-form" @onsubmit="AddAsync" @onsubmit:preventDefault>
             <h3>Lägg till sak</h3>
-            @EditorFields(draft, "new")
+            @EditorFields(draft, $"new-{IdSuffix}")
             <button type="submit" class="btn btn-primary" disabled="@(isSaving || string.IsNullOrWhiteSpace(draft.Name))">
                 @(isSaving ? "Sparar…" : "Lägg till")
             </button>
@@ -99,6 +105,19 @@
     private const string OtherOption = "__other";
 
     [Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
+
+    /// <summary>Custom section id, or empty for the default list.</summary>
+    [Parameter] public string SectionId { get; set; } = "";
+
+    [Parameter] public string Title { get; set; } = "Vem tar med";
+
+    [Parameter] public string? Description { get; set; }
+
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+
+    private string IdSuffix => string.IsNullOrEmpty(SectionId) ? "default" : SectionId;
+
+    private string HeadingId => $"bring-heading-{IdSuffix}";
 
     [CascadingParameter(Name = "CurrentUser")]
     private UserProfile? CurrentUser { get; set; }
@@ -138,7 +157,7 @@
             var itemsTask = BringItemService.GetAsync(Trip.Id);
 
             members = [.. (await membersTask).OrderBy(m => m.DisplayName, StringComparer.CurrentCultureIgnoreCase)];
-            items = [.. await itemsTask];
+            items = [.. (await itemsTask).Where(i => i.SectionId == SectionId)];
         }
         catch (Exception)
         {
@@ -217,6 +236,7 @@
         {
             Id = form.Id,
             TripId = Trip.Id,
+            SectionId = SectionId,
             Name = form.Name.Trim(),
             Quantity = form.Quantity < 1 ? 1 : form.Quantity
         };
@@ -292,6 +312,7 @@
         {
             Id = item.Id,
             TripId = Trip.Id,
+            SectionId = item.SectionId,
             Name = item.Name,
             Quantity = item.Quantity,
             ResponsibleUid = CurrentUser.Uid,
