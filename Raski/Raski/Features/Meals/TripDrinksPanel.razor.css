@@ -18,6 +18,11 @@
     margin: var(--space-4) 0 var(--space-2) 0;
 }
 
+.alcohol-summary {
+    font-size: 0.85rem;
+    font-weight: 400;
+}
+
 .breakfast-list .name {
     font-weight: 600;
 }

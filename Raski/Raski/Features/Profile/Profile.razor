@@ -45,6 +45,24 @@ else
     </section>
 
     <section class="card stack">
+        <h2 id="alcohol-heading">Dricker du alkohol?</h2>
+        <p class="muted">Används som standard på nya resor. Du kan ändra det per resa under Översikt.</p>
+        <div class="row-inline" role="group" aria-labelledby="alcohol-heading">
+            @foreach (var option in AlcoholPreferenceExtensions.All)
+            {
+                var selected = AuthService.Current?.Alcohol == option;
+                <button type="button"
+                        class="btn btn-sm @(selected ? "btn-primary" : "btn-secondary")"
+                        aria-pressed="@(selected ? "true" : "false")"
+                        disabled="@isSaving"
+                        @onclick="() => SaveAlcoholAsync(option)">
+                    @option.Label()
+                </button>
+            }
+        </div>
+    </section>
+
+    <section class="card stack">
         <h2 id="allergies-heading">Allergier och kostpreferenser</h2>
 
         @if (allergies.Count == 0)
@@ -179,6 +197,30 @@ else
         catch (Exception ex)
         {
             errorMessage = $"Kunde inte spara telefonnumret. {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task SaveAlcoholAsync(AlcoholPreference preference)
+    {
+        if (isSaving)
+        {
+            return;
+        }
+
+        errorMessage = null;
+        isSaving = true;
+
+        try
+        {
+            await UserService.SaveMyAlcoholAsync(preference);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Kunde inte spara. {ex.Message}";
         }
         finally
         {

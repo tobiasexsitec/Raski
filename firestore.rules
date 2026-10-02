@@ -91,6 +91,11 @@ service cloud.firestore {
 	  match /members/{memberUid} {
 		allow read: if isTripMember(tripId);
 		allow write: if isTripOwner(tripId);
+
+		// Members may override their own alcohol preference for this trip.
+		allow update: if isTripMember(tripId)
+					  && request.auth.uid == memberUid
+					  && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['alcohol']);
 	  }
 
 	  // Meals are collaborative: any member may plan, edit and remove them.

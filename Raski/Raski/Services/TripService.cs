@@ -50,7 +50,8 @@ public sealed class TripService(FirebaseInterop interop, IAuthService authServic
             displayName = profile.DisplayName,
             email = profile.Email,
             photoUrl = profile.PhotoUrl,
-            role = MemberRoles.Admin
+            role = MemberRoles.Admin,
+            alcohol = profile.Alcohol?.ToFirestore()
         }, ct: ct);
 
         return tripId;
@@ -100,7 +101,8 @@ public sealed class TripService(FirebaseInterop interop, IAuthService authServic
                 displayName = existing.DisplayName ?? existing.Email ?? "",
                 email = existing.Email ?? emailKey,
                 photoUrl = existing.PhotoUrl ?? "",
-                role = MemberRoles.Member
+                role = MemberRoles.Member,
+                alcohol = AlcoholPreferenceExtensions.ParseAlcoholPreference(existing.Alcohol)?.ToFirestore()
             }, ct: ct);
 
             await interop.AddToArrayAsync($"trips/{tripId}", "memberUids", existing.Id, ct);
@@ -120,6 +122,12 @@ public sealed class TripService(FirebaseInterop interop, IAuthService authServic
 
         return false;
     }
+
+    public Task SetMyAlcoholAsync(string tripId, AlcoholPreference preference, CancellationToken ct = default) =>
+        interop.UpdateDocumentAsync($"trips/{tripId}/members/{CurrentUid}", new
+        {
+            alcohol = preference.ToFirestore()
+        }, ct);
 
     public async Task RemoveMemberAsync(string tripId, string uid, CancellationToken ct = default)
     {

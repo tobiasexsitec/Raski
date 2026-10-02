@@ -19,6 +19,19 @@ public sealed class UserService(FirebaseInterop interop, IAuthService authServic
         authService.UpdateCachedProfile(p => p.Phone = normalized);
     }
 
+    public async Task SaveMyAlcoholAsync(AlcoholPreference preference, CancellationToken ct = default)
+    {
+        var uid = authService.Current?.Uid ?? throw new InvalidOperationException("Ingen inloggad användare.");
+
+        await interop.UpdateDocumentAsync($"users/{uid}", new
+        {
+            alcohol = preference.ToFirestore(),
+            updatedAt = FirestoreFormat.UtcNow()
+        }, ct);
+
+        authService.UpdateCachedProfile(p => p.Alcohol = preference);
+    }
+
     public async Task CompleteOnboardingAsync(CancellationToken ct = default)
     {
         var uid = authService.Current?.Uid ?? throw new InvalidOperationException("Ingen inloggad användare.");

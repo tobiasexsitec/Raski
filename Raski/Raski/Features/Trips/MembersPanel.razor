@@ -1,5 +1,6 @@
 @inject ITripService TripService
 @inject IUserService UserService
+@inject IAuthService AuthService
 
 <section class="card">
     <h2>Deltagare</h2>
@@ -29,6 +30,26 @@
                         @if (PhoneOf(member) is { Length: > 0 } phone)
                         {
                             <a class="muted" href="@($"tel:{phone}")">📞 @phone</a>
+                        }
+                        @if (member.Uid == AuthService.Current?.Uid)
+                        {
+                            <span class="row-inline" role="group" aria-label="Dricker du alkohol på den här resan?">
+                                <span class="muted">🍷 Alkohol:</span>
+                                @foreach (var option in AlcoholPreferenceExtensions.All)
+                                {
+                                    var selected = member.Alcohol == option;
+                                    <button type="button"
+                                            class="btn btn-sm @(selected ? "btn-primary" : "btn-secondary")"
+                                            aria-pressed="@(selected ? "true" : "false")"
+                                            @onclick="() => SetAlcoholAsync(member, option)">
+                                        @option.Label()
+                                    </button>
+                                }
+                            </span>
+                        }
+                        else if (member.Alcohol is { } alcohol)
+                        {
+                            <span class="muted">🍷 @alcohol.Description()</span>
                         }
                         @if (AllergiesOf(member) is { Count: > 0 } memberAllergies)
                         {
@@ -258,6 +279,21 @@
         catch (Exception)
         {
             errorMessage = "Kunde inte ta bort deltagaren.";
+        }
+    }
+
+    private async Task SetAlcoholAsync(TripMember member, AlcoholPreference preference)
+    {
+        errorMessage = null;
+
+        try
+        {
+            await TripService.SetMyAlcoholAsync(TripId, preference);
+            member.Alcohol = preference;
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte spara alkoholvalet.";
         }
     }
 

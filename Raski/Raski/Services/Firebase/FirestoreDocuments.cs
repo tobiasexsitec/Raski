@@ -35,6 +35,7 @@ internal sealed class UserDocument
     [JsonPropertyName("isGlobalAdmin")] public bool IsGlobalAdmin { get; set; }
     [JsonPropertyName("allergies")] public List<string>? Allergies { get; set; }
     [JsonPropertyName("phone")] public string? Phone { get; set; }
+    [JsonPropertyName("alcohol")] public string? Alcohol { get; set; }
 
     // Missing on users created before onboarding existed; they count as onboarded.
     [JsonPropertyName("onboardingCompleted")] public bool? OnboardingCompleted { get; set; }
@@ -49,6 +50,7 @@ internal sealed class UserDocument
         Theme = ThemeOptions.IsValid(Theme) ? Theme! : ThemeOptions.System,
         IsGlobalAdmin = IsGlobalAdmin,
         Allergies = AllergyNames.Distinct(Allergies),
+        Alcohol = AlcoholPreferenceExtensions.ParseAlcoholPreference(Alcohol),
         OnboardingCompleted = OnboardingCompleted ?? true
     };
 }
@@ -84,6 +86,7 @@ internal sealed class TripMemberDocument
     [JsonPropertyName("email")] public string? Email { get; set; }
     [JsonPropertyName("photoUrl")] public string? PhotoUrl { get; set; }
     [JsonPropertyName("role")] public string? Role { get; set; }
+    [JsonPropertyName("alcohol")] public string? Alcohol { get; set; }
 
     public TripMember ToModel() => new()
     {
@@ -91,7 +94,8 @@ internal sealed class TripMemberDocument
         DisplayName = DisplayName ?? "",
         Email = Email ?? "",
         PhotoUrl = PhotoUrl ?? "",
-        Role = Role == MemberRoles.Admin ? MemberRoles.Admin : MemberRoles.Member
+        Role = Role == MemberRoles.Admin ? MemberRoles.Admin : MemberRoles.Member,
+        Alcohol = AlcoholPreferenceExtensions.ParseAlcoholPreference(Alcohol)
     };
 }
 

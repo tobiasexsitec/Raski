@@ -1,9 +1,16 @@
 ﻿@inject ITripDrinkService TripDrinkService
 @inject IIngredientService IngredientService
+@inject ITripService TripService
 
 <section class="card breakfast" aria-labelledby="trip-drinks-heading">
     <div class="breakfast-header">
-        <h2 id="trip-drinks-heading">Dryck</h2>
+        <h2 id="trip-drinks-heading">
+            Dryck
+            @if (AlcoholSummary() is { Length: > 0 } summary)
+            {
+                <span class="muted alcohol-summary">@summary</span>
+            }
+        </h2>
         @if (!isEditing && !isLoading)
         {
             <button type="button" class="btn btn-secondary btn-sm" @onclick="StartEditing">Redigera</button>
@@ -149,6 +156,7 @@
 
     private readonly List<MealDrink> rows = [];
     private List<MealDrink> drinks = [];
+    private IReadOnlyList<TripMember> members = [];
     private string? loadedTripId;
     private bool isLoading = true;
     private bool isEditing;
@@ -179,6 +187,27 @@
         {
             isLoading = false;
         }
+
+        try
+        {
+            members = await TripService.GetMembersAsync(Trip.Id);
+        }
+        catch (Exception)
+        {
+            // The summary is optional; the drinks list still works without it.
+            members = [];
+        }
+    }
+
+    private string AlcoholSummary()
+    {
+        var parts = AlcoholPreferenceExtensions.All
+            .Select(option => (option, count: members.Count(m => m.Alcohol == option)))
+            .Where(p => p.count > 0)
+            .Select(p => $"{p.count} {p.option.Label().ToLowerInvariant()}")
+            .ToList();
+
+        return parts.Count == 0 ? "" : $"· 🍷 {string.Join(", ", parts)}";
     }
 
     private void StartEditing()

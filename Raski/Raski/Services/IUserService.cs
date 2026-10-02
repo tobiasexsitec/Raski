@@ -12,6 +12,9 @@ public interface IUserService
     /// <summary>Updates the signed-in user's phone number.</summary>
     Task SaveMyPhoneAsync(string phone, CancellationToken ct = default);
 
+    /// <summary>Updates the signed-in user's default alcohol preference. Existing trips are not affected.</summary>
+    Task SaveMyAlcoholAsync(AlcoholPreference preference, CancellationToken ct = default);
+
     /// <summary>Marks onboarding as done so the signed-in user is no longer redirected to it.</summary>
     Task CompleteOnboardingAsync(CancellationToken ct = default);
 

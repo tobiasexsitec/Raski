@@ -17,5 +17,8 @@ public interface ITripService
     /// </summary>
     Task<bool> AddMemberAsync(string tripId, string email, CancellationToken ct = default);
 
+    /// <summary>Overrides the signed-in user's alcohol preference for one trip only.</summary>
+    Task SetMyAlcoholAsync(string tripId, AlcoholPreference preference, CancellationToken ct = default);
+
     Task RemoveMemberAsync(string tripId, string uid, CancellationToken ct = default);
 }

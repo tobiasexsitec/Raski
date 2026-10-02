@@ -32,6 +32,9 @@ public sealed class TripMember
     public string PhotoUrl { get; set; } = "";
     public string Role { get; set; } = MemberRoles.Member;
 
+    /// <summary>Copied from the profile when joining so later profile changes keep trip history intact.</summary>
+    public AlcoholPreference? Alcohol { get; set; }
+
     public bool IsAdmin => Role == MemberRoles.Admin;
 }
 

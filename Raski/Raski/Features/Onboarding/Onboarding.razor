@@ -1,4 +1,4 @@
-@page "/on-boarding"
+﻿@page "/on-boarding"
 @layout EmptyLayout
 @implements IDisposable
 @inject IAuthService AuthService
@@ -33,11 +33,11 @@
 
         @if (!finished)
         {
-            <div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="@(step + 1)" aria-label="Steg @(step + 1) av 3">
-                <div class="progress-fill" style="width:@(((step + 1) * 100) / 3)%"></div>
-                @for (var i = 0; i < 3; i++)
+            <div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="@StepCount" aria-valuenow="@(step + 1)" aria-label="Steg @(step + 1) av @StepCount">
+                <div class="progress-fill" style="width:@(((step + 1) * 100) / StepCount)%"></div>
+                @for (var i = 0; i < StepCount; i++)
                 {
-                    <span class="progress-dot @(i <= step ? "done" : "")" style="left:@((i * 100) / 2)%"></span>
+                    <span class="progress-dot @(i <= step ? "done" : "")" style="left:@((i * 100) / (StepCount - 1))%"></span>
                 }
             </div>
         }
@@ -66,10 +66,11 @@
                 <section class="card-3d" @key="@("step-0")">
                     <div class="hero-emoji wave" aria-hidden="true">👋</div>
                     <h1 class="shimmer">Hej @FirstName!</h1>
-                    <p class="lead">Välkommen till Raski. Innan vi drar igång behöver vi veta två saker om dig.</p>
+                    <p class="lead">Välkommen till Raski. Innan vi drar igång behöver vi veta några saker om dig.</p>
                     <ul class="teaser">
                         <li style="--d:0">📞 Hur man når dig</li>
-                        <li style="--d:1">🥜 Vad du inte tål</li>
+                        <li style="--d:1">🍷 Om du dricker alkohol</li>
+                        <li style="--d:2">🥜 Vad du inte tål</li>
                     </ul>
                     <button type="button" class="btn btn-primary mega" @onclick="Next">
                         <span>Kör igång</span> <span class="arrow" aria-hidden="true">🚀</span>
@@ -108,9 +109,44 @@
                     </form>
                 </section>
             }
-            else
+            else if (step == 2)
             {
                 <section class="card-3d" @key="@("step-2")">
+                    <div class="hero-emoji wobble" aria-hidden="true">🍷</div>
+                    <h1 class="shimmer" id="onboarding-alcohol-heading">Dricker du alkohol?</h1>
+                    <p class="lead">Så att den som köper dryck vet hur mycket som behövs. Du kan ändra det per resa.</p>
+
+                    @if (errorMessage is not null)
+                    {
+                        <div class="error-banner shake" role="alert">@errorMessage</div>
+                    }
+
+                    <ul class="chips" role="group" aria-labelledby="onboarding-alcohol-heading">
+                        @foreach (var (option, index) in AlcoholPreferenceExtensions.All.Select((o, i) => (o, i)))
+                        {
+                            var selected = alcohol == option;
+                            <li style="--d:@index">
+                                <button type="button"
+                                        class="chip @(selected ? "selected" : "")"
+                                        aria-pressed="@(selected ? "true" : "false")"
+                                        @onclick="() => alcohol = option">
+                                    @option.Label()
+                                </button>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="actions">
+                        <button type="button" class="btn btn-secondary" @onclick="Back" disabled="@isSaving">Tillbaka</button>
+                        <button type="button" class="btn btn-primary mega" @onclick="SaveAlcoholAsync" disabled="@(isSaving || alcohol is null)">
+                            Nästa <span class="arrow" aria-hidden="true">✨</span>
+                        </button>
+                    </div>
+                </section>
+            }
+            else
+            {
+                <section class="card-3d" @key="@("step-3")">
                     <div class="hero-emoji wobble" aria-hidden="true">🥗</div>
                     <h1 class="shimmer">Allergier och kostpreferenser</h1>
                     <p class="lead">Tryck på det som gäller dig, eller skriv in något eget.</p>
@@ -176,10 +212,13 @@
 @code {
     private static readonly string[] FloaterEmojis = ["🥕", "🍕", "🥑", "🏕️", "🍓", "🧀", "🌮", "🥐", "🍉", "🎒"];
 
+    private const int StepCount = 4;
+
     private int step;
     private bool finished;
     private bool isSaving;
     private string phone = "";
+    private AlcoholPreference? alcohol;
     private string newAllergy = "";
     private string? errorMessage;
     private List<string> allergies = [];
@@ -212,6 +251,7 @@
         }
 
         phone = AuthService.Current?.Phone ?? "";
+        alcohol = AuthService.Current?.Alcohol;
         allergies = [.. AuthService.Current?.Allergies ?? []];
 
         try
@@ -261,6 +301,38 @@
         catch (Exception ex)
         {
             errorMessage = $"Kunde inte spara telefonnumret. {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task SaveAlcoholAsync()
+    {
+        if (isSaving || alcohol is not { } preference)
+        {
+            return;
+        }
+
+        errorMessage = null;
+
+        if (preference == AuthService.Current?.Alcohol)
+        {
+            step++;
+            return;
+        }
+
+        isSaving = true;
+
+        try
+        {
+            await UserService.SaveMyAlcoholAsync(preference);
+            step++;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Kunde inte spara. {ex.Message}";
         }
         finally
         {

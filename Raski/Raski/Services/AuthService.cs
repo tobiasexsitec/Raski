@@ -149,7 +149,8 @@ public sealed class AuthService(FirebaseInterop interop) : IAuthService, IAsyncD
                     displayName = profile.DisplayName,
                     email = profile.Email,
                     photoUrl = profile.PhotoUrl,
-                    role = MemberRoles.Member
+                    role = MemberRoles.Member,
+                    alcohol = profile.Alcohol?.ToFirestore()
                 });
 
                 // memberUids drives the "my trips" array-contains query and the security rules.
