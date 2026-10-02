@@ -1,0 +1,96 @@
+<form class="poll-form" @onsubmit="SubmitAsync" @onsubmit:preventDefault>
+    <div class="field">
+        <label for="@($"{IdPrefix}-question")">Fråga</label>
+        <input id="@($"{IdPrefix}-question")"
+               placeholder="T.ex. Vilket tema ska vi ha på lördagen?"
+               required
+               @bind="Draft.Question"
+               @bind:event="oninput" />
+    </div>
+
+    <fieldset class="field poll-form-options">
+        <legend class="field-label">Alternativ</legend>
+        @for (var i = 0; i < Draft.Options.Count; i++)
+        {
+            var option = Draft.Options[i];
+            var number = i + 1;
+
+            <div class="row-inline poll-form-option" @key="option.Key">
+                <input aria-label="@($"Alternativ {number}")"
+                       placeholder="@($"Alternativ {number}")"
+                       @bind="option.Text"
+                       @bind:event="oninput" />
+                @if (!option.IsSaved)
+                {
+                    <button type="button"
+                            class="btn btn-secondary btn-sm"
+                            aria-label="@($"Ta bort alternativ {number}")"
+                            @onclick="() => Draft.Options.Remove(option)">
+                        ✕
+                    </button>
+                }
+            </div>
+        }
+        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => Draft.Options.Add(new())">
+            + Lägg till alternativ
+        </button>
+    </fieldset>
+
+    <div class="poll-form-settings">
+        <label class="poll-check">
+            <input type="checkbox" @bind="Draft.AllowMultiple" />
+            Man får välja flera alternativ
+        </label>
+        @if (Draft.AllowMultiple)
+        {
+            <label class="poll-check">
+                Max antal val
+                <input type="number" min="0" step="1" class="poll-max-choices" @bind="Draft.MaxChoices" />
+                <span class="muted">(0 = valfritt antal)</span>
+            </label>
+        }
+        <label class="poll-check">
+            <input type="checkbox" @bind="Draft.AllowCustomOptions" />
+            Resenärer får lägga till egna alternativ
+        </label>
+        <label class="poll-check">
+            <input type="checkbox" @bind="Draft.HasDeadline" />
+            Stäng automatiskt vid en viss tid
+        </label>
+        @if (Draft.HasDeadline)
+        {
+            <div class="field">
+                <label for="@($"{IdPrefix}-deadline")">Stänger</label>
+                <input id="@($"{IdPrefix}-deadline")"
+                       type="datetime-local"
+                       required
+                       @bind="Draft.DeadlineLocal"
+                       @bind:format="yyyy-MM-ddTHH:mm" />
+            </div>
+        }
+    </div>
+
+    <div class="row-inline">
+        <button type="submit" class="btn btn-primary" disabled="@(IsSaving || !Draft.IsValid)">
+            @(IsSaving ? "Sparar…" : SubmitText)
+        </button>
+        <button type="button" class="btn btn-secondary" @onclick="OnCancel">Avbryt</button>
+    </div>
+</form>
+
+@code {
+    [Parameter, EditorRequired] public PollDraft Draft { get; set; } = default!;
+    [Parameter, EditorRequired] public string IdPrefix { get; set; } = "";
+    [Parameter] public string SubmitText { get; set; } = "Spara";
+    [Parameter] public bool IsSaving { get; set; }
+    [Parameter] public EventCallback OnSubmit { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private async Task SubmitAsync()
+    {
+        if (Draft.IsValid)
+        {
+            await OnSubmit.InvokeAsync();
+        }
+    }
+}

@@ -2,6 +2,7 @@
 @page "/resor/{TripId}/oversikt"
 @page "/resor/{TripId}/maltider"
 @page "/resor/{TripId}/vem-tar-med"
+@page "/resor/{TripId}/omrostningar"
 @inject ITripService TripService
 @inject NavigationManager Navigation
 
@@ -50,6 +51,12 @@ else if (trip is not null)
            aria-selected="@(CurrentTab == Tab.Bring ? "true" : "false")"
            aria-controls="tabpanel"
            href="@($"resor/{TripId}/vem-tar-med")">Vem tar med</a>
+        <a class="trip-tab @(CurrentTab == Tab.Polls ? "active" : "")"
+           role="tab"
+           id="tab-polls"
+           aria-selected="@(CurrentTab == Tab.Polls ? "true" : "false")"
+           aria-controls="tabpanel"
+           href="@($"resor/{TripId}/omrostningar")">Omröstningar</a>
     </nav>
 
     <div id="tabpanel" role="tabpanel" aria-labelledby="@TabId">
@@ -78,6 +85,10 @@ else if (trip is not null)
         {
             <BringSections Trip="trip" />
         }
+        else if (CurrentTab == Tab.Polls)
+        {
+            <PollsPanel Trip="trip" />
+        }
         else
         {
             <BreakfastPanel Trip="trip" />
@@ -99,7 +110,7 @@ else if (trip is not null)
 
     private bool IsAdmin => trip?.IsOwner(CurrentUser?.Uid) == true;
 
-    private enum Tab { Overview, Meals, Bring }
+    private enum Tab { Overview, Meals, Bring, Polls }
 
     private Tab CurrentTab
     {
@@ -107,6 +118,7 @@ else if (trip is not null)
         {
             var path = Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0];
             if (path.EndsWith("/vem-tar-med", StringComparison.OrdinalIgnoreCase)) return Tab.Bring;
+            if (path.EndsWith("/omrostningar", StringComparison.OrdinalIgnoreCase)) return Tab.Polls;
             if (path.EndsWith("/maltider", StringComparison.OrdinalIgnoreCase)) return Tab.Meals;
             return Tab.Overview;
         }
@@ -115,6 +127,7 @@ else if (trip is not null)
     private string TabId => CurrentTab switch
     {
         Tab.Bring => "tab-bring",
+        Tab.Polls => "tab-polls",
         Tab.Meals => "tab-meals",
         _ => "tab-overview"
     };

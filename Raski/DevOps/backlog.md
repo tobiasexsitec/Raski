@@ -27,7 +27,7 @@
 | [B-021](#b-021-sök-och-filtrera-i-inköpslistan) | Sök och filtrera i inköpslistan | Idé | – |
 | [B-022](#b-022-övrigt-att-inhandla) | Övrigt att inhandla | Idé | – |
 | [B-023](#b-023-ange-om-man-dricker-alkohol) | Ange om man dricker alkohol | Idé | – |
-| [B-024](#b-024-bestäm-tema-med-omröstning) | Bestäm tema med omröstning | Idé | – |
+| [B-024](#b-024-omröstningar-på-en-resa) | Omröstningar på en resa | Klar | – |
 | [B-025](#b-025-release-notes-i-appen) | Release notes i appen | Idé | – |
 | [B-026](#b-026-lägga-till-feature-requests-i-appen) | Lägga till feature requests i appen | Idé | – |
 | [B-027](#b-027-versionsnummer-0xy-före-släpp) | Versionsnummer 0.x.y före släpp | Idé | – |
@@ -868,20 +868,42 @@ På något sätt ska man kunna ange om man dricker alkohol eller inte.
 
 ---
 
-## B-024: Bestäm tema med omröstning
+## B-024: Omröstningar på en resa
 
-- **Status:** Idé
+- **Status:** Klar
 - **Prioritet:** –
 
-### Beskrivning
-Resenärerna ska kunna bestämma tema genom omröstning. Behöver diskuteras och
-funderas på hur det ska se ut.
+### User story
+Som resenär vill jag kunna skapa en omröstning med en fråga och svarsalternativ
+så att vi tillsammans kan fatta beslut på resan (t.ex. välja tema).
 
-### Öppna frågor
-- Tema för hela resan eller per måltid/kväll?
-- Vem kan föreslå teman?
-- Hur röstar man (en röst, flera, rangordning)?
-- När stängs omröstningen och hur avgörs lika?
+### Acceptanskriterier
+- [x] Resan har en egen flik "Omröstningar" där resans omröstningar listas.
+- [x] På fliken kan man skapa en ny omröstning, på samma sätt som man skapar
+      en ny sektion på fliken "Vem tar med".
+- [x] En resenär kan skapa en omröstning kopplad till en resa genom att ange
+      en fråga och ett eller flera svarsalternativ.
+- [x] Endast resenärer på resan kan se och rösta i omröstningen.
+- [x] Skaparen anger om resenärer får lägga till egna alternativ när de svarar.
+- [x] Om det är tillåtet kan en resenär lägga till ett eget alternativ, som
+      sedan blir valbart för alla.
+- [x] Skaparen anger om man får välja ett eller flera alternativ, och vid flera
+      val hur många (0 = valfritt antal).
+- [x] Skaparen kan ange en valfri deadline; omröstningen stängs automatiskt
+      när deadline passerats.
+- [x] Endast global admin kan stänga och öppna omröstningen manuellt.
+- [x] Man kan uppdatera sin röst tills omröstningen är stängd.
+- [x] Röster är synliga: man ser antal röster och vem som röstat på vad.
+- [x] Stängd omröstning visar resultatet men går inte att rösta i.
+- [x] Resultatet visas som det är, även vid lika antal röster (ingen
+      automatisk avgörning).
+- [x] Alternativ kan inte tas bort när de väl lagts till.
+- [x] Skaparen kan redigera eller ta bort omröstningen även efter att röster
+      lagts.
+- [x] Befintliga röster påverkas inte när omröstningen redigeras.
+
+### Beslut
+- Släppt i version 1.8.0.
 
 ---
 

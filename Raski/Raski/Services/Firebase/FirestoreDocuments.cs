@@ -212,6 +212,69 @@ internal sealed class BringSectionDocument
     };
 }
 
+internal sealed class PollDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("question")] public string? Question { get; set; }
+    [JsonPropertyName("allowMultiple")] public bool AllowMultiple { get; set; }
+    [JsonPropertyName("maxChoices")] public int? MaxChoices { get; set; }
+    [JsonPropertyName("allowCustomOptions")] public bool AllowCustomOptions { get; set; }
+    [JsonPropertyName("deadline")] public string? Deadline { get; set; }
+    [JsonPropertyName("closed")] public bool Closed { get; set; }
+    [JsonPropertyName("createdByUid")] public string? CreatedByUid { get; set; }
+    [JsonPropertyName("createdByName")] public string? CreatedByName { get; set; }
+    [JsonPropertyName("createdAt")] public string? CreatedAt { get; set; }
+
+    public Poll ToModel(string tripId) => new()
+    {
+        Id = Id,
+        TripId = tripId,
+        Question = Question ?? "",
+        AllowMultiple = AllowMultiple,
+        MaxChoices = Math.Max(0, MaxChoices ?? 0),
+        AllowCustomOptions = AllowCustomOptions,
+        Deadline = DateTimeOffset.TryParse(Deadline, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var deadline)
+            ? deadline
+            : null,
+        IsClosed = Closed,
+        CreatedByUid = CreatedByUid ?? "",
+        CreatedByName = CreatedByName ?? "",
+        CreatedAt = CreatedAt ?? ""
+    };
+}
+
+internal sealed class PollOptionDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("text")] public string? Text { get; set; }
+    [JsonPropertyName("order")] public int Order { get; set; }
+    [JsonPropertyName("addedByUid")] public string? AddedByUid { get; set; }
+    [JsonPropertyName("addedByName")] public string? AddedByName { get; set; }
+
+    public PollOption ToModel() => new()
+    {
+        Id = Id,
+        Text = Text ?? "",
+        Order = Order,
+        AddedByUid = AddedByUid ?? "",
+        AddedByName = AddedByName ?? ""
+    };
+}
+
+internal sealed class PollVoteDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("voterName")] public string? VoterName { get; set; }
+    [JsonPropertyName("optionIds")] public List<string>? OptionIds { get; set; }
+
+    public PollVote ToModel() => new()
+    {
+        VoterUid = Id,
+        VoterName = VoterName ?? "",
+        OptionIds = OptionIds ?? []
+    };
+}
+
 internal sealed class IngredientDocument
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";

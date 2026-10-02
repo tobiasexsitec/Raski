@@ -1,0 +1,381 @@
+@inject IPollService PollService
+
+<section class="card poll-card" aria-labelledby="@($"poll-{Poll.Id}-heading")">
+    @if (draft is not null)
+    {
+        <h2 id="@($"poll-{Poll.Id}-heading")">Redigera omröstning</h2>
+        <PollForm Draft="draft"
+                  IdPrefix="@($"edit-{Poll.Id}")"
+                  IsSaving="isSaving"
+                  OnSubmit="SaveEditAsync"
+                  OnCancel="() => draft = null" />
+    }
+    else
+    {
+        <div class="poll-header">
+            <h2 id="@($"poll-{Poll.Id}-heading")">@Poll.Question</h2>
+            @if (IsCreator || IsAdmin)
+            {
+                <span class="row-inline">
+                    @if (IsCreator)
+                    {
+                        <button type="button" class="btn btn-secondary btn-sm" disabled="@isSaving" @onclick="StartEdit">Redigera</button>
+                    }
+                    @if (IsAdmin && Poll.IsClosed)
+                    {
+                        <button type="button" class="btn btn-secondary btn-sm" disabled="@isSaving" @onclick="() => SetClosedAsync(false)">Öppna omröstningen igen</button>
+                    }
+                    else if (IsAdmin && IsOpen)
+                    {
+                        <button type="button" class="btn btn-secondary btn-sm" disabled="@isSaving" @onclick="() => SetClosedAsync(true)">Stäng omröstningen</button>
+                    }
+                    @if (IsCreator)
+                    {
+                    <button type="button"
+                            class="btn btn-danger btn-sm"
+                            aria-label="@($"Ta bort omröstningen {Poll.Question}")"
+                            disabled="@isSaving"
+                            @onclick="() => isConfirmingDelete = true">
+                        Ta bort
+                    </button>
+                    }
+                </span>
+            }
+        </div>
+
+        <p class="muted poll-meta">
+            Skapad av @(string.IsNullOrWhiteSpace(Poll.CreatedByName) ? "okänd" : Poll.CreatedByName)
+            · @ChoiceText
+            · @StatusText
+        </p>
+
+        @if (errorMessage is not null)
+        {
+            <div class="error-banner" role="alert">@errorMessage</div>
+        }
+
+        <fieldset class="poll-options" disabled="@(!IsOpen || isSaving)">
+            <legend class="visually-hidden">@Poll.Question</legend>
+            @foreach (var option in Poll.Options)
+            {
+                var voters = VotersFor(option.Id);
+                var inputId = $"poll-{Poll.Id}-option-{option.Id}";
+
+                <div class="poll-option @(selected.Contains(option.Id) ? "selected" : "")" @key="option.Id">
+                    <div class="poll-option-row">
+                        <input id="@inputId"
+                               type="@(Poll.AllowMultiple ? "checkbox" : "radio")"
+                               name="@($"poll-{Poll.Id}")"
+                               checked="@selected.Contains(option.Id)"
+                               disabled="@(LimitReached && !selected.Contains(option.Id))"
+                               @onchange="e => Toggle(option.Id, IsChecked(e.Value))" />
+                        <label for="@inputId" class="poll-option-text">
+                            @option.Text
+                            @if (!string.IsNullOrEmpty(option.AddedByUid) && option.AddedByUid != Poll.CreatedByUid)
+                            {
+                                <span class="muted"> (tillagt av @option.AddedByName)</span>
+                            }
+                        </label>
+                        <span class="poll-count" aria-label="@($"{voters.Count} röster")">@voters.Count</span>
+                    </div>
+                    <div class="poll-bar" aria-hidden="true">
+                        <span style="width: @(Percent(voters.Count))%"></span>
+                    </div>
+                    @if (voters.Count > 0)
+                    {
+                        <p class="muted poll-voters">@string.Join(", ", voters)</p>
+                    }
+                </div>
+            }
+        </fieldset>
+
+        @if (IsOpen)
+        {
+            @if (Poll.AllowCustomOptions)
+            {
+                <form class="row-inline poll-add-option" @onsubmit="AddOptionAsync" @onsubmit:preventDefault>
+                    <input aria-label="Eget alternativ" placeholder="Eget alternativ" @bind="newOptionText" @bind:event="oninput" />
+                    <button type="submit" class="btn btn-secondary btn-sm" disabled="@(isSaving || string.IsNullOrWhiteSpace(newOptionText))">
+                        Lägg till
+                    </button>
+                </form>
+            }
+
+            <div class="row-inline poll-actions">
+                <button type="button" class="btn btn-primary btn-sm" disabled="@(isSaving || !HasChanges)" @onclick="VoteAsync">
+                    "Uppdatera röst"
+                </button>
+                @if (MyVote is not null)
+                {
+                    <button type="button" class="btn btn-secondary btn-sm" disabled="@isSaving" @onclick="RemoveVoteAsync">Ta bort min röst</button>
+                }
+            </div>
+        }
+    }
+</section>
+
+@if (isConfirmingDelete)
+{
+    <div class="backdrop" @onclick="() => isConfirmingDelete = false">
+        <div class="dialog card"
+             role="alertdialog"
+             aria-modal="true"
+             aria-labelledby="@($"delete-poll-{Poll.Id}-title")"
+             @onclick:stopPropagation="true"
+             @onkeydown="OnDeleteDialogKeyDown">
+            <h2 id="@($"delete-poll-{Poll.Id}-title")">Ta bort "@Poll.Question"?</h2>
+            <p class="muted">Omröstningen och alla röster tas bort. Detta går inte att ångra.</p>
+            <div class="row-inline">
+                <button type="button" class="btn btn-danger" disabled="@isSaving" @onclick="DeleteAsync">Ta bort</button>
+                <button type="button" class="btn btn-secondary" @ref="cancelDeleteButton" @onclick="() => isConfirmingDelete = false">Avbryt</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public Poll Poll { get; set; } = default!;
+
+    private bool IsAdmin => CurrentUser?.IsGlobalAdmin == true;
+    [Parameter] public EventCallback<Poll> OnDeleted { get; set; }
+
+    [CascadingParameter(Name = "CurrentUser")]
+    private UserProfile? CurrentUser { get; set; }
+
+    private HashSet<string> selected = [];
+    private PollDraft? draft;
+    private string newOptionText = "";
+    private bool isSaving;
+    private bool isConfirmingDelete;
+    private bool focusedDelete;
+    private ElementReference cancelDeleteButton;
+    private string? errorMessage;
+    private string? loadedPollId;
+
+    private bool IsCreator => Poll.IsCreator(CurrentUser?.Uid);
+    private bool LimitReached => Poll.AllowMultiple && Poll.MaxChoices > 0 && selected.Count >= Poll.MaxChoices;
+    private string ChoiceText =>
+        !Poll.AllowMultiple ? "Ett val"
+        : Poll.MaxChoices > 0 ? $"Upp till {Poll.MaxChoices} val"
+        : "Valfritt antal val";
+    private bool IsOpen => Poll.IsOpen(DateTimeOffset.Now);
+    private PollVote? MyVote => Poll.Votes.FirstOrDefault(v => v.VoterUid == CurrentUser?.Uid);
+    private bool HasChanges => !selected.SetEquals(MyVote?.OptionIds ?? []) && selected.Count > 0;
+
+    private string StatusText =>
+        Poll.IsClosed ? "Stängd"
+        : Poll.Deadline is { } deadline
+            ? (IsOpen ? $"Stänger {deadline.ToLocalTime():yyyy-MM-dd HH:mm}" : $"Stängde {deadline.ToLocalTime():yyyy-MM-dd HH:mm}")
+            : "Öppen";
+
+    protected override void OnParametersSet()
+    {
+        if (loadedPollId != Poll.Id)
+        {
+            loadedPollId = Poll.Id;
+            ResetSelection();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (isConfirmingDelete && !focusedDelete)
+        {
+            focusedDelete = true;
+            await cancelDeleteButton.FocusAsync();
+        }
+        else if (!isConfirmingDelete)
+        {
+            focusedDelete = false;
+        }
+    }
+
+    private void ResetSelection() => selected = [.. MyVote?.OptionIds ?? []];
+
+    private List<string> VotersFor(string optionId) =>
+        [.. Poll.Votes
+            .Where(v => v.OptionIds.Contains(optionId))
+            .Select(v => string.IsNullOrWhiteSpace(v.VoterName) ? "Okänd" : v.VoterName)
+            .Order(StringComparer.CurrentCultureIgnoreCase)];
+
+    private int Percent(int count) => Poll.Votes.Count == 0 ? 0 : (int)Math.Round(100.0 * count / Poll.Votes.Count);
+
+    private static bool IsChecked(object? value) => value is true || value as string == "on";
+
+    private void Toggle(string optionId, bool isChecked)
+    {
+        if (!Poll.AllowMultiple)
+        {
+            selected = [optionId];
+            return;
+        }
+
+        if (isChecked)
+        {
+            if (LimitReached)
+            {
+                return;
+            }
+
+            selected.Add(optionId);
+        }
+        else
+        {
+            selected.Remove(optionId);
+        }
+    }
+
+    private async Task VoteAsync()
+    {
+        var optionIds = selected.ToList();
+
+        await RunAsync(async () =>
+        {
+            var vote = await PollService.VoteAsync(Poll.TripId, Poll.Id, optionIds);
+            Poll.Votes.RemoveAll(v => v.VoterUid == CurrentUser?.Uid);
+            if (vote is not null)
+            {
+                Poll.Votes.Add(vote);
+            }
+        }, "Kunde inte spara rösten.");
+    }
+
+    private async Task RemoveVoteAsync()
+    {
+        if (await RunAsync(async () =>
+        {
+            await PollService.VoteAsync(Poll.TripId, Poll.Id, []);
+            Poll.Votes.RemoveAll(v => v.VoterUid == CurrentUser?.Uid);
+        }, "Kunde inte ta bort rösten."))
+        {
+            selected.Clear();
+        }
+    }
+
+    private async Task AddOptionAsync()
+    {
+        if (string.IsNullOrWhiteSpace(newOptionText))
+        {
+            return;
+        }
+
+        var text = newOptionText.Trim();
+        var order = Poll.Options.Count == 0 ? 0 : Poll.Options.Max(o => o.Order) + 1;
+
+        if (await RunAsync(async () => Poll.Options.Add(await PollService.AddOptionAsync(Poll.TripId, Poll.Id, text, order)),
+                "Kunde inte lägga till alternativet."))
+        {
+            newOptionText = "";
+        }
+    }
+
+    private async Task SetClosedAsync(bool isClosed)
+    {
+        var previous = Poll.IsClosed;
+        Poll.IsClosed = isClosed;
+
+        if (!await RunAsync(() => PollService.UpdateAsync(Poll), "Kunde inte uppdatera omröstningen."))
+        {
+            Poll.IsClosed = previous;
+        }
+    }
+
+    private void StartEdit()
+    {
+        errorMessage = null;
+        draft = PollDraft.FromPoll(Poll);
+    }
+
+    private async Task SaveEditAsync()
+    {
+        if (draft is null)
+        {
+            return;
+        }
+
+        var edit = draft;
+        var updated = new Poll
+        {
+            Id = Poll.Id,
+            TripId = Poll.TripId,
+            Question = edit.Question.Trim(),
+            AllowMultiple = edit.AllowMultiple,
+            MaxChoices = edit.MaxChoices,
+            AllowCustomOptions = edit.AllowCustomOptions,
+            Deadline = edit.Deadline,
+            IsClosed = Poll.IsClosed
+        };
+
+        var ok = await RunAsync(async () =>
+        {
+            await PollService.UpdateAsync(updated);
+
+            var order = Poll.Options.Count == 0 ? 0 : Poll.Options.Max(o => o.Order) + 1;
+
+            foreach (var draftOption in edit.FilledOptions)
+            {
+                var existing = Poll.Options.FirstOrDefault(o => o.Id == draftOption.Id);
+
+                if (existing is null)
+                {
+                    Poll.Options.Add(await PollService.AddOptionAsync(Poll.TripId, Poll.Id, draftOption.Text, order++));
+                }
+                else if (existing.Text != draftOption.Text.Trim())
+                {
+                    existing.Text = draftOption.Text.Trim();
+                    await PollService.UpdateOptionAsync(Poll.TripId, Poll.Id, existing);
+                }
+            }
+        }, "Kunde inte spara omröstningen.");
+
+        if (ok)
+        {
+            Poll.Question = updated.Question;
+            Poll.AllowMultiple = updated.AllowMultiple;
+            Poll.MaxChoices = updated.MaxChoices;
+            Poll.AllowCustomOptions = updated.AllowCustomOptions;
+            Poll.Deadline = updated.Deadline;
+            draft = null;
+        }
+    }
+
+    private void OnDeleteDialogKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            isConfirmingDelete = false;
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        var ok = await RunAsync(() => PollService.DeleteAsync(Poll), "Kunde inte ta bort omröstningen.");
+        isConfirmingDelete = false;
+
+        if (ok)
+        {
+            await OnDeleted.InvokeAsync(Poll);
+        }
+    }
+
+    private async Task<bool> RunAsync(Func<Task> action, string error)
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            await action();
+            return true;
+        }
+        catch (Exception)
+        {
+            errorMessage = error;
+            return false;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+}

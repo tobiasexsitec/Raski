@@ -23,6 +23,14 @@ service cloud.firestore {
 	  return isSignedIn() && request.auth.uid == tripData(tripId).ownerUid;
 	}
 
+	function pollData(tripId, pollId) {
+	  return get(/databases/$(database)/documents/trips/$(tripId)/polls/$(pollId)).data;
+	}
+
+	function isPollCreator(tripId, pollId) {
+	  return isTripMember(tripId) && request.auth.uid == pollData(tripId, pollId).createdByUid;
+	}
+
 	// The flag lives on the user's own profile document and can only be granted
 	// by another global admin. The first admin is set manually in the console.
 	function isGlobalAdmin() {
@@ -108,6 +116,41 @@ service cloud.firestore {
 	  // Custom "who brings what" sections, managed by any member.
 	  match /bringSections/{sectionId} {
 		allow read, write: if isTripMember(tripId);
+	  }
+
+	  // Polls: any member may create one; only its creator may edit or
+	  // delete it. Only a global admin may close or reopen it.
+	  match /polls/{pollId} {
+		allow read: if isTripMember(tripId);
+		allow create: if isTripMember(tripId)
+						&& request.resource.data.createdByUid == request.auth.uid
+						&& request.resource.data.get('closed', false) == false;
+		allow update: if (isPollCreator(tripId, pollId) || isGlobalAdmin())
+						&& request.resource.data.createdByUid == resource.data.createdByUid
+						&& (isGlobalAdmin()
+							|| request.resource.data.get('closed', false) == resource.data.get('closed', false));
+		allow delete: if isPollCreator(tripId, pollId);
+
+		// Options can never be removed by voters; the creator may add and
+		// edit them, other members may add when the poll allows it.
+		match /options/{optionId} {
+		  allow read: if isTripMember(tripId);
+		  allow create: if isPollCreator(tripId, pollId)
+						  || (isTripMember(tripId)
+							  && pollData(tripId, pollId).allowCustomOptions == true
+							  && pollData(tripId, pollId).closed != true);
+		  allow update, delete: if isPollCreator(tripId, pollId);
+		}
+
+		// One vote document per member, keyed by uid.
+		match /votes/{voterUid} {
+		  allow read: if isTripMember(tripId);
+		  allow create, update: if isTripMember(tripId)
+								  && request.auth.uid == voterUid
+								  && pollData(tripId, pollId).closed != true;
+		  allow delete: if (isTripMember(tripId) && request.auth.uid == voterUid)
+						  || isPollCreator(tripId, pollId);
+		}
 	  }
 
 	  // Shared check-off state for the shopping list.

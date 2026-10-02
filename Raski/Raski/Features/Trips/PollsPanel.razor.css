@@ -1,0 +1,16 @@
+.polls-intro h2 {
+    margin-top: 0;
+}
+
+.polls-intro p {
+    margin-bottom: 0;
+}
+
+.polls-intro,
+.poll-new {
+    margin-bottom: var(--space-3);
+}
+
+.poll-create {
+    margin-bottom: var(--space-3);
+}

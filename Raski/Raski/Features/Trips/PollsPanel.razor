@@ -1,0 +1,127 @@
+@inject IPollService PollService
+
+<section class="card polls-intro" aria-labelledby="polls-intro-heading">
+    <h2 id="polls-intro-heading">Omröstningar</h2>
+    <p class="muted">Rösta tillsammans om tema, aktiviteter och annat på resan.</p>
+</section>
+
+@if (errorMessage is not null)
+{
+    <div class="error-banner" role="alert">@errorMessage</div>
+}
+
+@if (isLoading)
+{
+    <p class="muted">Hämtar omröstningar…</p>
+}
+else
+{
+    @if (isCreating)
+    {
+        <section class="card poll-new" aria-labelledby="new-poll-heading">
+            <h2 id="new-poll-heading">Ny omröstning</h2>
+            <PollForm Draft="draft"
+                      IdPrefix="new-poll"
+                      SubmitText="Skapa"
+                      IsSaving="isSaving"
+                      OnSubmit="CreateAsync"
+                      OnCancel="CancelCreate" />
+        </section>
+    }
+    else
+    {
+        <button type="button" class="btn btn-secondary btn-sm poll-create" @onclick="StartCreate">
+            + Skapa omröstning
+        </button>
+    }
+
+    @if (polls.Count == 0 && !isCreating)
+    {
+        <p class="muted">Inga omröstningar än.</p>
+    }
+
+    @foreach (var poll in polls)
+    {
+        <PollCard @key="poll.Id" Poll="poll" OnDeleted="OnDeleted" />
+    }
+}
+
+@code {
+    [Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
+
+    private List<Poll> polls = [];
+    private PollDraft draft = PollDraft.CreateNew();
+    private bool isCreating;
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+    private string? loadedTripId;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (loadedTripId == Trip.Id)
+        {
+            return;
+        }
+
+        loadedTripId = Trip.Id;
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            polls = [.. await PollService.GetAsync(Trip.Id)];
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte hämta omröstningarna.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void StartCreate()
+    {
+        errorMessage = null;
+        draft = PollDraft.CreateNew();
+        isCreating = true;
+    }
+
+    private void CancelCreate() => isCreating = false;
+
+    private async Task CreateAsync()
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            var poll = new Poll
+            {
+                TripId = Trip.Id,
+                Question = draft.Question.Trim(),
+                AllowMultiple = draft.AllowMultiple,
+                MaxChoices = draft.MaxChoices,
+                AllowCustomOptions = draft.AllowCustomOptions,
+                Deadline = draft.Deadline
+            };
+
+            await PollService.CreateAsync(poll, draft.FilledOptions.Select(o => o.Text.Trim()).ToList());
+
+            polls = [.. await PollService.GetAsync(Trip.Id)];
+            isCreating = false;
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte skapa omröstningen.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void OnDeleted(Poll poll) => polls.Remove(poll);
+}
