@@ -23,7 +23,7 @@
 | [B-017](#b-017-förrätt-efterrätt-och-kommentar-på-måltider) | Förrätt, efterrätt och kommentar på måltider | Klar | – |
 | [B-018](#b-018-drycker-med-länk-på-måltider) | Drycker med länk på måltider | Klar | – |
 | [B-019](#b-019-gemensam-dryck-för-hela-resan) | Gemensam dryck för hela resan | Klar | – |
-| [B-020](#b-020-byt-ikon-bredvid-appnamnet) | Byt ikon bredvid appnamnet | Idé | – |
+| [B-020](#b-020-byt-ikon-bredvid-appnamnet) | Byt ikon bredvid appnamnet | Klar | – |
 | [B-021](#b-021-sök-och-filtrera-i-inköpslistan) | Sök och filtrera i inköpslistan | Idé | – |
 | [B-022](#b-022-övrigt-att-inhandla) | Övrigt att inhandla | Idé | – |
 | [B-023](#b-023-ange-om-man-dricker-alkohol) | Ange om man dricker alkohol | Klar | – |
@@ -811,17 +811,23 @@ handlas.
 
 ## B-020: Byt ikon bredvid appnamnet
 
-- **Status:** Idé
+- **Status:** Klar
 - **Prioritet:** –
 
 ### Beskrivning
 Ikonen bredvid appnamnet uppe till vänster ska inte vara en morot.
 
 ### Acceptanskriterier
-- [ ] Moroten ersätts med en mer passande ikon/logga.
+- [x] Moroten ersätts med en mer passande ikon/logga.
+- [x] Ikonen föreställer "raske briller" – ett par solglasögon.
 
-### Öppna frågor
-- Vilken ikon ska användas istället?
+### Tekniska anteckningar
+- Emojin 🕶️ (solglasögon) i `Layout/MainLayout.razor`, samma upplägg som tidigare morot.
+- Egenritade SVG-varianter av sportglasögon provades men valdes bort.
+
+### Beslut
+- Ikonen ska vara "raske briller" – ett par solglasögon (🕶️).
+- Släppt i version 1.12.0.
 
 ---
 
