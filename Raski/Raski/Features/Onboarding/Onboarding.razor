@@ -6,7 +6,7 @@
 @inject IAllergyService AllergyService
 @inject NavigationManager Navigation
 
-<PageTitle>Välkommen – Raski</PageTitle>
+<PageTitle>Välkommen – Raski™</PageTitle>
 
 <AuthGuard>
     <div class="onboarding @($"step-{step}") @(finished ? "finished" : "")">
@@ -52,7 +52,7 @@
                     </div>
                     <div class="trophy" aria-hidden="true">🎉</div>
                     <h1 class="shimmer">Du är redo!</h1>
-                    <p class="lead">Välkommen till Raski, @FirstName. Nu kan resan börja.</p>
+                    <p class="lead">Välkommen till Raski™, @FirstName. Nu kan resan börja.</p>
                     <div class="fireworks" aria-hidden="true">
                         @for (var i = 0; i < 5; i++)
                         {
@@ -66,7 +66,7 @@
                 <section class="card-3d" @key="@("step-0")">
                     <div class="hero-emoji wave" aria-hidden="true">👋</div>
                     <h1 class="shimmer">Hej @FirstName!</h1>
-                    <p class="lead">Välkommen till Raski. Innan vi drar igång behöver vi veta några saker om dig.</p>
+                    <p class="lead">Välkommen till Raski™. Innan vi drar igång behöver vi veta några saker om dig.</p>
                     <ul class="teaser">
                         <li style="--d:0">📞 Hur man når dig</li>
                         <li style="--d:1">🍷 Om du dricker alkohol</li>

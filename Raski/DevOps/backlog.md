@@ -32,6 +32,8 @@
 | [B-026](#b-026-lägga-till-feature-requests-i-appen) | Lägga till feature requests i appen | Idé | – |
 | [B-027](#b-027-versionsnummer-0xy-före-släpp) | Versionsnummer 0.x.y före släpp | Idé | – |
 | [B-028](#b-028-egna-sektioner-under-vem-tar-med) | Egna sektioner under "Vem tar med" | Klar | – |
+| [B-029](#b-029-about-sida) | About-sida | Redo | – |
+| [B-030](#b-030-raski-som-varumärke) | Raski™ som varumärke | Klar | – |
 
 > **KRAV vid varje ändring i backloggen (gäller även AI-assistenter):**
 > 1. Läs översiktstabellen **före** ändringen.
@@ -1043,3 +1045,64 @@ vi kan organisera även annat än mat och dryck.
 - Sektioner kan flyttas upp och ner.
 - Fliken har ett introcard "Vem tar med"; standardsektionen heter "Allmänt".
 - Formuläret för ny sektion visas först efter klick på "+ Skapa sektion".
+
+---
+
+## B-029: About-sida
+
+- **Status:** Redo
+- **Prioritet:** –
+
+### Beskrivning
+En About-sida
+knappen för att byta till mörkt tema.
+
+### User story
+Som användare vill jag kunna läsa om appen så att jag förstår vad den är och
+vem som står bakom den.
+
+### Acceptanskriterier
+- [ ] Ny sida (`/about`) med information om appen.
+- [ ] Sidan innehåller beskrivning av appen, versionsnummer, kontaktuppgifter
+      och release notes.
+- [ ] Sidan är nåbar utan inloggning.
+- [ ] Länken "Om Raski™" visas i toppraden, bredvid växlingen till mörkt tema.
+- [ ] Sidan fungerar i både ljust och mörkt tema.
+
+### Tekniska noteringar
+- Ny Razor-sida och länk i layoutens topprad (där temaväxlingen finns).
+- Release notes kan samordnas med B-025.
+
+### Beslut
+- Innehåll: beskrivning, version, kontakt och release notes.
+- Sidan är nåbar utan inloggning.
+- Länktexten är "Om Raski™".
+
+---
+
+## B-030: Raski™ som varumärke
+
+- **Status:** Klar
+- **Prioritet:** –
+
+### Beskrivning
+Appnamnet ska visas som Raski™ (trademark) överallt där det syns för användaren.
+
+### User story
+Som ägare av appen vill jag att namnet visas som Raski™ så att det tydligt
+framgår att det är ett varumärke.
+
+### Acceptanskriterier
+- [x] Sidtitlar (fliktitlar) visar Raski™.
+- [x] Appnamnet i sidhuvudet och på inloggningssidan visar Raski™.
+- [x] Välkomsttexter i onboarding visar Raski™.
+- [x] `<title>` i `index.html` och `name` i `manifest.webmanifest` visar Raski™.
+
+### Tekniska noteringar
+- Endast användarsynlig text ändras; namespaces, filnamn och nycklar
+  (t.ex. `raski-theme`) behålls.
+
+### Beslut
+- `short_name` i manifestet behålls som "Raski" på grund av begränsat utrymme
+  under hemskärmsikonen.
+- Släppt i version 1.10.0.
