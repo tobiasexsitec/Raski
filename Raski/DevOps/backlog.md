@@ -30,7 +30,7 @@
 | [B-024](#b-024-omröstningar-på-en-resa) | Omröstningar på en resa | Klar | – |
 | [B-025](#b-025-release-notes-i-appen) | Release notes i appen | Pågår | – |
 | [B-026](#b-026-lägga-till-feature-requests-i-appen) | Lägga till feature requests i appen | Idé | – |
-| [B-027](#b-027-versionsnummer-0xy-före-släpp) | Versionsnummer 0.x.y före släpp | Idé | – |
+| [B-027](#b-027-versionsnummer-0xy-före-släpp) | Versionsnummer 0.x.y före släpp | Pågår | – |
 | [B-028](#b-028-egna-sektioner-under-vem-tar-med) | Egna sektioner under "Vem tar med" | Klar | – |
 | [B-029](#b-029-about-sida) | About-sida | Klar | – |
 | [B-030](#b-030-raski-som-varumärke) | Raski™ som varumärke | Klar | – |
@@ -548,7 +548,7 @@ att jag kan se att jag kör den senaste versionen.
 
 ### Beslut
 - Manuell
-- Släppt i version 1.1.0.
+- Släppt i version 0.1.0.
 
 ---
 
@@ -627,7 +627,7 @@ stil så att informationen blir lättare att överblicka.
 ### Beslut
 - Rubriker i flera nivåer (`#`, `##`, `###`) och fet stil (`**text**`) stöds.
 - Implementerat i `Shared/FormattedText.cs`; `#` → `h3`, `##` → `h4`, `###` → `h5`.
-- Släppt i version 1.3.0.
+- Släppt i version 0.3.0.
 
 ---
 
@@ -699,7 +699,7 @@ på en måltid så att planeringen blir tydligare.
 - `firestore.rules` behövde inte ändras (ingen fältvalidering för måltider).
 
 ### Beslut
-- Släppt i version 1.4.0.
+- Släppt i version 0.4.0.
 
 ---
 
@@ -739,7 +739,7 @@ alla vet vad som ska drickas och var det kan köpas.
 - Drycker utan namn sparas inte.
 - `firestore.rules` behövde inte ändras (ingen fältvalidering för måltider).
 - Drycker visas även på måltidskortet i måltidslistan.
-- Släppt i version 1.5.0.
+- Släppt i version 0.5.0.
 
 ---
 
@@ -806,7 +806,7 @@ handlas.
 - Endast fast mängd för resan – inget alternativ per person och dag.
 - Dryckessektionen och totalen visas längst ner, under alla måltider.
 - Drycker ingår i inköpslistan via ingrediensregistret (taggen `drycker`).
-- Släppt i version 1.6.0.
+- Släppt i version 0.6.0.
 
 ---
 
@@ -828,7 +828,7 @@ Ikonen bredvid appnamnet uppe till vänster ska inte vara en morot.
 
 ### Beslut
 - Ikonen ska vara "raske briller" – ett par solglasögon (🕶️).
-- Släppt i version 1.12.0.
+- Släppt i version 0.12.0.
 
 ---
 
@@ -949,7 +949,7 @@ så att vi tillsammans kan fatta beslut på resan (t.ex. välja tema).
 - [x] Befintliga röster påverkas inte när omröstningen redigeras.
 
 ### Beslut
-- Släppt i version 1.8.0.
+- Släppt i version 0.8.0.
 
 ---
 
@@ -1002,21 +1002,26 @@ att de kan hamna i backloggen.
 
 ## B-027: Versionsnummer 0.x.y före släpp
 
-- **Status:** Idé
+- **Status:** Pågår
 - **Prioritet:** –
 
 ### Beskrivning
 Appen är inte helt släppt ännu och versionsnumret ska därför vara 0.x.y.
 
 ### Acceptanskriterier
-- [ ] Versionsnumret ändras till 0.x.y.
-- [ ] Versionsnumret i appen (B-012) och versionshöjningen (B-013) följer det
+- [x] Versionsnumret ändras till 0.x.y.
+- [x] Versionsnumret i appen (B-012) och versionshöjningen (B-013) följer det
       nya schemat.
-- [ ] Tvingad omladdning vid ny version (B-014) fungerar trots att numret blir lägre.
+- [x] Tvingad omladdning vid ny version (B-014) fungerar trots att numret blir lägre.
 
-### Öppna frågor
-- Vilken 0.x.y-version ska vi börja på?
-- När släpps 1.0.0?
+### Tekniska anteckningar
+- Omladdningen (B-014) bygger på service workerns assets-manifest-hash, inte på
+  versionsnumret, så ett lägre nummer påverkar inte den.
+
+### Beslut
+- Alla tidigare releaser numreras om från 1.x.y till 0.x.y (t.ex. 1.13.1 → 0.13.1),
+  i `Raski.csproj`, `release-notes.json` och backlogens "Släppt i version".
+- 1.0.0 släpps när appen släpps publikt.
 
 ---
 
@@ -1097,7 +1102,7 @@ vem som står bakom den.
 - Sidan är nåbar utan inloggning.
 - Länktexten är "Om Raski™".
 - Länken i toppraden är en genomskinlig knapp med orange ram och ett orange "i" i en ring.
-- Släppt i version 1.11.0.
+- Släppt i version 0.11.0.
 
 ---
 
@@ -1126,7 +1131,7 @@ framgår att det är ett varumärke.
 ### Beslut
 - `short_name` i manifestet behålls som "Raski" på grund av begränsat utrymme
   under hemskärmsikonen.
-- Släppt i version 1.10.0.
+- Släppt i version 0.10.0.
 
 ---
 
@@ -1168,7 +1173,7 @@ använda appen så att jag förstår vad den är till för.
 - Introduktionen ligger före välkomststeget "Hej {namn}!".
 - Befintliga användare som redan gjort onboarding får inte se den.
 - Det finns en "Tillbaka"-knapp.
-- Släppt i version 1.11.0.
+- Släppt i version 0.11.0.
 
 ---
 
@@ -1201,4 +1206,4 @@ jag lätt hittar appen.
 ### Beslut
 - Motiv: solglasögon framför en retro-solnedgång (orange) på mörkblå bakgrund,
   med en turkos våg som accent.
-- Släppt i version 1.13.0.
+- Släppt i version 0.13.0.
