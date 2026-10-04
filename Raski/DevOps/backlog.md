@@ -30,7 +30,7 @@
 | [B-024](#b-024-omröstningar-på-en-resa) | Omröstningar på en resa | Klar | – |
 | [B-025](#b-025-release-notes-i-appen) | Release notes i appen | Pågår | – |
 | [B-026](#b-026-lägga-till-feature-requests-i-appen) | Lägga till feature requests i appen | Idé | – |
-| [B-027](#b-027-versionsnummer-0xy-före-släpp) | Versionsnummer 0.x.y före släpp | Pågår | – |
+| [B-027](#b-027-versionsnummer-0xy-före-släpp) | Versionsnummer 0.x.y före släpp | Klar | – |
 | [B-028](#b-028-egna-sektioner-under-vem-tar-med) | Egna sektioner under "Vem tar med" | Klar | – |
 | [B-029](#b-029-about-sida) | About-sida | Klar | – |
 | [B-030](#b-030-raski-som-varumärke) | Raski™ som varumärke | Klar | – |
@@ -1002,7 +1002,7 @@ att de kan hamna i backloggen.
 
 ## B-027: Versionsnummer 0.x.y före släpp
 
-- **Status:** Pågår
+- **Status:** Klar
 - **Prioritet:** –
 
 ### Beskrivning
@@ -1022,6 +1022,7 @@ Appen är inte helt släppt ännu och versionsnumret ska därför vara 0.x.y.
 - Alla tidigare releaser numreras om från 1.x.y till 0.x.y (t.ex. 1.13.1 → 0.13.1),
   i `Raski.csproj`, `release-notes.json` och backlogens "Släppt i version".
 - 1.0.0 släpps när appen släpps publikt.
+- Släppt i version 0.14.0.
 
 ---
 
