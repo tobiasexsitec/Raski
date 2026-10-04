@@ -35,8 +35,9 @@
 | [B-029](#b-029-about-sida) | About-sida | Klar | – |
 | [B-030](#b-030-raski-som-varumärke) | Raski™ som varumärke | Klar | – |
 | [B-031](#b-031-om-raski-i-onboarding) | Om Raski™ i onboarding | Klar | – |
+| [B-032](#b-032-ny-appikon) | Ny appikon | Klar | – |
 
-> **KRAV vid varje ändring i backloggen (gäller även AI-assistenter):**
+>
 > 1. Läs översiktstabellen **före** ändringen.
 > 2. Redigera **aldrig** en del av en tabellrad – ersätt alltid **hela raden**, från
 >    inledande `| [B-XXX](#...)` till avslutande `|`.
@@ -1168,3 +1169,36 @@ använda appen så att jag förstår vad den är till för.
 - Befintliga användare som redan gjort onboarding får inte se den.
 - Det finns en "Tillbaka"-knapp.
 - Släppt i version 1.11.0.
+
+---
+
+## B-032: Ny appikon
+
+- **Status:** Klar
+- **Prioritet:** –
+
+### Beskrivning
+En egen, snygg appikon för PWA:n (hemskärm, favicon) i stället för
+standardikonen.
+
+### User story
+Som användare vill jag att Raski™ har en igenkännbar ikon på hemskärmen så att
+jag lätt hittar appen.
+
+### Acceptanskriterier
+- [x] Ikonen bygger på varumärkets 🕶️ (solglasögon) och appens färger.
+- [x] Ikonen finns som SVG och som PNG i 512, 192 och favicon-storlek.
+- [x] Ikonen fungerar som maskable-ikon på Android (motivet ligger i säker zon).
+
+### Öppna frågor
+- Ska ikonen även ersätta 🕶️-emojin bredvid appnamnet i headern?
+
+### Tekniska noteringar
+- Källa: `wwwroot/icon.svg`. PNG-filerna renderas från SVG:n (t.ex. med
+  headless Edge) och ersätter `icon-512.png`, `icon-192.png` och `favicon.png`.
+- `manifest.webmanifest` har fått en maskable-post och SVG-ikonen.
+
+### Beslut
+- Motiv: solglasögon framför en retro-solnedgång (orange) på mörkblå bakgrund,
+  med en turkos våg som accent.
+- Släppt i version 1.13.0.
