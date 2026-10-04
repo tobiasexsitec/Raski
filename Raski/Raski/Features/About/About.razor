@@ -1,0 +1,85 @@
+@page "/about"
+@inject IReleaseNotesService ReleaseNotesService
+
+<PageTitle>Om Raski™</PageTitle>
+
+<div class="stack">
+    <header class="page-header">
+        <h1>Om Raski™</h1>
+    </header>
+
+    <section class="card stack" aria-labelledby="about-description">
+        <h2 id="about-description">Vad är Raski™?</h2>
+        @foreach (var section in AboutContent.Sections)
+        {
+            <p>@section.Text</p>
+        }
+        <p class="muted">Version <strong>@AppVersion</strong></p>
+    </section>
+
+    <section class="card stack" aria-labelledby="about-contact">
+        <h2 id="about-contact">Kontakt</h2>
+        <p>
+            Raski™ utvecklas av @ContactName. Har du frågor, hittat en bugg eller har ett
+            förslag? Hör av dig till <a href="mailto:@ContactEmail">@ContactEmail</a>.
+        </p>
+    </section>
+
+    <section class="card stack" aria-labelledby="about-release-notes">
+        <h2 id="about-release-notes">Release notes</h2>
+        @if (releases is null)
+        {
+            <p class="muted" role="status">Laddar…</p>
+        }
+        else if (errorMessage is not null)
+        {
+            <div class="error-banner" role="alert">@errorMessage</div>
+        }
+        else
+        {
+            <ul class="release-list">
+                @foreach (var release in releases)
+                {
+                    <li class="release">
+                        <h3 class="release-version"><span class="tag tag-accent">@release.Version</span></h3>
+                        <ul>
+                            @foreach (var note in release.Notes)
+                            {
+                                <li>@note</li>
+                            }
+                        </ul>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+</div>
+
+@code {
+    private const string ContactName = "Tobias Krispinsson";
+    private const string ContactEmail = "tobias.krispinsson@exsitec.se";
+
+    private static readonly string AppVersion =
+        (typeof(About).Assembly
+            .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
+            .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
+            .FirstOrDefault()?.InformationalVersion
+        ?? typeof(About).Assembly.GetName().Version?.ToString()
+        ?? "?").Split('+')[0];
+
+    private IReadOnlyList<ReleaseNote>? releases;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            releases = await ReleaseNotesService.GetAsync();
+        }
+        catch (Exception)
+        {
+            releases = [];
+            errorMessage = "Kunde inte ladda release notes.";
+        }
+    }
+}

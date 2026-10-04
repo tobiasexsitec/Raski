@@ -17,6 +17,9 @@
 .onboarding.step-1 { background-image: linear-gradient(135deg, #0f2b4d, #1b6b7a 45%, #2a0f4d); }
 .onboarding.step-2 { background-image: linear-gradient(135deg, #3a0f3d, #7a1b5b 45%, #0f2b4d); }
 .onboarding.step-3 { background-image: linear-gradient(135deg, #0f3d2b, #1b7a4f 45%, #3a0f3d); }
+.onboarding.intro-0 { background-image: linear-gradient(135deg, #1a1a2e, #3a2a6b 45%, #0f2b4d); }
+.onboarding.intro-1 { background-image: linear-gradient(135deg, #2b1a4d, #6b2a7a 45%, #1a1a2e); }
+.onboarding.intro-2 { background-image: linear-gradient(135deg, #4d1a2b, #a8432a 45%, #2b1a4d); }
 .onboarding.finished { background-image: linear-gradient(135deg, #ff6b6b, #ffd43b 30%, #51cf66 60%, #4dabf7 80%, #e599f7); animation-duration: 4s; }
 
 @keyframes bg-shift {
@@ -350,6 +353,22 @@
 .add { align-items: stretch; }
 
 /* Buttons */
+.skip-intro {
+    display: block;
+    margin: var(--space-4) auto 0;
+    padding: var(--space-2);
+    background: none;
+    border: 0;
+    color: rgba(255, 255, 255, .75);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.skip-intro:hover,
+.skip-intro:focus-visible {
+    color: #fff;
+}
+
 .actions {
     display: flex;
     gap: var(--space-3);

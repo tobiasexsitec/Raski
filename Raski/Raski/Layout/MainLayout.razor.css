@@ -41,6 +41,34 @@
     font-size: 0.75rem;
 }
 
+.about-link {
+    white-space: nowrap;
+    text-decoration: none;
+    gap: var(--space-1);
+    background: transparent;
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+}
+
+.about-link:hover {
+    text-decoration: none;
+}
+
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1em;
+    height: 1.1em;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+    font-size: 0.8em;
+    font-weight: 700;
+    font-style: italic;
+    font-family: Georgia, serif;
+    line-height: 1;
+}
+
 .spacer {
     flex: 1 1 auto;
 }

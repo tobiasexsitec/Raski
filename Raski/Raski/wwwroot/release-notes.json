@@ -1,0 +1,13 @@
+[
+  "Ny sida \"Om Raski™\" med beskrivning, kontakt och release notes.", "Introduktion till Raski™ i onboardingen." ]
+  { "version": "1.10.0", "notes": [ "Raski™ som varumärke" ] },
+  { "version": "1.9.0", "notes": [ "Ange i profilen om du dricker alkohol." ] },
+  { "version": "1.8.0", "notes": [ "Omröstningar på en resa." ] },
+  { "version": "1.7.0", "notes": [ "Egna sektioner under \"Vem tar med\"." ] },
+  { "version": "1.6.0", "notes": [ "Gemensam dryck för hela resan." ] },
+  { "version": "1.5.0", "notes": [ "Drycker med mängd, enhet och länk på måltider." ] },
+  { "version": "1.4.0", "notes": [ "Förrätt, efterrätt och kommentar på måltider." ] },
+  { "version": "1.3.0", "notes": [ "Rubriker och fet stil i Övrig info." ] },
+  { "version": "1.2.0", "notes": [ "Appen laddas om automatiskt när en ny version finns." ] },
+  { "version": "1.1.0", "notes": [ "Versionsnumret visas i appen och höjs vid varje release." ] }
+]

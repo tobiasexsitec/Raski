@@ -15,6 +15,8 @@
 
         <div class="spacer"></div>
 
+        <a class="about-link btn btn-sm" href="about"><span class="info-icon" aria-hidden="true">i</span> Om Raski™</a>
+
         <ThemeToggle />
 
         @if (AuthService.Current is { } user)
@@ -51,7 +53,7 @@
     </header>
 
     <main class="content" id="main" tabindex="-1">
-        <AuthGuard>
+        <AuthGuard AllowAnonymous="IsPublicPage()">
             @Body
         </AuthGuard>
     </main>
@@ -76,6 +78,11 @@
         Navigation.LocationChanged += OnLocationChanged;
     }
 
+    private bool IsPublicPage() =>
+        Navigation.ToBaseRelativePath(Navigation.Uri)
+            .Split('?', '#')[0]
+            .Equals("about", StringComparison.OrdinalIgnoreCase);
+
     private void ToggleMenu() => menuOpen = !menuOpen;
 
     private void OnMenuKeyDown(KeyboardEventArgs e)
@@ -99,11 +106,8 @@
 
     private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
     {
-        if (menuOpen)
-        {
-            menuOpen = false;
-            StateHasChanged();
-        }
+        menuOpen = false;
+        StateHasChanged();
     }
 
     public void Dispose()

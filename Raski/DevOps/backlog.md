@@ -28,12 +28,13 @@
 | [B-022](#b-022-övrigt-att-inhandla) | Övrigt att inhandla | Idé | – |
 | [B-023](#b-023-ange-om-man-dricker-alkohol) | Ange om man dricker alkohol | Klar | – |
 | [B-024](#b-024-omröstningar-på-en-resa) | Omröstningar på en resa | Klar | – |
-| [B-025](#b-025-release-notes-i-appen) | Release notes i appen | Idé | – |
+| [B-025](#b-025-release-notes-i-appen) | Release notes i appen | Pågår | – |
 | [B-026](#b-026-lägga-till-feature-requests-i-appen) | Lägga till feature requests i appen | Idé | – |
 | [B-027](#b-027-versionsnummer-0xy-före-släpp) | Versionsnummer 0.x.y före släpp | Idé | – |
 | [B-028](#b-028-egna-sektioner-under-vem-tar-med) | Egna sektioner under "Vem tar med" | Klar | – |
-| [B-029](#b-029-about-sida) | About-sida | Redo | – |
+| [B-029](#b-029-about-sida) | About-sida | Klar | – |
 | [B-030](#b-030-raski-som-varumärke) | Raski™ som varumärke | Klar | – |
+| [B-031](#b-031-om-raski-i-onboarding) | Om Raski™ i onboarding | Klar | – |
 
 > **KRAV vid varje ändring i backloggen (gäller även AI-assistenter):**
 > 1. Läs översiktstabellen **före** ändringen.
@@ -947,7 +948,7 @@ så att vi tillsammans kan fatta beslut på resan (t.ex. välja tema).
 
 ## B-025: Release notes i appen
 
-- **Status:** Idé
+- **Status:** Pågår
 - **Prioritet:** –
 
 ### User story
@@ -955,13 +956,20 @@ Som användare vill jag kunna se vad som är nytt i appen så att jag vet vilka
 funktioner som tillkommit eller ändrats.
 
 ### Acceptanskriterier
-- [ ] Release notes per version är nåbara i appen.
-- [ ] Senaste versionen visas överst.
+- [x] Release notes per version är nåbara i appen.
+- [x] Senaste versionen visas överst.
 
 ### Öppna frågor
 - Ska nyheter visas automatiskt efter en ny version (t.ex. i samband med B-014)?
-- Var ska release notes nås (meny, versionsnumret från B-012)?
-- Var lagras texterna (fil i repot eller Firestore)?
+
+### Tekniska noteringar
+- Texterna ligger i `wwwroot/release-notes.json` och läses av
+  `IReleaseNotesService`, som sorterar på version (nyast först).
+- Vid varje release läggs en post till i filen – ingen kodändring krävs.
+
+### Beslut
+- Release notes visas på About-sidan (B-029).
+- Texterna lagras som en fil i repot, inte i Firestore.
 
 ---
 
@@ -1050,11 +1058,11 @@ vi kan organisera även annat än mat och dryck.
 
 ## B-029: About-sida
 
-- **Status:** Redo
+- **Status:** Klar
 - **Prioritet:** –
 
 ### Beskrivning
-En About-sida
+En About-sida med information om appen, nåbar via en länk i toppraden bredvid
 knappen för att byta till mörkt tema.
 
 ### User story
@@ -1062,21 +1070,27 @@ Som användare vill jag kunna läsa om appen så att jag förstår vad den är o
 vem som står bakom den.
 
 ### Acceptanskriterier
-- [ ] Ny sida (`/about`) med information om appen.
-- [ ] Sidan innehåller beskrivning av appen, versionsnummer, kontaktuppgifter
+- [x] Ny sida (`/about`) med information om appen.
+- [x] Sidan innehåller beskrivning av appen, versionsnummer, kontaktuppgifter
       och release notes.
-- [ ] Sidan är nåbar utan inloggning.
-- [ ] Länken "Om Raski™" visas i toppraden, bredvid växlingen till mörkt tema.
-- [ ] Sidan fungerar i både ljust och mörkt tema.
+- [x] Sidan är nåbar utan inloggning.
+- [x] Länken "Om Raski™" visas i toppraden, bredvid växlingen till mörkt tema.
+- [x] Inloggningssidan (startsidan för utloggade) har en länk till About-sidan.
+- [x] Sidan fungerar i både ljust och mörkt tema.
 
 ### Tekniska noteringar
 - Ny Razor-sida och länk i layoutens topprad (där temaväxlingen finns).
 - Release notes kan samordnas med B-025.
+- `Features/About/About.razor`. `MainLayout` sätter `AllowAnonymous` på
+  `AuthGuard` när rutten är `about`.
+- Release notes läses från `wwwroot/release-notes.json` (se B-025).
 
 ### Beslut
 - Innehåll: beskrivning, version, kontakt och release notes.
 - Sidan är nåbar utan inloggning.
 - Länktexten är "Om Raski™".
+- Länken i toppraden är en genomskinlig knapp med orange ram och ett orange "i" i en ring.
+- Släppt i version 1.11.0.
 
 ---
 
@@ -1106,3 +1120,45 @@ framgår att det är ett varumärke.
 - `short_name` i manifestet behålls som "Raski" på grund av begränsat utrymme
   under hemskärmsikonen.
 - Släppt i version 1.10.0.
+
+---
+
+## B-031: Om Raski™ i onboarding
+
+- **Status:** Klar
+- **Prioritet:** –
+
+### Beskrivning
+About-texten (B-029) visas som en del av onboardingen, uppdelad i några korta
+kort där användaren trycker "Nästa" mellan varje.
+
+### User story
+Som ny användare vill jag få en kort introduktion till Raski™ när jag börjar
+använda appen så att jag förstår vad den är till för.
+
+### Acceptanskriterier
+- [x] Onboardingen inleds med tre kort, ett per stycke i About-texten.
+- [x] Varje kort har en egen emoji och rubrik i samma stil som övriga steg.
+- [x] Korten räknas in i stegindikatorn.
+- [x] Det går att hoppa över introduktionen.
+- [x] Det går att gå tillbaka mellan korten och från "Hej {namn}!" till introduktionen.
+- [x] Texten finns på ett ställe och delas mellan About-sidan och onboardingen.
+
+### Förslag på kort
+1. 🧳 **Resan är ett bolag** – "Att åka på resa är lite som att driva ett bolag…"
+2. 📈 **Verksamheten växer** – "Med åren har verksamheten vuxit… Därför lanserar vi nu Raski™…"
+3. 🚀 **Mot nya rekordhöjder** – "Raski™ är byggt med användaren i centrum…"
+   Knappen leder vidare till befintligt steg "Hej {namn}!".
+
+### Tekniska noteringar
+- Onboarding.razor har redan en stegmotor (`step`, `StepCount`, `Next`) och
+  3D-kort med animationer – introduktionen blir nya steg i samma mekanik.
+- Texten ligger i `Features/About/AboutContent.cs` och används av både
+  About-sidan och onboardingen. Introduktionen styrs av ett separat `intro`-index
+  så att befintliga steg (`step`) är oförändrade.
+
+### Beslut
+- Introduktionen ligger före välkomststeget "Hej {namn}!".
+- Befintliga användare som redan gjort onboarding får inte se den.
+- Det finns en "Tillbaka"-knapp.
+- Släppt i version 1.11.0.

@@ -9,7 +9,7 @@
 <PageTitle>Välkommen – Raski™</PageTitle>
 
 <AuthGuard>
-    <div class="onboarding @($"step-{step}") @(finished ? "finished" : "")">
+    <div class="onboarding @(InIntro ? $"intro-{intro}" : $"step-{step}") @(finished ? "finished" : "")">
         <div class="aurora" aria-hidden="true">
             <span class="blob b1"></span>
             <span class="blob b2"></span>
@@ -33,11 +33,11 @@
 
         @if (!finished)
         {
-            <div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="@StepCount" aria-valuenow="@(step + 1)" aria-label="Steg @(step + 1) av @StepCount">
-                <div class="progress-fill" style="width:@(((step + 1) * 100) / StepCount)%"></div>
-                @for (var i = 0; i < StepCount; i++)
+            <div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="@TotalCount" aria-valuenow="@(Position + 1)" aria-label="Steg @(Position + 1) av @TotalCount">
+                <div class="progress-fill" style="width:@(((Position + 1) * 100) / TotalCount)%"></div>
+                @for (var i = 0; i < TotalCount; i++)
                 {
-                    <span class="progress-dot @(i <= step ? "done" : "")" style="left:@((i * 100) / (StepCount - 1))%"></span>
+                    <span class="progress-dot @(i <= Position ? "done" : "")" style="left:@((i * 100) / (TotalCount - 1))%"></span>
                 }
             </div>
         }
@@ -61,6 +61,30 @@
                     </div>
                 </section>
             }
+            else if (InIntro)
+            {
+                var section = AboutContent.Sections[intro];
+                var isLast = intro == IntroCount - 1;
+                <section class="card-3d" @key="@($"intro-{intro}")">
+                    <div class="hero-emoji wobble" aria-hidden="true">@section.Emoji</div>
+                    <h1 class="shimmer">@section.Title</h1>
+                    <p class="lead">@section.Text</p>
+                    <div class="actions">
+                        @if (intro > 0)
+                        {
+                            <button type="button" class="btn btn-secondary" @onclick="Back">Tillbaka</button>
+                        }
+                        <button type="button" class="btn btn-primary mega" @onclick="Next">
+                            @(isLast ? "Kör igång" : "Nästa")
+                            <span class="arrow" aria-hidden="true">@(isLast ? "🚀" : "✨")</span>
+                        </button>
+                    </div>
+                    @if (!isLast)
+                    {
+                        <button type="button" class="skip-intro" @onclick="SkipIntro">Hoppa över</button>
+                    }
+                </section>
+            }
             else if (step == 0)
             {
                 <section class="card-3d" @key="@("step-0")">
@@ -72,9 +96,12 @@
                         <li style="--d:1">🍷 Om du dricker alkohol</li>
                         <li style="--d:2">🥜 Vad du inte tål</li>
                     </ul>
-                    <button type="button" class="btn btn-primary mega" @onclick="Next">
-                        <span>Kör igång</span> <span class="arrow" aria-hidden="true">🚀</span>
-                    </button>
+                    <div class="actions">
+                        <button type="button" class="btn btn-secondary" @onclick="Back">Tillbaka</button>
+                        <button type="button" class="btn btn-primary mega" @onclick="Next">
+                            <span>Kör igång</span> <span class="arrow" aria-hidden="true">🚀</span>
+                        </button>
+                    </div>
                 </section>
             }
             else if (step == 1)
@@ -213,8 +240,14 @@
     private static readonly string[] FloaterEmojis = ["🥕", "🍕", "🥑", "🏕️", "🍓", "🧀", "🌮", "🥐", "🍉", "🎒"];
 
     private const int StepCount = 4;
+    private static int IntroCount => AboutContent.Sections.Count;
+    private static int TotalCount => IntroCount + StepCount;
 
+    private int intro;
     private int step;
+
+    private bool InIntro => intro < IntroCount;
+    private int Position => InIntro ? intro : IntroCount + step;
     private bool finished;
     private bool isSaving;
     private string phone = "";
@@ -267,13 +300,32 @@
     private void Next()
     {
         errorMessage = null;
+        if (InIntro)
+        {
+            intro++;
+            return;
+        }
+
         step++;
     }
+
+    private void SkipIntro() => intro = IntroCount;
 
     private void Back()
     {
         errorMessage = null;
-        step = Math.Max(0, step - 1);
+        if (InIntro)
+        {
+            intro = Math.Max(0, intro - 1);
+        }
+        else if (step == 0)
+        {
+            intro = IntroCount - 1;
+        }
+        else
+        {
+            step--;
+        }
     }
 
     private async Task SavePhoneAsync()
