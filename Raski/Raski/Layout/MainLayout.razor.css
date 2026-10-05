@@ -36,22 +36,35 @@
     font-size: 1.3rem;
 }
 
-.app-version {
+.app-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    /* Leaves room for the fixed bottom navigation on small screens. */
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
     color: var(--text-muted);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
 }
 
 .about-link {
-    white-space: nowrap;
-    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
     gap: var(--space-1);
+    white-space: nowrap;
+    padding: var(--space-1) var(--space-3);
+    color: var(--accent);
+    font-weight: 600;
     background: transparent;
     border: 1.5px solid var(--accent);
-    color: var(--accent);
+    border-radius: 999px;
 }
 
 .about-link:hover {
     text-decoration: none;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
 .info-icon {
@@ -79,8 +92,6 @@
     max-width: var(--content-max);
     margin: 0 auto;
     padding: var(--space-4);
-    /* Leaves room for the fixed bottom navigation on small screens. */
-    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
 }
 
 /* User menu */
@@ -155,6 +166,9 @@
 @media (min-width: 48rem) {
     .content {
         padding: var(--space-5);
+    }
+
+    .app-footer {
         /* The navigation floats above the content on large screens too. */
         padding-bottom: 6rem;
     }

@@ -11,11 +11,8 @@
             <span class="brand-mark" aria-hidden="true">🕶️</span>
             <span class="brand-name">Raski™</span>
         </a>
-        <span class="app-version" title="Appversion">v@(AppVersion)</span>
 
         <div class="spacer"></div>
-
-        <a class="about-link btn btn-sm" href="about"><span class="info-icon" aria-hidden="true">i</span> Om Raski™</a>
 
         @if (AuthService.Current is { } user)
         {
@@ -55,6 +52,12 @@
             @Body
         </AuthGuard>
     </main>
+
+    <footer class="app-footer">
+        <a class="about-link" href="about"><span class="info-icon" aria-hidden="true">i</span> Om Raski™</a>
+        <span aria-hidden="true">·</span>
+        <span class="app-version" title="Appversion">v@(AppVersion)</span>
+    </footer>
 
     <NavMenu />
 </div>

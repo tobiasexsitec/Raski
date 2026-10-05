@@ -42,6 +42,7 @@
 | [B-036](#b-036-större-textruta-för-övrig-info-på-mobil) | Större textruta för Övrig info på mobil | Klar | – |
 | [B-037](#b-037-länk-till-destination-och-boende-på-översikten) | Länk till destination och boende på översikten | Klar | – |
 | [B-038](#b-038-flytta-temaväljaren-till-profilsidan) | Flytta temaväljaren till profilsidan | Klar | – |
+| [B-039](#b-039-sidfot-med-om-raski-och-version) | Sidfot med Om Raski™ och version | Pågår | – |
 | [B-040](#b-040-datum-i-release-notes) | Datum i release notes | Pågår | – |
 
 >
@@ -1415,6 +1416,37 @@ inställningar på profilsidan.
 
 ### Beslut
 - Ingår i nästa release tillsammans med ytterligare en funktion (versionen höjs då).
+
+---
+
+## B-039: Sidfot med Om Raski™ och version
+
+- **Status:** Pågår
+- **Prioritet:** –
+
+### Beskrivning
+Länken "Om Raski™" och versionsnumret ligger i dag i toppfältet. De flyttas till en
+minimal sidfot längst ner på sidan för att frigöra plats i toppfältet.
+
+### User story
+Som användare vill jag ha ett luftigt toppfält och hitta information om appen och dess
+version längst ner på sidan.
+
+### Acceptanskriterier
+- [ ] Toppfältet visar inte längre "Om Raski™" eller versionsnumret.
+- [ ] En minimal sidfot visar länken "Om Raski™" och versionen (t.ex. "v0.19.0").
+- [ ] Sidfoten skyms inte av den fasta navigeringen i nederkant.
+- [ ] Sidfoten följer designsystemet och fungerar i ljust och mörkt tema.
+
+### Öppna frågor
+- –
+
+### Tekniska noteringar
+- Sidfoten ligger i `Layout/MainLayout.razor` efter `<main>`. Utrymmet för den fasta
+  navigeringen (`padding-bottom`) flyttas från `.content` till `.app-footer`.
+
+### Beslut
+- –
 
 ---
 
