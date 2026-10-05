@@ -1,4 +1,5 @@
 [
+  { "version": "0.18.0", "notes": [ "Övrig info kan nu vara upp till 20 000 tecken, med teckenräknare." ] },
   { "version": "0.17.0", "notes": [ "Release notes laddas igen på About-sidan." ] },
   { "version": "0.16.0", "notes": [ "Länkar i Övrig info och i kommentarer på måltider är nu klickbara." ] },
   { "version": "0.15.0", "notes": [ "Release notes visas i appen." ] },

@@ -50,7 +50,9 @@ else
 
         <div class="field">
             <label for="notes">Övrig info</label>
-            <InputTextArea id="notes" @bind-Value="model.Notes" placeholder="Boende, transport, allergier…" />
+            <InputTextArea id="notes" @bind-Value="model.Notes" @oninput="OnNotesInput" maxlength="@TripFormModel.MaxNotesLength" aria-describedby="notes-counter" placeholder="Boende, transport, allergier…" />
+            <div id="notes-counter" class="notes-counter muted">@NotesLength.ToString("N0", Sv) / @TripFormModel.MaxNotesLength.ToString("N0", Sv)</div>
+            <ValidationMessage For="() => model.Notes" />
         </div>
 
         @if (dateError is not null)
@@ -81,6 +83,14 @@ else
     private string? loadError;
     private string? saveError;
     private string? dateError;
+    private int? liveNotesLength;
+
+    private static readonly System.Globalization.CultureInfo Sv = new("sv-SE");
+
+    // InputTextArea only updates the model on change, so track length while typing.
+    private int NotesLength => liveNotesLength ?? model.Notes.Length;
+
+    private void OnNotesInput(ChangeEventArgs e) => liveNotesLength = e.Value?.ToString()?.Length ?? 0;
 
     private bool IsNew => string.IsNullOrEmpty(TripId);
 

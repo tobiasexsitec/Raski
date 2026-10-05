@@ -21,6 +21,9 @@ public sealed class TripFormModel
     [Required(ErrorMessage = "Ange slutdatum.")]
     public DateTime EndDate { get; set; } = DateTime.Today.AddDays(2);
 
-    [StringLength(2000)]
+    [StringLength(MaxNotesLength, ErrorMessage = "Övrig info får vara högst 20 000 tecken.")]
     public string Notes { get; set; } = "";
+
+    // Firestore caps a document at ~1 MiB; this keeps the trip well below that.
+    public const int MaxNotesLength = 20_000;
 }

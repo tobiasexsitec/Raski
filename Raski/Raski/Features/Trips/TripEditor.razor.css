@@ -8,6 +8,11 @@
     margin-top: var(--space-4);
 }
 
+.notes-counter {
+    font-size: 0.85em;
+    text-align: end;
+}
+
 @media (min-width: 30rem) {
     .date-row {
         grid-template-columns: 1fr 1fr;

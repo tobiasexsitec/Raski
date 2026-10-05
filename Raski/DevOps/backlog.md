@@ -38,6 +38,7 @@
 | [B-032](#b-032-ny-appikon) | Ny appikon | Klar | – |
 | [B-033](#b-033-klickbara-länkar-i-texter) | Klickbara länkar i texter | Klar | – |
 | [B-034](#b-034-bugg-release-notes-laddas-inte-på-about-sidan) | Bugg: Release notes laddas inte på About-sidan | Klar | Hög |
+| [B-035](#b-035-längre-text-i-övrig-info) | Längre text i Övrig info | Klar | – |
 
 >
 > 1. Läs översiktstabellen **före** ändringen.
@@ -1280,3 +1281,35 @@ Som användare vill jag kunna läsa release notes på About-sidan så att jag se
 ### Beslut
 0.14.0 B-027) läggs till.
 - Släppt i version 0.17.0.
+
+---
+
+## B-035: Längre text i Övrig info
+
+- **Status:** Klar
+- **Prioritet:** –
+
+### Beskrivning
+Övrig info var begränsad till 2000 tecken, vilket är för kort. Dessutom gick det
+inte att spara utan att man fick veta varför när gränsen överskreds.
+
+### User story
+Som resans arrangör vill jag kunna skriva lång övrig info så att all praktisk
+information om resan kan samlas på ett ställe.
+
+### Acceptanskriterier
+- [x] Övrig info tillåter upp till 20 000 tecken.
+- [x] Fältet hindrar inmatning över gränsen (`maxlength`).
+- [x] Ett felmeddelande på svenska visas under fältet om gränsen överskrids.
+- [x] En teckenräknare (t.ex. "1 234 / 20 000") visas under fältet och uppdateras medan man skriver.
+
+### Öppna frågor
+- –
+
+### Tekniska noteringar
+- `TripFormModel.MaxNotesLength`, `TripEditor.razor`.
+- Firestore begränsar ett dokument till ~1 MiB, därför behålls en (hög) gräns.
+
+### Beslut
+- Gränsen höjs från 2000 till 20 000 tecken i stället för att tas bort helt.
+- Släppt i version 0.18.0.
