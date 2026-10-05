@@ -41,6 +41,7 @@
 | [B-035](#b-035-längre-text-i-övrig-info) | Längre text i Övrig info | Klar | – |
 | [B-036](#b-036-större-textruta-för-övrig-info-på-mobil) | Större textruta för Övrig info på mobil | Klar | – |
 | [B-037](#b-037-länk-till-destination-och-boende-på-översikten) | Länk till destination och boende på översikten | Klar | – |
+| [B-038](#b-038-flytta-temaväljaren-till-profilsidan) | Flytta temaväljaren till profilsidan | Klar | – |
 
 >
 > 1. Läs översiktstabellen **före** ändringen.
@@ -1383,3 +1384,33 @@ jag enkelt hittar dit.
 ### Beslut
 - Länktexten är "Visa på karta" i stället för hela URL:en, eftersom Google Maps-länkar är långa.
 - Släppt i version 0.19.0.
+
+---
+
+## B-038: Flytta temaväljaren till profilsidan
+
+- **Status:** Klar
+- **Prioritet:** –
+
+### Beskrivning
+Väljaren för ljust/mörkt tema ligger i dag i appens toppfält. Den flyttas till profilsidan
+för att frigöra plats i toppfältet.
+
+### User story
+Som användare vill jag hitta inställningen för ljust/mörkt tema bland mina övriga
+inställningar på profilsidan.
+
+### Acceptanskriterier
+- [x] Temaväljaren visas inte längre i toppfältet.
+- [x] Profilsidan har en sektion "Utseende" med temaväljaren (ljust, mörkt, följ systemet).
+- [x] Valt tema sparas och tillämpas som tidigare.
+
+### Öppna frågor
+- –
+
+### Tekniska noteringar
+- `<ThemeToggle />` flyttas från `MainLayout.razor` till `Features/Profile/Profile.razor`. `ThemeService` startas fortfarande i `App.razor`.
+- `.theme-toggle` har `align-self: flex-start` så att den inte sträcks ut i `stack`-kort.
+
+### Beslut
+- Ingår i nästa release tillsammans med ytterligare en funktion (versionen höjs då).
