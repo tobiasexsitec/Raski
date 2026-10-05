@@ -1,7 +1,11 @@
 [
-  { "version": "0.16.0", "notes": [ "Länkar i Övrig info och i kommentarer på måltider är nu klickbara." ] },
-  { "version": "0.15.0",
-  { "version": "0.13.0"
+  { "version": "0.17.0", "notes": [ "Release notes laddas igen på About-sidan." ] },
+  { "version": "0.16.0"
+  { "version": "0.15.0", "notes": [ "Release notes visas i appen." ] },
+  { "version": "0.14.0", "notes": [ "Versionsnumret följer 0.x.y fram till första släppet." ] },
+  { "version": "0.13.0", "notes": [ "Ny appikon." ] },
+  { "version": "0.12.0", "notes": [ "Ny ikon bredvid appnamnet." ] },
+  { "version": "0.11.0", "notes": [ "About-sida.", "Om Raski™ i onboarding." ] },
   { "version": "0.10.0", "notes": [ "Raski™ som varumärke" ] },
   { "version": "0.9.0", "notes": [ "Ange i profilen om du dricker alkohol." ] },
   { "version": "0.8.0", "notes": [ "Omröstningar på en resa." ] },

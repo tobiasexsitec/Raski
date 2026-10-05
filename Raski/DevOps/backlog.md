@@ -37,6 +37,7 @@
 | [B-031](#b-031-om-raski-i-onboarding) | Om Raski™ i onboarding | Klar | – |
 | [B-032](#b-032-ny-appikon) | Ny appikon | Klar | – |
 | [B-033](#b-033-klickbara-länkar-i-texter) | Klickbara länkar i texter | Klar | – |
+| [B-034](#b-034-bugg-release-notes-laddas-inte-på-about-sidan) | Bugg: Release notes laddas inte på About-sidan | Klar | Hög |
 
 >
 > 1. Läs översiktstabellen **före** ändringen.
@@ -1248,3 +1249,34 @@ in, så att jag slipper kopiera och klistra in dem i webbläsaren.
 - E-postadresser och telefonnummer blir inte `mailto:`/`tel:`-länkar.
 - Länkar visas i sin helhet och kortas inte av.
 - Släppt i version 0.16.0.
+
+---
+
+## B-034: Bugg: Release notes laddas inte på About-sidan
+
+- **Status:** Klar
+- **Prioritet:** Hög
+
+### Beskrivning
+About-sidan visar
+`wwwroot/release-notes.json` var ogiltig JSON: posterna för 0.15.0 och 0.13.0
+saknade `notes` och avslutande klammer/komma.
+
+### User story
+Som användare vill jag kunna läsa release notes på About-sidan så att jag ser vad som är nytt.
+
+### Acceptanskriterier
+- [x] `release-notes.json` är giltig JSON.
+- [x] Posterna för 0.15.0 (Release notes i appen) och 0.13.0 (Ny appikon) har texter.
+- [x] Release notes visas på About-sidan.
+- [x] Saknade versioner 0.11.0, 0.12.0 och 0.14.0 finns med.
+
+### Öppna frågor
+- –
+
+### Tekniska noteringar
+- Endast `wwwroot/release-notes.json` ändrad.
+
+### Beslut
+0.14.0 B-027) läggs till.
+- Släppt i version 0.17.0.
