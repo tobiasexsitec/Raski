@@ -39,6 +39,7 @@
 | [B-033](#b-033-klickbara-länkar-i-texter) | Klickbara länkar i texter | Klar | – |
 | [B-034](#b-034-bugg-release-notes-laddas-inte-på-about-sidan) | Bugg: Release notes laddas inte på About-sidan | Klar | Hög |
 | [B-035](#b-035-längre-text-i-övrig-info) | Längre text i Övrig info | Klar | – |
+| [B-036](#b-036-större-textruta-för-övrig-info-på-mobil) | Större textruta för Övrig info på mobil | Klar | – |
 
 >
 > 1. Läs översiktstabellen **före** ändringen.
@@ -1312,4 +1313,34 @@ information om resan kan samlas på ett ställe.
 
 ### Beslut
 - Gränsen höjs från 2000 till 20 000 tecken i stället för att tas bort helt.
+- Släppt i version 0.18.0.
+
+---
+
+## B-036: Större textruta för Övrig info på mobil
+
+- **Status:** Klar
+- **Prioritet:** –
+
+### Beskrivning
+När texten i Övrig info blir längre är textrutan för liten på telefonen och det
+blir svårt att se och redigera texten.
+
+### User story
+Som arrangör vill jag ha en större textruta för Övrig info på mobilen så att jag
+kan se och redigera längre texter bekvämt.
+
+### Acceptanskriterier
+- [x] Textrutan är minst 12rem hög.
+- [x] Textrutan växer med innehållet upp till 70 % av skärmhöjden och scrollar därefter.
+- [x] I webbläsare utan stöd för att växa automatiskt är rutan halva skärmhöjden.
+
+### Öppna frågor
+- –
+
+### Tekniska noteringar
+- Endast CSS i `TripEditor.razor.css` (`field-sizing: content` med fallback).
+
+### Beslut
+- Ingår i samma release som B-035 (0.18.0).
 - Släppt i version 0.18.0.

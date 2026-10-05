@@ -13,6 +13,20 @@
     text-align: end;
 }
 
+/* Fallback for browsers without field-sizing (e.g. older iOS Safari). */
+.field ::deep textarea#notes {
+    min-height: 12rem;
+    height: 50vh;
+    max-height: 70vh;
+}
+
+@supports (field-sizing: content) {
+    .field ::deep textarea#notes {
+        field-sizing: content;
+        height: auto;
+    }
+}
+
 @media (min-width: 30rem) {
     .date-row {
         grid-template-columns: 1fr 1fr;
