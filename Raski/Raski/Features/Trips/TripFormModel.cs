@@ -15,6 +15,18 @@ public sealed class TripFormModel
     [StringLength(80)]
     public string Destination { get; set; } = "";
 
+    [StringLength(2000, ErrorMessage = "Länken får vara högst 2000 tecken.")]
+    [RegularExpression(@"^https?://\S+$", ErrorMessage = "Ange en giltig länk som börjar med http:// eller https://.")]
+    public string DestinationUrl { get; set; } = "";
+
+    [StringLength(2000, ErrorMessage = "Länken får vara högst 2000 tecken.")]
+    [RegularExpression(@"^https?://\S+$", ErrorMessage = "Ange en giltig länk som börjar med http:// eller https://.")]
+    public string AccommodationUrl { get; set; } = "";
+
+    [StringLength(30, ErrorMessage = "Telefonnumret får vara högst 30 tecken.")]
+    [RegularExpression(@"^\+?[0-9 ()\-]+$", ErrorMessage = "Ange ett giltigt telefonnummer.")]
+    public string AccommodationPhone { get; set; } = "";
+
     [Required(ErrorMessage = "Ange startdatum.")]
     public DateTime StartDate { get; set; } = DateTime.Today;
 

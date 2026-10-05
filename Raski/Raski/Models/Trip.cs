@@ -5,6 +5,9 @@ public sealed class Trip
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
     public string Destination { get; set; } = "";
+    public string? DestinationUrl { get; set; }
+    public string? AccommodationUrl { get; set; }
+    public string? AccommodationPhone { get; set; }
     public DateOnly StartDate { get; set; }
     public DateOnly EndDate { get; set; }
     public string? Notes { get; set; }

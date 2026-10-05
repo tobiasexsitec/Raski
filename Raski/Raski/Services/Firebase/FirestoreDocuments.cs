@@ -60,6 +60,9 @@ internal sealed class TripDocument
     [JsonPropertyName("id")] public string Id { get; set; } = "";
     [JsonPropertyName("name")] public string? Name { get; set; }
     [JsonPropertyName("destination")] public string? Destination { get; set; }
+    [JsonPropertyName("destinationUrl")] public string? DestinationUrl { get; set; }
+    [JsonPropertyName("accommodationUrl")] public string? AccommodationUrl { get; set; }
+    [JsonPropertyName("accommodationPhone")] public string? AccommodationPhone { get; set; }
     [JsonPropertyName("startDate")] public string? StartDate { get; set; }
     [JsonPropertyName("endDate")] public string? EndDate { get; set; }
     [JsonPropertyName("notes")] public string? Notes { get; set; }
@@ -71,6 +74,9 @@ internal sealed class TripDocument
         Id = Id,
         Name = Name ?? "",
         Destination = Destination ?? "",
+        DestinationUrl = string.IsNullOrWhiteSpace(DestinationUrl) ? null : DestinationUrl,
+        AccommodationUrl = string.IsNullOrWhiteSpace(AccommodationUrl) ? null : AccommodationUrl,
+        AccommodationPhone = string.IsNullOrWhiteSpace(AccommodationPhone) ? null : AccommodationPhone,
         StartDate = FirestoreFormat.ParseDate(StartDate),
         EndDate = FirestoreFormat.ParseDate(EndDate),
         Notes = Notes,

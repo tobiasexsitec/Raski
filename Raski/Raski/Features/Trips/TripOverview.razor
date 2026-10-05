@@ -64,9 +64,27 @@ else if (trip is not null)
         {
             <section class="card">
                 <h2>Översikt</h2>
-                @if (!string.IsNullOrWhiteSpace(trip.Destination))
+                @if (!string.IsNullOrWhiteSpace(trip.Destination) || trip.DestinationUrl is not null)
                 {
-                    <p>📍 @trip.Destination</p>
+                    <p>
+                        📍 @trip.Destination
+                        @if (trip.DestinationUrl is not null)
+                        {
+                            @if (!string.IsNullOrWhiteSpace(trip.Destination))
+                            {
+                                <text> – </text>
+                            }
+                            <a href="@trip.DestinationUrl" target="_blank" rel="noopener noreferrer">Visa på karta</a>
+                        }
+                    </p>
+                }
+                @if (trip.AccommodationUrl is not null)
+                {
+                    <p>🏠 Boende – <a href="@trip.AccommodationUrl" target="_blank" rel="noopener noreferrer">Visa boende</a></p>
+                }
+                @if (trip.AccommodationPhone is not null)
+                {
+                    <p>📞 Värd – <a href="tel:@trip.AccommodationPhone.Replace(" ", "")">@trip.AccommodationPhone</a></p>
                 }
                 <p>📅 @trip.StartDate.ToString("yyyy-MM-dd") – @trip.EndDate.ToString("yyyy-MM-dd")</p>
             </section>

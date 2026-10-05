@@ -36,6 +36,9 @@ public sealed class TripService(FirebaseInterop interop, IAuthService authServic
         {
             name = trip.Name,
             destination = trip.Destination,
+            destinationUrl = trip.DestinationUrl ?? "",
+            accommodationUrl = trip.AccommodationUrl ?? "",
+            accommodationPhone = trip.AccommodationPhone ?? "",
             startDate = FirestoreFormat.ToIso(trip.StartDate),
             endDate = FirestoreFormat.ToIso(trip.EndDate),
             notes = trip.Notes ?? "",
@@ -62,6 +65,9 @@ public sealed class TripService(FirebaseInterop interop, IAuthService authServic
         {
             name = trip.Name,
             destination = trip.Destination,
+            destinationUrl = trip.DestinationUrl ?? "",
+            accommodationUrl = trip.AccommodationUrl ?? "",
+            accommodationPhone = trip.AccommodationPhone ?? "",
             startDate = FirestoreFormat.ToIso(trip.StartDate),
             endDate = FirestoreFormat.ToIso(trip.EndDate),
             notes = trip.Notes ?? ""

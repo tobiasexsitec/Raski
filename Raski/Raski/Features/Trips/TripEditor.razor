@@ -34,6 +34,24 @@ else
             <InputText id="destination" @bind-Value="model.Destination" placeholder="Åre" />
         </div>
 
+        <div class="field">
+            <label for="destination-url">Länk till destination (t.ex. Google Maps)</label>
+            <InputText id="destination-url" type="url" @bind-Value="model.DestinationUrl" placeholder="https://maps.google.com/…" />
+            <ValidationMessage For="() => model.DestinationUrl" />
+        </div>
+
+        <div class="field">
+            <label for="accommodation-url">Länk till boende</label>
+            <InputText id="accommodation-url" type="url" @bind-Value="model.AccommodationUrl" placeholder="https://www.airbnb.se/…" />
+            <ValidationMessage For="() => model.AccommodationUrl" />
+        </div>
+
+        <div class="field">
+            <label for="accommodation-phone">Telefonnummer till värden</label>
+            <InputText id="accommodation-phone" type="tel" autocomplete="off" @bind-Value="model.AccommodationPhone" placeholder="070-123 45 67" />
+            <ValidationMessage For="() => model.AccommodationPhone" />
+        </div>
+
         <div class="date-row">
             <div class="field">
                 <label for="start">Startdatum</label>
@@ -125,6 +143,9 @@ else
 
             model.Name = trip.Name;
             model.Destination = trip.Destination;
+            model.DestinationUrl = trip.DestinationUrl ?? "";
+            model.AccommodationUrl = trip.AccommodationUrl ?? "";
+            model.AccommodationPhone = trip.AccommodationPhone ?? "";
             model.StartDate = trip.StartDate.ToDateTime(TimeOnly.MinValue);
             model.EndDate = trip.EndDate.ToDateTime(TimeOnly.MinValue);
             model.Notes = trip.Notes ?? "";
@@ -157,6 +178,9 @@ else
             Id = TripId ?? "",
             Name = model.Name.Trim(),
             Destination = model.Destination.Trim(),
+            DestinationUrl = string.IsNullOrWhiteSpace(model.DestinationUrl) ? null : model.DestinationUrl.Trim(),
+            AccommodationUrl = string.IsNullOrWhiteSpace(model.AccommodationUrl) ? null : model.AccommodationUrl.Trim(),
+            AccommodationPhone = string.IsNullOrWhiteSpace(model.AccommodationPhone) ? null : model.AccommodationPhone.Trim(),
             StartDate = DateOnly.FromDateTime(model.StartDate),
             EndDate = DateOnly.FromDateTime(model.EndDate),
             Notes = string.IsNullOrWhiteSpace(model.Notes) ? null : model.Notes.Trim()

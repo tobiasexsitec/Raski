@@ -40,6 +40,7 @@
 | [B-034](#b-034-bugg-release-notes-laddas-inte-på-about-sidan) | Bugg: Release notes laddas inte på About-sidan | Klar | Hög |
 | [B-035](#b-035-längre-text-i-övrig-info) | Längre text i Övrig info | Klar | – |
 | [B-036](#b-036-större-textruta-för-övrig-info-på-mobil) | Större textruta för Övrig info på mobil | Klar | – |
+| [B-037](#b-037-länk-till-destination-och-boende-på-översikten) | Länk till destination och boende på översikten | Klar | – |
 
 >
 > 1. Läs översiktstabellen **före** ändringen.
@@ -1344,3 +1345,41 @@ kan se och redigera längre texter bekvämt.
 ### Beslut
 - Ingår i samma release som B-035 (0.18.0).
 - Släppt i version 0.18.0.
+
+---
+
+## B-037: Länk till destination och boende på översikten
+
+- **Status:** Klar
+- **Prioritet:** –
+
+### Beskrivning
+Det ska gå att lägga till en länk (t.ex. till Google Maps) för resans destination.
+På översikten visas då "📍 Göteborg – Visa på karta" där "Visa på karta" är länken.
+Det ska också gå att lägga till en länk till boendet, som visas som "🏠 Boende – Visa boende".
+Dessutom ska telefonnummer till värden för boendet kunna anges, och visas som "📞 Värd – <nummer>".
+
+### User story
+Som deltagare vill jag kunna klicka mig vidare till destinationen på en karta så att
+jag enkelt hittar dit.
+
+### Acceptanskriterier
+- [x] Resans redigeringsformulär har ett valfritt fält för länk till destinationen.
+- [x] Länken valideras (måste börja med http:// eller https://), felmeddelande på svenska.
+- [x] Översikten visar "Destination – länk" och länken öppnas i en ny flik.
+- [x] Utan länk visas destinationen som tidigare.
+- [x] Formuläret har ett valfritt fält för länk till boendet (samma validering).
+- [x] Översikten visar "🏠 Boende – Visa boende" när länk finns, annars ingenting.
+- [x] Formuläret har ett valfritt fält för värdens telefonnummer (validerat, felmeddelande på svenska).
+- [x] Översikten visar värdens telefonnummer som en klickbar `tel:`-länk när det finns.
+
+### Öppna frågor
+- –
+
+### Tekniska noteringar
+- Nya fält `destinationUrl`, `accommodationUrl` och `accommodationPhone` på `trips/{tripId}` (`Trip`, `TripDocument`, `TripService`, `TripFormModel`, `TripEditor`, `TripOverview`).
+- `firestore.rules` validerar inte enskilda fält på resor, så ingen regeländring krävs.
+
+### Beslut
+- Länktexten är "Visa på karta" i stället för hela URL:en, eftersom Google Maps-länkar är långa.
+- Släppt i version 0.19.0.
