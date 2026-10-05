@@ -42,8 +42,8 @@
 | [B-036](#b-036-större-textruta-för-övrig-info-på-mobil) | Större textruta för Övrig info på mobil | Klar | – |
 | [B-037](#b-037-länk-till-destination-och-boende-på-översikten) | Länk till destination och boende på översikten | Klar | – |
 | [B-038](#b-038-flytta-temaväljaren-till-profilsidan) | Flytta temaväljaren till profilsidan | Klar | – |
-| [B-039](#b-039-sidfot-med-om-raski-och-version) | Sidfot med Om Raski™ och version | Pågår | – |
-| [B-040](#b-040-datum-i-release-notes) | Datum i release notes | Pågår | – |
+| [B-039](#b-039-sidfot-med-om-raski-och-version) | Sidfot med Om Raski™ och version | Klar | – |
+| [B-040](#b-040-datum-i-release-notes) | Datum i release notes | Klar | – |
 
 >
 > 1. Läs översiktstabellen **före** ändringen.
@@ -1416,12 +1416,13 @@ inställningar på profilsidan.
 
 ### Beslut
 - Ingår i nästa release tillsammans med ytterligare en funktion (versionen höjs då).
+- Släppt i version 0.20.0.
 
 ---
 
 ## B-039: Sidfot med Om Raski™ och version
 
-- **Status:** Pågår
+- **Status:** Klar
 - **Prioritet:** –
 
 ### Beskrivning
@@ -1433,10 +1434,10 @@ Som användare vill jag ha ett luftigt toppfält och hitta information om appen 
 version längst ner på sidan.
 
 ### Acceptanskriterier
-- [ ] Toppfältet visar inte längre "Om Raski™" eller versionsnumret.
-- [ ] En minimal sidfot visar länken "Om Raski™" och versionen (t.ex. "v0.19.0").
-- [ ] Sidfoten skyms inte av den fasta navigeringen i nederkant.
-- [ ] Sidfoten följer designsystemet och fungerar i ljust och mörkt tema.
+- [x] Toppfältet visar inte längre "Om Raski™" eller versionsnumret.
+- [x] En minimal sidfot visar länken "Om Raski™" och versionen (t.ex. "v0.19.0").
+- [x] Sidfoten skyms inte av den fasta navigeringen i nederkant.
+- [x] Sidfoten följer designsystemet och fungerar i ljust och mörkt tema.
 
 ### Öppna frågor
 - –
@@ -1446,13 +1447,14 @@ version längst ner på sidan.
   navigeringen (`padding-bottom`) flyttas från `.content` till `.app-footer`.
 
 ### Beslut
-- –
+- "Om Raski™" visas som en tydlig knapp med accentfärgad ram i sidfoten.
+- Släppt i version 0.20.0.
 
 ---
 
 ## B-040: Datum i release notes
 
-- **Status:** Pågår
+- **Status:** Klar
 - **Prioritet:** –
 
 ### Beskrivning
@@ -1464,9 +1466,9 @@ Som användare vill jag se när en version släpptes så att jag förstår hur a
 ändringarna är.
 
 ### Acceptanskriterier
-- [ ] Ett datum (ÅÅÅÅ-MM-DD) visas bredvid versionsbadgen i release notes.
-- [ ] Versioner utan datum visas fortfarande, utan datum.
-- [ ] Befintliga versioner har fått datum.
+- [x] Ett datum (ÅÅÅÅ-MM-DD) visas bredvid versionsbadgen i release notes.
+- [x] Versioner utan datum visas fortfarande, utan datum.
+- [x] Befintliga versioner har fått datum.
 
 ### Öppna frågor
 - –
@@ -1477,4 +1479,4 @@ Som användare vill jag se när en version släpptes så att jag förstår hur a
 - Datum för befintliga versioner är hämtade ur git-historiken för versionshöjningarna.
 
 ### Beslut
-- –
+- Släppt i version 0.20.0.
