@@ -42,6 +42,7 @@
 | [B-036](#b-036-större-textruta-för-övrig-info-på-mobil) | Större textruta för Övrig info på mobil | Klar | – |
 | [B-037](#b-037-länk-till-destination-och-boende-på-översikten) | Länk till destination och boende på översikten | Klar | – |
 | [B-038](#b-038-flytta-temaväljaren-till-profilsidan) | Flytta temaväljaren till profilsidan | Klar | – |
+| [B-040](#b-040-datum-i-release-notes) | Datum i release notes | Pågår | – |
 
 >
 > 1. Läs översiktstabellen **före** ändringen.
@@ -1414,3 +1415,34 @@ inställningar på profilsidan.
 
 ### Beslut
 - Ingår i nästa release tillsammans med ytterligare en funktion (versionen höjs då).
+
+---
+
+## B-040: Datum i release notes
+
+- **Status:** Pågår
+- **Prioritet:** –
+
+### Beskrivning
+Varje version i release notes på About-sidan visar ett datum bredvid badgen med
+versionsnumret.
+
+### User story
+Som användare vill jag se när en version släpptes så att jag förstår hur aktuella
+ändringarna är.
+
+### Acceptanskriterier
+- [ ] Ett datum (ÅÅÅÅ-MM-DD) visas bredvid versionsbadgen i release notes.
+- [ ] Versioner utan datum visas fortfarande, utan datum.
+- [ ] Befintliga versioner har fått datum.
+
+### Öppna frågor
+- –
+
+### Tekniska noteringar
+- Nytt valfritt fält `date` i `wwwroot/release-notes.json`, mappat till
+  `DateOnly? Date` på `ReleaseNote`.
+- Datum för befintliga versioner är hämtade ur git-historiken för versionshöjningarna.
+
+### Beslut
+- –

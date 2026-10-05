@@ -41,7 +41,13 @@
                 @foreach (var release in releases)
                 {
                     <li class="release">
-                        <h3 class="release-version"><span class="tag tag-accent">@release.Version</span></h3>
+                        <h3 class="release-version">
+                            <span class="tag tag-accent">@release.Version</span>
+                            @if (release.Date is { } date)
+                            {
+                                <time class="release-date muted" datetime="@date.ToString("yyyy-MM-dd")">@date.ToString("yyyy-MM-dd")</time>
+                            }
+                        </h3>
                         <ul>
                             @foreach (var note in release.Notes)
                             {
