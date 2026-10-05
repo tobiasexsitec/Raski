@@ -1,5 +1,6 @@
 [
-  { "version": "0.15.0", "notes": [ "Release notes per version visas på sidan \"Om Raski™\"." ] },
+  { "version": "0.16.0", "notes": [ "Länkar i Övrig info och i kommentarer på måltider är nu klickbara." ] },
+  { "version": "0.15.0",
   { "version": "0.13.0"
   { "version": "0.10.0", "notes": [ "Raski™ som varumärke" ] },
   { "version": "0.9.0", "notes": [ "Ange i profilen om du dricker alkohol." ] },

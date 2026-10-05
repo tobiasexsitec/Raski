@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Components.Rendering;
 namespace Raski.Shared;
 
 /// <summary>
-/// Renders plain text with a small markdown subset: "#", "##", "###" headings and **bold**.
-/// Text is always rendered as encoded content, never as raw HTML.
+/// Renders plain text with a small markdown subset: "#", "##", "###" headings, **bold** and clickable http(s) links.
+/// Text is always
 /// </summary>
 public sealed class FormattedText : ComponentBase
 {
@@ -86,17 +86,17 @@ public sealed class FormattedText : ComponentBase
             var isBold = i % 2 == 1 && !(unmatched && i == parts.Length - 1);
             if (unmatched && i == parts.Length - 1)
             {
-                builder.AddContent(seq++, "**" + parts[i]);
+                TextLinks.AddContent(builder, "**" + parts[i], ref seq);
             }
             else if (isBold && parts[i].Length > 0)
             {
                 builder.OpenElement(seq++, "strong");
-                builder.AddContent(seq++, parts[i]);
+                TextLinks.AddContent(builder, parts[i], ref seq);
                 builder.CloseElement();
             }
             else if (!isBold)
             {
-                builder.AddContent(seq++, parts[i]);
+                TextLinks.AddContent(builder, parts[i], ref seq);
             }
         }
     }
