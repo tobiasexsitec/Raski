@@ -28,7 +28,7 @@
 | [B-022](#b-022-övrigt-att-inhandla) | Övrigt att inhandla | Idé | – |
 | [B-023](#b-023-ange-om-man-dricker-alkohol) | Ange om man dricker alkohol | Klar | – |
 | [B-024](#b-024-omröstningar-på-en-resa) | Omröstningar på en resa | Klar | – |
-| [B-025](#b-025-release-notes-i-appen) | Release notes i appen | Pågår | – |
+| [B-025](#b-025-release-notes-i-appen) | Release notes i appen | Klar | – |
 | [B-026](#b-026-lägga-till-feature-requests-i-appen) | Lägga till feature requests i appen | Idé | – |
 | [B-027](#b-027-versionsnummer-0xy-före-släpp) | Versionsnummer 0.x.y före släpp | Klar | – |
 | [B-028](#b-028-egna-sektioner-under-vem-tar-med) | Egna sektioner under "Vem tar med" | Klar | – |
@@ -955,7 +955,7 @@ så att vi tillsammans kan fatta beslut på resan (t.ex. välja tema).
 
 ## B-025: Release notes i appen
 
-- **Status:** Pågår
+- **Status:** Klar
 - **Prioritet:** –
 
 ### User story
@@ -966,9 +966,6 @@ funktioner som tillkommit eller ändrats.
 - [x] Release notes per version är nåbara i appen.
 - [x] Senaste versionen visas överst.
 
-### Öppna frågor
-- Ska nyheter visas automatiskt efter en ny version (t.ex. i samband med B-014)?
-
 ### Tekniska noteringar
 - Texterna ligger i `wwwroot/release-notes.json` och läses av
   `IReleaseNotesService`, som sorterar på version (nyast först).
@@ -977,6 +974,8 @@ funktioner som tillkommit eller ändrats.
 ### Beslut
 - Release notes visas på About-sidan (B-029).
 - Texterna lagras som en fil i repot, inte i Firestore.
+- Nyheter visas inte automatiskt efter en ny version.
+- Släppt i version 0.15.0.
 
 ---
 

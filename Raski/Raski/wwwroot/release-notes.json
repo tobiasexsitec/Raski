@@ -1,5 +1,6 @@
 [
-  { "version": "0.13.0", "notes": [ "Ny sida \"Om Raski™\" med beskrivning, kontakt och release notes.", "Introduktion till Raski™ i onboardingen." ] },
+  { "version": "0.15.0", "notes": [ "Release notes per version visas på sidan \"Om Raski™\"." ] },
+  { "version": "0.13.0"
   { "version": "0.10.0", "notes": [ "Raski™ som varumärke" ] },
   { "version": "0.9.0", "notes": [ "Ange i profilen om du dricker alkohol." ] },
   { "version": "0.8.0", "notes": [ "Omröstningar på en resa." ] },
