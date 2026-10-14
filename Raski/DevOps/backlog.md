@@ -879,6 +879,9 @@ en måltid eller dryck.
 - [x] Ny sektion "Övrigt att handla" på inköpslistan.
 - [x] Övriga artiklar kan läggas till (namn, mängd, enhet) och tas bort.
 - [x] Övriga artiklar visas och kan bockas av på inköpslistan.
+- [x] Inmatningsfältet för övriga artiklar ligger högst upp på inköpslistan.
+- [x] Inmatningsfältet har rubriken
+      ingredienser till en måltid registreras under fliken "Måltider" på resan.
 
 ### Öppna frågor
 - –
@@ -888,6 +891,8 @@ en måltid eller dryck.
 - Artiklar läggs till direkt på inköpslistan, som hör till resan.
 - Mängd och enhet anges på samma sätt som för ingredienser.
 - Släppt i version 0.22.0.
+till toppen av inköpslistan.
+- Släppt i version 0.24.0.
 
 ---
 

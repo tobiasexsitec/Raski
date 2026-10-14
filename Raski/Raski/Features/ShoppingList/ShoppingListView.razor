@@ -35,6 +35,36 @@ else
         <div class="error-banner">@errorMessage</div>
     }
 
+    <h2>Lägg till på inköpslistan</h2>
+    <p class="muted">Hör varan till en måltid? Registrera då ingrediensen under fliken "Måltider" på resan.</p>
+
+    <form class="extra-form" @onsubmit="AddExtraAsync">
+        <input class="field extra-name"
+               placeholder="Vad behövs? T.ex. toapapper"
+               aria-label="Vara"
+               maxlength="100"
+               @bind="newExtraName" />
+        <input class="field extra-quantity"
+               type="number"
+               step="any"
+               min="0"
+               inputmode="decimal"
+               placeholder="Mängd"
+               aria-label="Mängd"
+               @bind="newExtraAmount" />
+        <div class="extra-unit">
+            <AutoComplete TItem="string"
+                          Value="@newExtraUnit"
+                          ValueChanged="value => newExtraUnit = value"
+                          SearchFunc="SearchUnitsAsync"
+                          DisplaySelector="u => u"
+                          MinimumLength="1"
+                          AriaLabel="Enhet"
+                          Placeholder="Enhet" />
+        </div>
+        <button type="submit" class="btn btn-primary" disabled="@isSaving">Lägg till</button>
+    </form>
+
     @if (TotalCount > 0)
     {
         <p class="progress-text">@CheckedCount av @TotalCount ihandlade</p>
@@ -106,33 +136,10 @@ else
                 }
             </ul>
         }
-
-        <form class="extra-form" @onsubmit="AddExtraAsync">
-            <input class="field extra-name"
-                   placeholder="Vad behövs? T.ex. toapapper"
-                   aria-label="Vara"
-                   maxlength="100"
-                   @bind="newExtraName" />
-            <input class="field extra-quantity"
-                   type="number"
-                   step="any"
-                   min="0"
-                   inputmode="decimal"
-                   placeholder="Mängd"
-                   aria-label="Mängd"
-                   @bind="newExtraAmount" />
-            <div class="extra-unit">
-                <AutoComplete TItem="string"
-                              Value="@newExtraUnit"
-                              ValueChanged="value => newExtraUnit = value"
-                              SearchFunc="SearchUnitsAsync"
-                              DisplaySelector="u => u"
-                              MinimumLength="1"
-                              AriaLabel="Enhet"
-                              Placeholder="Enhet" />
-            </div>
-            <button type="submit" class="btn btn-primary" disabled="@isSaving">Lägg till</button>
-        </form>
+        else
+        {
+            <p class="muted">Inget övrigt tillagt än.</p>
+        }
     </section>
 }
 
