@@ -16,6 +16,10 @@ public sealed class ShoppingListService(
     IAuthService authService) : IShoppingListService
 {
     private static string StatePath(string tripId) => $"trips/{tripId}/shoppingState";
+    private static string ExtrasPath(string tripId) => $"trips/{tripId}/shoppingExtras";
+
+    // Prefixed so extras share the checked-state collection without colliding with ingredient ids.
+    private static string ExtraStateKey(string extraId) => "extra:" + extraId;
 
     public async Task<IReadOnlyList<ShoppingListItem>> BuildAsync(string tripId, CancellationToken ct = default)
     {
@@ -67,7 +71,41 @@ public sealed class ShoppingListService(
             }
         }
 
-        return items;
+        var extras = await interop.QueryAsync<ShoppingExtraDocument>(ExtrasPath(tripId), new FirestoreQuery(), ct);
+
+        var extraItems = extras
+            .Where(e => !string.IsNullOrWhiteSpace(e.Name))
+            .Select(e => new ShoppingListItem
+            {
+                IngredientId = ExtraStateKey(e.Id),
+                ExtraId = e.Id,
+                Name = e.Name?.Trim() ?? "",
+                Amounts = e.Amount is > 0 ? [new AmountPerUnit(e.Unit?.Trim() ?? "", e.Amount.Value)] : [],
+                Checked = checkedState.TryGetValue(ExtraStateKey(e.Id), out var isChecked) && isChecked
+            })
+            .OrderBy(i => i.Name, StringComparer.CurrentCultureIgnoreCase);
+
+        return [.. items, .. extraItems];
+    }
+
+    public Task AddExtraAsync(string tripId, string name, decimal? amount, string unit, CancellationToken ct = default)
+    {
+        var data = new Dictionary<string, object?>
+        {
+            ["name"] = name.Trim(),
+            ["amount"] = amount is > 0 ? amount : null,
+            ["unit"] = unit.Trim(),
+            ["createdAt"] = FirestoreFormat.UtcNow(),
+            ["createdByUid"] = authService.Current?.Uid ?? ""
+        };
+
+        return interop.AddDocumentAsync(ExtrasPath(tripId), data, ct);
+    }
+
+    public async Task DeleteExtraAsync(string tripId, string extraId, CancellationToken ct = default)
+    {
+        await interop.DeleteDocumentAsync($"{ExtrasPath(tripId)}/{extraId}", ct);
+        await interop.DeleteDocumentAsync($"{StatePath(tripId)}/{ExtraStateKey(extraId)}", ct);
     }
 
     private const string DrinkTag = "drycker";

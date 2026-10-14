@@ -358,6 +358,14 @@ internal sealed class ShoppingStateDocument
     [JsonPropertyName("checkedAt")] public string? CheckedAt { get; set; }
 }
 
+internal sealed class ShoppingExtraDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("name")] public string? Name { get; set; }
+    [JsonPropertyName("amount")] public decimal? Amount { get; set; }
+    [JsonPropertyName("unit")] public string? Unit { get; set; }
+}
+
 internal sealed class InviteDocument
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";

@@ -44,6 +44,16 @@
 | [B-038](#b-038-flytta-temaväljaren-till-profilsidan) | Flytta temaväljaren till profilsidan | Klar | – |
 | [B-039](#b-039-sidfot-med-om-raski-och-version) | Sidfot med Om Raski™ och version | Klar | – |
 | [B-040](#b-040-datum-i-release-notes) | Datum i release notes | Klar | – |
+| [B-041](#b-041-tema-på-resan) | Tema på resan | Idé | – |
+| [B-042](#b-042-antal-personer-på-översikten) | Antal personer på översikten | Idé | – |
+| [B-043](#b-043-markera-saker-som-saknar-ansvarig) | Markera saker som saknar ansvarig | Idé | – |
+| [B-044](#b-044-dashboard-med-nedräkning-till-resan) | Dashboard med nedräkning till resan | Idé | – |
+| [B-045](#b-045-anonyma-deltagare-via-e-post) | Anonyma deltagare via e-post | Idé | – |
+| [B-046](#b-046-koppla-anonym-deltagare-till-befintlig-användare) | Koppla anonym deltagare till befintlig användare | Idé | – |
+| [B-047](#b-047-barn-och-sällskap-på-deltagare) | Barn och sällskap på deltagare | Idé | – |
+| [B-048](#b-048-popup-med-nyheter-vid-ny-version) | Popup med nyheter vid ny version | Idé | – |
+| [B-049](#b-049-bugg-appen-laddar-om-ofta-på-mobilen) | Bugg: Appen laddar om ofta på mobilen | Idé | Hög |
+| [B-050](#b-050-lägg-till-sak-från-vem-tar-med-på-inköpslistan) | Lägg till sak från "Vem tar med" på inköpslistan | Idé | – |
 
 >
 > 1. Läs översiktstabellen **före** ändringen.
@@ -870,9 +880,15 @@ en måltid eller dryck.
 - [ ] Övriga artiklar kan läggas till, redigeras och tas bort.
 - [ ] Övriga artiklar visas på inköpslistan.
 
+### Öppna frågor
+- Ska övriga artiklar kunna läggas till direkt från inköpslistan, eller bara från resan?
+
+### Beslut
+- Önskemålet har lyfts igen: man ska kunna lägga till saker på inköpslistan som inte hör till någon maträtt.
+
 ---
 
-## B-023: Ange om man dricker alkohol
+## B-023
 
 - **Status:** Klar
 - **Prioritet:** –
@@ -1493,3 +1509,281 @@ Som användare vill jag se när en version släpptes så att jag förstår hur a
 
 ### Beslut
 - Släppt i version 0.20.0.
+
+---
+
+## B-041: Tema på resan
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### Beskrivning
+Man ska kunna välja ett tema för resan, t.ex. skidresa eller höstresa, som påverkar
+resans utseende.
+
+### User story
+Som arrangör vill jag ge resan ett tema så att den känns personlig och är lätt att känna igen.
+
+### Acceptanskriterier
+- [ ] Tema kan väljas när resan skapas och ändras i redigeringen.
+- [ ] Temat syns på resan (t.ex. ikon, färg eller bakgrund) och i reselistan.
+- [ ] Resor utan tema visas som i dag.
+
+### Öppna frågor
+- Vilka teman ska finnas från start?
+- Ska temat bara vara en ikon/färg, eller också påverka t.ex. förslag på packlista?
+- Ska temat fungera både i ljust och mörkt läge?
+
+### Tekniska noteringar
+- Nytt fält på `Trip`, `TripDocument` och skrivningen i `TripService`.
+- UI i `TripEditor`, `TripOverview`, `TripList`.
+
+### Beslut
+- –
+
+---
+
+## B-042: Antal personer på översikten
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### Beskrivning
+Översikten på resan ska visa hur många personer som är med.
+
+### User story
+Som resenär vill jag se antalet deltagare så att jag kan planera mängder.
+
+### Acceptanskriterier
+- [ ] Översikten visar antal deltagare.
+- [ ] Antalet uppdateras när deltagare läggs till eller tas bort.
+
+### Öppna frågor
+- Ska väntande inbjudningar och anonyma deltagare (B-045) räknas?
+- Ska barn (B-047) visas separat, t.ex. "8 vuxna, 3 barn"?
+
+### Tekniska noteringar
+- Räknas från `trips/{tripId}/members`. UI i `TripOverview`.
+
+### Beslut
+- –
+
+---
+
+## B-043: Markera saker som saknar ansvarig
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### Beskrivning
+Det ska tydligt framgå när något på en resa (t.ex. måltider eller "Vem tar med")
+saknar ansvarig, gärna redan på startsidan.
+
+### User story
+Som resenär vill jag se vad som saknar ansvarig så att inget glöms bort.
+
+### Acceptanskriterier
+- [ ] Saker utan ansvarig markeras tydligt på resan.
+- [ ] Startsidan visar en indikator/antal per resa för saker utan ansvarig.
+
+### Öppna frågor
+- Vilka typer av saker omfattas (måltider, drycker, "Vem tar med", övrigt)?
+- Ska det visas på startsidan, på dashboarden (B-044) eller båda?
+
+### Tekniska noteringar
+- Kräver att startsidan läser måltider/ansvar per resa – tänk på antal Firestore-läsningar.
+
+### Beslut
+- –
+
+---
+
+## B-044: Dashboard med nedräkning till resan
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### Beskrivning
+En ny dashboard som bl.a. visar en nedräkning till resan.
+
+### User story
+Som resenär vill jag se hur länge det är kvar till resan så att jag får en överblick och pepp.
+
+### Acceptanskriterier
+- [ ] Dashboarden visar nedräkning (dagar kvar) till nästa resa.
+- [ ] Under pågående resa visas t.ex. "Dag X av Y".
+
+### Öppna frågor
+- Ska dashboarden ersätta startsidan (`/`) eller vara en egen sida/flik på resan?
+- Vad mer ska visas: saker utan ansvarig (B-043), dagens måltider, omröstningar?
+
+### Tekniska noteringar
+- Ny komponent under `Features/`. Svensk route om egen sida.
+
+### Beslut
+- –
+
+---
+
+## B-045: Anonyma deltagare via e-post
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### Beskrivning
+Man ska kunna lägga till en deltagare på en resa med bara e-post, utan att personen
+har ett konto.
+
+### User story
+Som arrangör vill jag lägga till deltagare som inte har konto så att alla finns med i planeringen.
+
+### Acceptanskriterier
+- [ ] En deltagare kan läggas till med e-post (och ev. namn) utan konto.
+- [ ] Den anonyma deltagaren kan tilldelas ansvar och syns i deltagarlistan.
+- [ ] När personen senare skapar konto med samma e-post kopplas deltagaren automatiskt.
+
+### Öppna frågor
+- Hur skiljer sig detta från befintliga inbjudningar per e-post?
+- Ska namn vara obligatoriskt?
+
+### Tekniska noteringar
+- Påverkar `members`/inbjudningar och `firestore.rules`.
+
+### Beslut
+- –
+
+---
+
+## B-046: Koppla anonym deltagare till befintlig användare
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### Beskrivning
+En admin ska kunna koppla en anonym deltagare (B-045) till en befintlig användare,
+t.ex. om personen har konto med en annan e-post.
+
+### User story
+Som admin vill jag koppla ihop en anonym deltagare med ett konto så att ansvar och data följer med.
+
+### Acceptanskriterier
+- [ ] Endast admin kan koppla en anonym deltagare till en befintlig användare.
+- [ ] Ansvar och övrig data flyttas till användaren.
+- [ ] Den anonyma deltagaren tas bort efter kopplingen.
+
+### Öppna frågor
+- Avses global admin eller resans admin?
+
+### Tekniska noteringar
+- Beror på B-045. Kräver uppdatering av referenser i måltider m.m. samt `firestore.rules`.
+
+### Beslut
+- –
+
+---
+
+## B-047: Barn och sällskap på deltagare
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### Beskrivning
+Man ska kunna ange om man har med sig barn samt vilka man "hör ihop med"
+(t.ex. partner/familj).
+
+### User story
+Som resenär vill jag ange barn och sällskap så att planering av mat och boende blir rätt.
+
+### Acceptanskriterier
+- [ ] Man kan ange antal barn (ev. ålder) på resan.
+- [ ] Man kan välja andra deltagare som man hör ihop med.
+- [ ] Grupperingen syns i deltagarlistan på översikten.
+
+### Öppna frågor
+- Är barn egna deltagare (med namn/allergier) eller bara ett antal?
+- Ska det anges på profilen eller per resa?
+- Ska "hör ihop med" vara ömsesidigt automatiskt?
+
+### Tekniska noteringar
+- Påverkar `members`-dokument och ev. `UserProfile`.
+
+### Beslut
+- –
+
+---
+
+## B-048: Popup med nyheter vid ny version
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### Beskrivning
+När en användare öppnar appen efter en ny version visas en popup "Nya features" med
+en lista över nyheterna och en länk till About-sidan.
+
+### User story
+Som användare vill jag se vad som är nytt så att jag upptäcker nya funktioner.
+
+### Acceptanskriterier
+- [ ] Popupen visas en gång per ny version (modaldialog med bakgrund).
+- [ ] Listan hämtas från release notes.
+- [ ] Länk till About-sidan.
+- [ ] Visas inte för nya användare som går igenom onboarding.
+
+### Öppna frågor
+- Om man hoppat över flera versioner, ska alla nyheter sedan senast visas?
+
+### Tekniska noteringar
+- Senast sedda version sparas på `users/{uid}` (eller localStorage). Använder `release-notes.json`.
+
+### Beslut
+- –
+
+---
+
+## B-049: Bugg: Appen laddar om ofta på mobilen
+
+- **Status:** Idé
+- **Prioritet:** Hög
+
+### Beskrivning
+Appen laddar om väldigt ofta på mobilen, t.ex. när man lägger till en ingrediens.
+Den laddar också alltid om två gånger när man öppnar appen på nytt i Chrome.
+
+### User story
+Som användare vill jag att appen inte laddar om oväntat så att jag inte tappar det jag gör.
+
+### Acceptanskriterier
+- [ ] Appen laddar inte om när man lägger till en ingrediens.
+- [ ] Appen laddar bara en gång vid start i Chrome.
+
+### Öppna frågor
+- Sker det även i Safari/iOS och installerad PWA?
+
+### Tekniska noteringar
+- Misstänkt koppling till tvingad omladdning vid ny version (B-014) och service workern.
+
+### Beslut
+- –
+
+## B-050: Lägg till sak från "Vem tar med" på inköpslistan
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### Beskrivning
+En rad under "Vem tar med" ska kunna markeras med "Lägg till på inköpslista", så att
+saken visas under "Övrigt att handla" på resans inköpslista (B-022).
+
+### User story
+Som deltagare vill jag kunna markera att något i "Vem tar med" behöver köpas så att
+det hamnar på inköpslistan och inte glöms bort.
+
+### Acceptanskriterier
+- [ ] En rad i "Vem tar med" kan markeras som "Lägg till på inköpslista".
+- [ ] Markerade rader visas på inköpslistan under "Övrigt att handla".
+- [ ] Avmarkering tar bort raden från inköpslistan.
+
+### Öppna frågor
+- Ska antal på raden föras över som mängd på inköpslistan?
+- Ska avbockning på inköpslistan synas på raden i "Vem tar med"?

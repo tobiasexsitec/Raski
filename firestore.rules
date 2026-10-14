@@ -162,6 +162,11 @@ service cloud.firestore {
 	  match /shoppingState/{ingredientId} {
 		allow read, write: if isTripMember(tripId);
 	  }
+
+	  // Items added directly to the shopping list, edited by any member.
+	  match /shoppingExtras/{extraId} {
+		allow read, write: if isTripMember(tripId);
+	  }
 	}
 
 	// The global ingredient and unit registries are shared by all trips.

@@ -15,4 +15,10 @@ public interface IShoppingListService
 
     /// <summary>Persists the checked state so it is shared by every participant.</summary>
     Task SetCheckedAsync(string tripId, string ingredientId, bool isChecked, CancellationToken ct = default);
+
+    /// <summary>Adds an item that does not belong to any meal.</summary>
+    Task AddExtraAsync(string tripId, string name, decimal? amount, string unit, CancellationToken ct = default);
+
+    /// <summary>Removes an extra item together with its checked state.</summary>
+    Task DeleteExtraAsync(string tripId, string extraId, CancellationToken ct = default);
 }

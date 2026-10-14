@@ -2,6 +2,7 @@
 @implements IAsyncDisposable
 @inject IShoppingListService ShoppingListService
 @inject ITripService TripService
+@inject IIngredientService IngredientService
 
 <PageTitle>Inköpslista – Raski™</PageTitle>
 
@@ -23,17 +24,26 @@
 {
     <p class="muted">Räknar ihop ingredienser…</p>
 }
-else if (errorMessage is not null)
+else if (errorMessage is not null && items.Count == 0)
 {
     <div class="error-banner">@errorMessage</div>
 }
-else if (groups.Count == 0)
-{
-    <p class="muted">Inga ingredienser än. Lägg till måltider först.</p>
-}
 else
 {
-    <p class="progress-text">@CheckedCount av @TotalCount ihandlade</p>
+    @if (errorMessage is not null)
+    {
+        <div class="error-banner">@errorMessage</div>
+    }
+
+    @if (TotalCount > 0)
+    {
+        <p class="progress-text">@CheckedCount av @TotalCount ihandlade</p>
+    }
+
+    @if (groups.Count == 0)
+    {
+        <p class="muted">Inga ingredienser från måltider än.</p>
+    }
 
     @foreach (var group in groups)
     {
@@ -63,6 +73,67 @@ else
             </ul>
         </section>
     }
+
+    <section class="group">
+        <h2>Övrigt att handla</h2>
+
+        @if (extras.Count > 0)
+        {
+            <ul class="items">
+                @foreach (var item in extras)
+                {
+                    <li class="item extra-item @(item.Checked ? "is-checked" : "")">
+                        <label>
+                            <input type="checkbox"
+                                   checked="@item.Checked"
+                                   @onchange="e => ToggleAsync(item, e)" />
+
+                            <span class="item-body">
+                                <span class="item-name">@item.Name</span>
+                                @if (item.Amounts.Count > 0)
+                                {
+                                    <span class="item-amount">@FormatAmounts(item)</span>
+                                }
+                            </span>
+                        </label>
+
+                        <button type="button"
+                                class="btn btn-icon btn-sm"
+                                aria-label="@($"Ta bort {item.Name}")"
+                                disabled="@isSaving"
+                                @onclick="() => DeleteExtraAsync(item)">✕</button>
+                    </li>
+                }
+            </ul>
+        }
+
+        <form class="extra-form" @onsubmit="AddExtraAsync">
+            <input class="field extra-name"
+                   placeholder="Vad behövs? T.ex. toapapper"
+                   aria-label="Vara"
+                   maxlength="100"
+                   @bind="newExtraName" />
+            <input class="field extra-quantity"
+                   type="number"
+                   step="any"
+                   min="0"
+                   inputmode="decimal"
+                   placeholder="Mängd"
+                   aria-label="Mängd"
+                   @bind="newExtraAmount" />
+            <div class="extra-unit">
+                <AutoComplete TItem="string"
+                              Value="@newExtraUnit"
+                              ValueChanged="value => newExtraUnit = value"
+                              SearchFunc="SearchUnitsAsync"
+                              DisplaySelector="u => u"
+                              MinimumLength="1"
+                              AriaLabel="Enhet"
+                              Placeholder="Enhet" />
+            </div>
+            <button type="submit" class="btn btn-primary" disabled="@isSaving">Lägg till</button>
+        </form>
+    </section>
 }
 
 @code {
@@ -71,6 +142,11 @@ else
     private Trip? trip;
     private IReadOnlyList<ShoppingListItem> items = [];
     private IReadOnlyList<ShoppingListGroup> groups = [];
+    private IReadOnlyList<ShoppingListItem> extras = [];
+    private string newExtraName = "";
+    private decimal? newExtraAmount;
+    private string newExtraUnit = "";
+    private bool isSaving;
     private CancellationTokenSource? listenerCts;
     private bool isLoading = true;
     private string? errorMessage;
@@ -154,7 +230,63 @@ else
         }
     }
 
-    private void Regroup() => groups = ShoppingListAggregator.GroupByTag(items);
+    private void Regroup()
+    {
+        groups = ShoppingListAggregator.GroupByTag(items.Where(i => !i.IsExtra));
+        extras = [.. items.Where(i => i.IsExtra)];
+    }
+
+    private async Task AddExtraAsync()
+    {
+        if (string.IsNullOrWhiteSpace(newExtraName))
+        {
+            errorMessage = "Skriv vad som ska handlas.";
+            return;
+        }
+
+        await SaveExtrasAsync(
+            () => ShoppingListService.AddExtraAsync(TripId, newExtraName, newExtraAmount, newExtraUnit),
+            "Kunde inte lägga till varan.");
+
+        if (errorMessage is null)
+        {
+            newExtraName = "";
+            newExtraAmount = null;
+            newExtraUnit = "";
+        }
+    }
+
+    private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
+        IngredientService.SearchUnitsAsync(term);
+
+    private Task DeleteExtraAsync(ShoppingListItem item) =>
+        item.ExtraId is null
+            ? Task.CompletedTask
+            : SaveExtrasAsync(
+                () => ShoppingListService.DeleteExtraAsync(TripId, item.ExtraId),
+                "Kunde inte ta bort varan.");
+
+    private async Task SaveExtrasAsync(Func<Task> save, string failureMessage)
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            await save();
+            items = await ShoppingListService.BuildAsync(TripId);
+            Regroup();
+            hasCelebrated = TotalCount > 0 && CheckedCount == TotalCount;
+        }
+        catch (Exception)
+        {
+            errorMessage = failureMessage;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
 
     /// <summary>Celebrates once per completion so unchecking and rechecking can retrigger it.</summary>
     private async Task CelebrateIfCompleteAsync()
