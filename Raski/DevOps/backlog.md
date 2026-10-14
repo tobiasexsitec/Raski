@@ -1787,3 +1787,9 @@ det hamnar på inköpslistan och inte glöms bort.
 ### Öppna frågor
 - Ska antal på raden föras över som mängd på inköpslistan?
 - Ska avbockning på inköpslistan synas på raden i "Vem tar med"?
+
+### Tekniska noteringar
+- Kan bygga på `shoppingExtras` från B-022, t.ex. med en referens till `BringItem`-id.
+
+### Beslut
+- –
