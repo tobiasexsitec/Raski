@@ -1,4 +1,5 @@
 @inject IBringItemService BringItemService
+@inject IShoppingListService ShoppingListService
 @inject ITripService TripService
 
 <section class="card bring-card" aria-labelledby="@HeadingId">
@@ -71,6 +72,13 @@
                                         Jag tar med
                                     </button>
                                 }
+                                <button type="button"
+                                        class="btn btn-secondary btn-sm"
+                                        aria-label="@($"Lägg till {item.Name} på inköpslista")"
+                                        disabled="@isSaving"
+                                        @onclick="() => MoveToShoppingListAsync(item)">
+                                    Lägg till på inköpslista
+                                </button>
                                 <button type="button"
                                         class="btn btn-secondary btn-sm"
                                         aria-label="@($"Redigera {item.Name}")"
@@ -337,6 +345,27 @@
         {
             errorMessage = "Kunde inte spara.";
             return false;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task MoveToShoppingListAsync(BringItem item)
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            await ShoppingListService.AddExtraAsync(Trip.Id, item.Name.Trim(), item.Quantity, "st");
+            await BringItemService.DeleteAsync(Trip.Id, item.Id);
+            items.Remove(item);
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte lägga till på inköpslistan.";
         }
         finally
         {

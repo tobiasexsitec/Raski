@@ -25,7 +25,7 @@
 | [B-019](#b-019-gemensam-dryck-för-hela-resan) | Gemensam dryck för hela resan | Klar | – |
 | [B-020](#b-020-byt-ikon-bredvid-appnamnet) | Byt ikon bredvid appnamnet | Klar | – |
 | [B-021](#b-021-sök-och-filtrera-i-inköpslistan) | Sök och filtrera i inköpslistan | Idé | – |
-| [B-022](#b-022-övrigt-att-inhandla) | Övrigt att inhandla | Idé | – |
+| [B-022](#b-022-övrigt-att-inhandla) | Övrigt att inhandla | Klar | – |
 | [B-023](#b-023-ange-om-man-dricker-alkohol) | Ange om man dricker alkohol | Klar | – |
 | [B-024](#b-024-omröstningar-på-en-resa) | Omröstningar på en resa | Klar | – |
 | [B-025](#b-025-release-notes-i-appen) | Release notes i appen | Klar | – |
@@ -53,7 +53,7 @@
 | [B-047](#b-047-barn-och-sällskap-på-deltagare) | Barn och sällskap på deltagare | Idé | – |
 | [B-048](#b-048-popup-med-nyheter-vid-ny-version) | Popup med nyheter vid ny version | Idé | – |
 | [B-049](#b-049-bugg-appen-laddar-om-ofta-på-mobilen) | Bugg: Appen laddar om ofta på mobilen | Idé | Hög |
-| [B-050](#b-050-lägg-till-sak-från-vem-tar-med-på-inköpslistan) | Lägg till sak från "Vem tar med" på inköpslistan | Idé | – |
+| [B-050](#b-050-lägg-till-sak-från-vem-tar-med-på-inköpslistan) | Lägg till sak från "Vem tar med" på inköpslistan | Klar | – |
 
 >
 > 1. Läs översiktstabellen **före** ändringen.
@@ -868,7 +868,7 @@ hittar det jag letar efter.
 
 ## B-022: Övrigt att inhandla
 
-- **Status:** Idé
+- **Status:** Klar
 - **Prioritet:** –
 
 ### Beskrivning
@@ -876,15 +876,18 @@ Man måste kunna lägga till övriga saker som ska inhandlas och som inte hör t
 en måltid eller dryck.
 
 ### Acceptanskriterier
-- [ ] Ny sektion "Övrigt" placerad under Dryck-sektionen.
-- [ ] Övriga artiklar kan läggas till, redigeras och tas bort.
-- [ ] Övriga artiklar visas på inköpslistan.
+- [x] Ny sektion "Övrigt att handla" på inköpslistan.
+- [x] Övriga artiklar kan läggas till (namn, mängd, enhet) och tas bort.
+- [x] Övriga artiklar visas och kan bockas av på inköpslistan.
 
 ### Öppna frågor
-- Ska övriga artiklar kunna läggas till direkt från inköpslistan, eller bara från resan?
+- –
 
 ### Beslut
 - Önskemålet har lyfts igen: man ska kunna lägga till saker på inköpslistan som inte hör till någon maträtt.
+- Artiklar läggs till direkt på inköpslistan, som hör till resan.
+- Mängd och enhet anges på samma sätt som för ingredienser.
+- Släppt i version 0.22.0.
 
 ---
 
@@ -1768,7 +1771,7 @@ Som användare vill jag att appen inte laddar om oväntat så att jag inte tappa
 
 ## B-050: Lägg till sak från "Vem tar med" på inköpslistan
 
-- **Status:** Idé
+- **Status:** Klar
 - **Prioritet:** –
 
 ### Beskrivning
@@ -1780,16 +1783,17 @@ Som deltagare vill jag kunna markera att något i "Vem tar med" behöver köpas 
 det hamnar på inköpslistan och inte glöms bort.
 
 ### Acceptanskriterier
-- [ ] En rad i "Vem tar med" kan markeras som "Lägg till på inköpslista".
-- [ ] Markerade rader visas på inköpslistan under "Övrigt att handla".
-- [ ] Avmarkering tar bort raden från inköpslistan.
+- [x] En rad i "Vem tar med" har knappen "Lägg till på inköpslista".
+- [x] Klick flyttar saken: den läggs under "Övrigt att handla" (antal i st) och tas bort från "Vem tar med".
+- [x] På inköpslistan beter sig saken som andra extra varor (kan bockas av och tas bort).
 
 ### Öppna frågor
-- Ska antal på raden föras över som mängd på inköpslistan?
-- Ska avbockning på inköpslistan synas på raden i "Vem tar med"?
+- –
 
 ### Tekniska noteringar
-- Kan bygga på `shoppingExtras` från B-022, t.ex. med en referens till `BringItem`-id.
+- Återanvänder `ShoppingListService.AddExtraAsync` (B-022) och `BringItemService.DeleteAsync`; ingen koppling sparas mellan raderna.
 
 ### Beslut
-- –
+- Saken flyttas helt till inköpslistan i stället för att länkas, så den inte finns på två ställen.
+- Antal förs över som mängd med enheten "st".
+- Släppt i version 0.23.0.
