@@ -51,7 +51,7 @@
 | [B-045](#b-045-anonyma-deltagare-via-e-post) | Anonyma deltagare via e-post | Idé | – |
 | [B-046](#b-046-koppla-anonym-deltagare-till-befintlig-användare) | Koppla anonym deltagare till befintlig användare | Idé | – |
 | [B-047](#b-047-barn-och-sällskap-på-deltagare) | Barn och sällskap på deltagare | Idé | – |
-| [B-048](#b-048-popup-med-nyheter-vid-ny-version) | Popup med nyheter vid ny version | Idé | – |
+| [B-048](#b-048-popup-med-nyheter-vid-ny-version) | Popup med nyheter vid ny version | Klar | – |
 | [B-049](#b-049-bugg-appen-laddar-om-ofta-på-mobilen) | Bugg: Appen laddar om ofta på mobilen | Idé | Hög |
 | [B-050](#b-050-lägg-till-sak-från-vem-tar-med-på-inköpslistan) | Lägg till sak från "Vem tar med" på inköpslistan | Klar | – |
 
@@ -1722,7 +1722,7 @@ Som resenär vill jag ange barn och sällskap så att planering av mat och boend
 
 ## B-048: Popup med nyheter vid ny version
 
-- **Status:** Idé
+- **Status:** Klar
 - **Prioritet:** –
 
 ### Beskrivning
@@ -1733,19 +1733,27 @@ en lista över nyheterna och en länk till About-sidan.
 Som användare vill jag se vad som är nytt så att jag upptäcker nya funktioner.
 
 ### Acceptanskriterier
-- [ ] Popupen visas en gång per ny version (modaldialog med bakgrund).
-- [ ] Listan hämtas från release notes.
-- [ ] Länk till About-sidan.
-- [ ] Visas inte för nya användare som går igenom onboarding.
+- [x] Popupen visas en gång per ny version (modaldialog med bakgrund).
+- [x] Listan hämtas från release notes.
+- [x] Länk till About-sidan.
+- [x] Visas inte för nya användare som går igenom onboarding.
+- [x] Har man hoppat över versioner visas alla nyheter sedan senast, grupperade per version.
 
 ### Öppna frågor
-- Om man hoppat över flera versioner, ska alla nyheter sedan senast visas?
+- –
 
 ### Tekniska noteringar
-- Senast sedda version sparas på `users/{uid}` (eller localStorage). Använder `release-notes.json`.
+- `lastSeenVersion` sparas på `users/{uid}`; befintliga regler tillåter redan att användaren uppdaterar fältet.
+- `WhatsNewDialog` (Features/About) renderas globalt i `MainLayout` när användaren är inloggad och klar med onboarding.
+- `AppInfo` ger appversionen utan build-metadata och används även av sidfoten.
 
 ### Beslut
-- –
+- Alla versioner sedan senast sedda visas, grupperade per version.
+- Senast sedda version sparas i Firestore så den följer användaren mellan enheter.
+- Befintliga användare utan sparat värde ser bara senaste versionens nyheter.
+- Nya användare får nuvarande version satt när onboarding slutförs.
+- Popupen visas globalt, på vilken sida som helst.
+- Släppt i version 0.25.0.
 
 ---
 

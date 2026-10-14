@@ -1,0 +1,140 @@
+@implements IDisposable
+@inject IAuthService AuthService
+@inject IUserService UserService
+@inject IReleaseNotesService ReleaseNotesService
+@inject NavigationManager Navigation
+
+@if (notes.Count > 0)
+{
+    <div class="backdrop" @onclick="CloseAsync">
+        <div class="dialog card stack"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="whats-new-title"
+             @onclick:stopPropagation="true"
+             @onkeydown="OnKeyDown">
+            <h2 id="whats-new-title">Nya features 🎉</h2>
+            <p class="muted intro">Det har hänt lite sen du var här sist, här är de nya funktionerna</p>
+
+            @foreach (var note in notes)
+            {
+                <section class="release" aria-label="@($"Version {note.Version}")">
+                    <h3><span class="tag tag-accent">v@(note.Version)</span></h3>
+                    <ul>
+                        @foreach (var line in note.Notes)
+                        {
+                            <li>@line</li>
+                        }
+                    </ul>
+                </section>
+            }
+
+            <div class="row-inline">
+                <button type="button" class="btn btn-primary" @ref="closeButton" @onclick="CloseAsync">Stäng</button>
+                <button type="button" class="btn btn-secondary" @onclick="GoToAboutAsync">Läs mer på Om Raski™</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private IReadOnlyList<ReleaseNote> notes = [];
+    private ElementReference closeButton;
+    private bool checkedForUid;
+    private bool focused;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthService.StateChanged += OnStateChanged;
+        await CheckAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (notes.Count > 0 && !focused)
+        {
+            focused = true;
+            await closeButton.FocusAsync();
+        }
+    }
+
+    private async Task CheckAsync()
+    {
+        if (checkedForUid || AuthService.Current is not { OnboardingCompleted: true } user)
+        {
+            return;
+        }
+
+        checkedForUid = true;
+        var current = AppInfo.Parse(AppInfo.Version);
+        if (current is null)
+        {
+            return;
+        }
+
+        var lastSeen = AppInfo.Parse(user.LastSeenVersion);
+        if (lastSeen is not null && lastSeen >= current)
+        {
+            return;
+        }
+
+        IReadOnlyList<ReleaseNote> all;
+        try
+        {
+            all = await ReleaseNotesService.GetAsync();
+        }
+        catch (Exception)
+        {
+            // Missing or broken release notes must never block the app; try again next start.
+            return;
+        }
+
+        // Users without a recorded version only get the latest news, not the whole history.
+        notes = [.. all.Where(n => AppInfo.Parse(n.Version) is { } v
+                                   && v <= current
+                                   && (lastSeen is null ? v == current : v > lastSeen))];
+
+        if (notes.Count == 0)
+        {
+            await MarkSeenAsync();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task MarkSeenAsync()
+    {
+        try
+        {
+            await UserService.SaveMyLastSeenVersionAsync(AppInfo.Version);
+        }
+        catch (Exception)
+        {
+            // Not critical; the popup is shown again next time.
+        }
+    }
+
+    private async Task CloseAsync()
+    {
+        notes = [];
+        await MarkSeenAsync();
+    }
+
+    private async Task GoToAboutAsync()
+    {
+        await CloseAsync();
+        Navigation.NavigateTo("about");
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await CloseAsync();
+        }
+    }
+
+    private void OnStateChanged() => _ = InvokeAsync(CheckAsync);
+
+    public void Dispose() => AuthService.StateChanged -= OnStateChanged;
+}

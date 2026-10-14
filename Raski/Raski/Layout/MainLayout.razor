@@ -60,16 +60,15 @@
     </footer>
 
     <NavMenu />
+
+    @if (AuthService.Current is { OnboardingCompleted: true })
+    {
+        <WhatsNewDialog />
+    }
 </div>
 
 @code {
-    private static readonly string AppVersion =
-        typeof(MainLayout).Assembly
-            .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
-            .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
-            .FirstOrDefault()?.InformationalVersion
-        ?? typeof(MainLayout).Assembly.GetName().Version?.ToString()
-        ?? "?";
+    private static readonly string AppVersion = AppInfo.InformationalVersion;
 
     private bool menuOpen;
 

@@ -39,6 +39,7 @@ internal sealed class UserDocument
 
     // Missing on users created before onboarding existed; they count as onboarded.
     [JsonPropertyName("onboardingCompleted")] public bool? OnboardingCompleted { get; set; }
+    [JsonPropertyName("lastSeenVersion")] public string? LastSeenVersion { get; set; }
 
     public UserProfile ToModel() => new()
     {
@@ -51,7 +52,8 @@ internal sealed class UserDocument
         IsGlobalAdmin = IsGlobalAdmin,
         Allergies = AllergyNames.Distinct(Allergies),
         Alcohol = AlcoholPreferenceExtensions.ParseAlcoholPreference(Alcohol),
-        OnboardingCompleted = OnboardingCompleted ?? true
+        OnboardingCompleted = OnboardingCompleted ?? true,
+        LastSeenVersion = LastSeenVersion
     };
 }
 

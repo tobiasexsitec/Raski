@@ -18,5 +18,8 @@ public interface IUserService
     /// <summary>Marks onboarding as done so the signed-in user is no longer redirected to it.</summary>
     Task CompleteOnboardingAsync(CancellationToken ct = default);
 
+    /// <summary>Records which app version's news the signed-in user has seen.</summary>
+    Task SaveMyLastSeenVersionAsync(string version, CancellationToken ct = default);
+
     Task SetGlobalAdminAsync(string uid, bool isGlobalAdmin, CancellationToken ct = default);
 }

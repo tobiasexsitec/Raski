@@ -1,6 +1,11 @@
 [
-  { "version": "0.21.0", "date": "2026-10-05", "notes": [ "Skicka önskemål om nya funktioner från About-sidan.", "Kontakt ligger nu längst ner på About-sidan." ] },
-  { "version": "0.20.0",
+  { "version": "0.25.0", "date": "2026-10-14", "notes": [ "En popup visar vad som är nytt sedan du var här sist." ] },
+  { "version": "0.24.0",
+  { "version": "0.23.0", "date": "2026-10-14", "notes": [ "Saker under \"Vem tar med\" kan flyttas till inköpslistan." ] },
+  { "version": "0.22.0", "date": "2026-10-14", "notes": [ "Lägg till övrigt att handla direkt på inköpslistan." ] },
+  { "version": "0.21.0", "date": "2026-10-14", "notes": [ "Skicka önskemål om nya funktioner från About-sidan.", "Kontakt ligger nu längst ner på About-sidan." ] },
+  { "version": "0.20.0", "date": "2026-10-05", "notes": [ "Temaväljaren finns nu på profilsidan.", "Om Raski™ och versionen visas i en sidfot.", "Datum visas i release notes." ] },
+  { "version": "0.19.0", "date": "2026-10-05", "notes": [ "Länk till destination och boende samt värdens telefonnummer på översikten." ] },
   { "version": "0.18.0", "date": "2026-10-05", "notes": [ "Övrig info kan nu vara upp till 20 000 tecken, med teckenräknare.", "Större textruta för Övrig info på mobilen." ] },
   { "version": "0.17.0", "date": "2026-10-05", "notes": [ "Release notes laddas igen på About-sidan." ] },
   { "version": "0.16.0", "date": "2026-10-05", "notes": [ "Länkar i Övrig info och i kommentarer på måltider är nu klickbara." ] },

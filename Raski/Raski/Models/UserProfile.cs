@@ -20,6 +20,9 @@ public sealed class UserProfile
 
     /// <summary>New users are sent through onboarding until this is set.</summary>
     public bool OnboardingCompleted { get; set; } = true;
+
+    /// <summary>App version whose news the user has seen; null if never recorded.</summary>
+    public string? LastSeenVersion { get; set; }
 }
 
 public static class ThemeOptions

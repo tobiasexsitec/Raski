@@ -98,7 +98,8 @@ public sealed class AuthService(FirebaseInterop interop) : IAuthService, IAsyncD
             IsGlobalAdmin = existing?.IsGlobalAdmin ?? false,
             Allergies = AllergyNames.Distinct(existing?.Allergies),
             Phone = existing?.Phone ?? "",
-            OnboardingCompleted = existing is not null && (existing.OnboardingCompleted ?? true)
+            OnboardingCompleted = existing is not null && (existing.OnboardingCompleted ?? true),
+            LastSeenVersion = existing?.LastSeenVersion
         };
 
         // Built as a dictionary so createdAt is only written once; a null value

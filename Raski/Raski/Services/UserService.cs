@@ -36,13 +36,34 @@ public sealed class UserService(FirebaseInterop interop, IAuthService authServic
     {
         var uid = authService.Current?.Uid ?? throw new InvalidOperationException("Ingen inloggad användare.");
 
+        // New users have nothing to catch up on, so the news popup starts from the current version.
+        var version = AppInfo.Version;
+
         await interop.UpdateDocumentAsync($"users/{uid}", new
         {
             onboardingCompleted = true,
+            lastSeenVersion = version,
             updatedAt = FirestoreFormat.UtcNow()
         }, ct);
 
-        authService.UpdateCachedProfile(p => p.OnboardingCompleted = true);
+        authService.UpdateCachedProfile(p =>
+        {
+            p.OnboardingCompleted = true;
+            p.LastSeenVersion = version;
+        });
+    }
+
+    public async Task SaveMyLastSeenVersionAsync(string version, CancellationToken ct = default)
+    {
+        var uid = authService.Current?.Uid ?? throw new InvalidOperationException("Ingen inloggad användare.");
+
+        await interop.UpdateDocumentAsync($"users/{uid}", new
+        {
+            lastSeenVersion = version,
+            updatedAt = FirestoreFormat.UtcNow()
+        }, ct);
+
+        authService.UpdateCachedProfile(p => p.LastSeenVersion = version);
     }
 
     public async Task<IReadOnlyList<UserProfile>> GetAllAsync(CancellationToken ct = default)
