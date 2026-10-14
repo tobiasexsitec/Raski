@@ -29,7 +29,7 @@
 | [B-023](#b-023-ange-om-man-dricker-alkohol) | Ange om man dricker alkohol | Klar | – |
 | [B-024](#b-024-omröstningar-på-en-resa) | Omröstningar på en resa | Klar | – |
 | [B-025](#b-025-release-notes-i-appen) | Release notes i appen | Klar | – |
-| [B-026](#b-026-lägga-till-feature-requests-i-appen) | Lägga till feature requests i appen | Idé | – |
+| [B-026](#b-026-lägga-till-feature-requests-i-appen) | Lägga till feature requests i appen | Klar | – |
 | [B-027](#b-027-versionsnummer-0xy-före-släpp) | Versionsnummer 0.x.y före släpp | Klar | – |
 | [B-028](#b-028-egna-sektioner-under-vem-tar-med) | Egna sektioner under "Vem tar med" | Klar | – |
 | [B-029](#b-029-about-sida) | About-sida | Klar | – |
@@ -989,7 +989,7 @@ funktioner som tillkommit eller ändrats.
 
 ## B-026: Lägga till feature requests i appen
 
-- **Status:** Idé
+- **Status:** Klar
 - **Prioritet:** –
 
 ### User story
@@ -997,17 +997,30 @@ Som användare vill jag kunna lämna önskemål om nya funktioner direkt i appen
 att de kan hamna i backloggen.
 
 ### Acceptanskriterier
-- [ ] Inloggad användare kan skicka in en feature request (titel och beskrivning).
-- [ ] Inskickade feature requests sparas och kan läsas av admin.
+- [x] Inloggad användare kan skicka in en feature request (titel och beskrivning)
+      från Kontakt-sektionen på About-sidan.
+- [x] Kontakt-sektionen ligger längst ner på About-sidan, under Release notes.
+- [x] Inskickade feature requests sparas i Firestore.
+- [x] Globala admins kan se alla feature requests på en adminsida (`/admin/onskemal`).
 
 ### Öppna frågor
-- Var lagras de (Firestore, GitHub-issue)?
 - Ska användare kunna se och rösta på andras förslag?
 - Hur förs de över till backloggen?
 
+### Tekniska anteckningar
+- Collection `featureRequests/{id}` med `title`, `description`, `createdByUid`,
+  `createdByName`, `createdByEmail`, `createdAt`.
+- Regler: alla inloggade får skapa i eget namn, bara globala admins får läsa och radera.
+- `IFeatureRequestService` / `FeatureRequestService`, sida `Features/Admin/FeatureRequestAdmin.razor`.
+
+### Beslut
+- Lagras i Firestore (inte GitHub-issues).
+visas bara för admins).
+- Släppt i version 0.21.0.
+
 ---
 
-## B-027: Versionsnummer 0.x.y före släpp
+## B-027:
 
 - **Status:** Klar
 - **Prioritet:** –

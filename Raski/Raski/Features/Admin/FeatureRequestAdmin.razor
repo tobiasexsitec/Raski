@@ -1,0 +1,89 @@
+@page "/admin/onskemal"
+@inject IFeatureRequestService FeatureRequestService
+@inject IAuthService AuthService
+
+<PageTitle>Önskemål – Raski™</PageTitle>
+
+<div class="page-header">
+    <div>
+        <h1>Önskemål</h1>
+        <p class="muted">Funktioner som användare har önskat.</p>
+    </div>
+</div>
+
+@if (!AuthService.IsGlobalAdmin)
+{
+    <div class="empty-state card">
+        <p><strong>Du saknar behörighet.</strong></p>
+        <p>Bara globala admins kan se önskemål.</p>
+        <a class="btn btn-secondary" href="">Till mina resor</a>
+    </div>
+}
+else
+{
+    @if (errorMessage is not null)
+    {
+        <div class="error-banner">@errorMessage</div>
+    }
+
+    @if (isLoading)
+    {
+        <p class="muted">Hämtar önskemål…</p>
+    }
+    else if (requests.Count == 0)
+    {
+        <div class="empty-state card">
+            <p>Inga önskemål ännu.</p>
+        </div>
+    }
+    else
+    {
+        <ul class="request-list">
+            @foreach (var request in requests)
+            {
+                <li class="card stack">
+                    <h2 class="request-title">@request.Title</h2>
+                    @if (!string.IsNullOrWhiteSpace(request.Description))
+                    {
+                        <p class="request-description">@request.Description</p>
+                    }
+                    <p class="muted">
+                        @(string.IsNullOrWhiteSpace(request.CreatedByName) ? request.CreatedByEmail : request.CreatedByName)
+                        @if (request.CreatedAt is { } at)
+                        {
+                            <text> · </text><time datetime="@at.ToString("O")">@at.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</time>
+                        }
+                    </p>
+                </li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    private List<FeatureRequest> requests = [];
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthService.IsGlobalAdmin)
+        {
+            isLoading = false;
+            return;
+        }
+
+        try
+        {
+            requests = [.. await FeatureRequestService.GetAllAsync()];
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Kunde inte hämta önskemålen. {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

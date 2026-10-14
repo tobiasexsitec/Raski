@@ -1,5 +1,7 @@
 @page "/about"
 @inject IReleaseNotesService ReleaseNotesService
+@inject IFeatureRequestService FeatureRequestService
+@inject IAuthService AuthService
 
 <PageTitle>Om Raski™</PageTitle>
 
@@ -15,14 +17,6 @@
             <p>@section.Text</p>
         }
         <p class="muted">Version <strong>@AppVersion</strong></p>
-    </section>
-
-    <section class="card stack" aria-labelledby="about-contact">
-        <h2 id="about-contact">Kontakt</h2>
-        <p>
-            Raski™ utvecklas av @ContactName. Har du frågor, hittat en bugg eller har ett
-            förslag? Hör av dig till <a href="mailto:@ContactEmail">@ContactEmail</a>.
-        </p>
     </section>
 
     <section class="card stack" aria-labelledby="about-release-notes">
@@ -59,6 +53,44 @@
             </ul>
         }
     </section>
+
+    <section class="card stack" aria-labelledby="about-contact">
+        <h2 id="about-contact">Kontakt</h2>
+        <p>
+            Raski™ utvecklas av @ContactName. Har du frågor, hittat en bugg eller har ett
+            förslag? Hör av dig till <a href="mailto:@ContactEmail">@ContactEmail</a>.
+        </p>
+
+        @if (AuthService.Current is not null)
+        {
+            <h3 id="about-feature-request">Önska en funktion</h3>
+            @if (requestErrorMessage is not null)
+            {
+                <div class="error-banner" role="alert">@requestErrorMessage</div>
+            }
+            @if (requestSent)
+            {
+                <p role="status">Tack! Ditt önskemål har skickats.</p>
+            }
+            <div class="field">
+                <label class="field-label" for="feature-title">Titel</label>
+                <input id="feature-title" maxlength="200" @bind="requestTitle" @bind:event="oninput" />
+            </div>
+            <div class="field">
+                <label class="field-label" for="feature-description">Beskrivning</label>
+                <textarea id="feature-description" rows="4" maxlength="5000" @bind="requestDescription" @bind:event="oninput"></textarea>
+            </div>
+            <div class="row-inline">
+                <button type="button" class="btn btn-primary" disabled="@isSending" @onclick="SubmitRequestAsync">
+                    @(isSending ? "Skickar…" : "Skicka önskemål")
+                </button>
+                @if (AuthService.IsGlobalAdmin)
+                {
+                    <a class="btn btn-secondary" href="admin/onskemal">Visa alla önskemål</a>
+                }
+            </div>
+        }
+    </section>
 </div>
 
 @code {
@@ -75,6 +107,41 @@
 
     private IReadOnlyList<ReleaseNote>? releases;
     private string? errorMessage;
+
+    private string requestTitle = "";
+    private string requestDescription = "";
+    private bool isSending;
+    private bool requestSent;
+    private string? requestErrorMessage;
+
+    private async Task SubmitRequestAsync()
+    {
+        requestErrorMessage = null;
+        requestSent = false;
+
+        if (string.IsNullOrWhiteSpace(requestTitle))
+        {
+            requestErrorMessage = "Ange en titel.";
+            return;
+        }
+
+        isSending = true;
+        try
+        {
+            await FeatureRequestService.SubmitAsync(requestTitle, requestDescription);
+            requestTitle = "";
+            requestDescription = "";
+            requestSent = true;
+        }
+        catch (Exception ex)
+        {
+            requestErrorMessage = $"Kunde inte skicka önskemålet. {ex.Message}";
+        }
+        finally
+        {
+            isSending = false;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {

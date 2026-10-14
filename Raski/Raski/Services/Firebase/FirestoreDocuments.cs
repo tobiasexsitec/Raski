@@ -55,6 +55,30 @@ internal sealed class UserDocument
     };
 }
 
+internal sealed class FeatureRequestDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("title")] public string? Title { get; set; }
+    [JsonPropertyName("description")] public string? Description { get; set; }
+    [JsonPropertyName("createdByUid")] public string? CreatedByUid { get; set; }
+    [JsonPropertyName("createdByName")] public string? CreatedByName { get; set; }
+    [JsonPropertyName("createdByEmail")] public string? CreatedByEmail { get; set; }
+    [JsonPropertyName("createdAt")] public string? CreatedAt { get; set; }
+
+    public FeatureRequest ToModel() => new()
+    {
+        Id = Id,
+        Title = Title ?? "",
+        Description = Description ?? "",
+        CreatedByUid = CreatedByUid ?? "",
+        CreatedByName = CreatedByName ?? "",
+        CreatedByEmail = CreatedByEmail ?? "",
+        CreatedAt = DateTimeOffset.TryParse(CreatedAt, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var at)
+            ? at
+            : null
+    };
+}
+
 internal sealed class TripDocument
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";

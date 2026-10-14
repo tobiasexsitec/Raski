@@ -26,6 +26,7 @@ builder.Services.AddSingleton<IBringItemService, BringItemService>();
 builder.Services.AddSingleton<IBringSectionService, BringSectionService>();
 builder.Services.AddSingleton<IPollService, PollService>();
 builder.Services.AddSingleton<IShoppingListService, ShoppingListService>();
+builder.Services.AddSingleton<IFeatureRequestService, FeatureRequestService>();
 builder.Services.AddSingleton(new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddSingleton<IReleaseNotesService, ReleaseNotesService>();
 

@@ -192,6 +192,21 @@ service cloud.firestore {
 	  allow delete: if false;
 	}
 
+	// Feature requests can be submitted by any signed-in user in their own
+	// name but are only readable by global admins.
+	match /featureRequests/{requestId} {
+	  allow read: if isGlobalAdmin();
+	  allow create: if isSignedIn()
+					&& request.resource.data.createdByUid == request.auth.uid
+					&& request.resource.data.title is string
+					&& request.resource.data.title.size() > 0
+					&& request.resource.data.title.size() <= 200
+					&& request.resource.data.description is string
+					&& request.resource.data.description.size() <= 5000;
+	  allow update: if false;
+	  allow delete: if isGlobalAdmin();
+	}
+
 	match /tags/{tagId} {
 	  allow read, create, update: if isSignedIn();
 	  allow delete: if false;
