@@ -105,3 +105,13 @@ Mönstret finns i `MealService.ObserveMeals` / `ShoppingListService`: en bounded
   - Innehåller en release både `feat` och `fix` höjs minor. Major höjs endast när användaren uttryckligen säger till; `BREAKING CHANGE`/`!` styr inte versionen.
   - Vid versionshöjning: ange den nya versionen under **Beslut** i objektfilen (t.ex. `- Släppt i version 0.5.0.`). Release notes och nyhets-popupen ska bara innehålla `feat`/`fix`. Appen är inte släppt ännu, så versionen ligger på 0.x.y tills 1.0.0 släpps.
 - När du redigerar tabellerna i `Raski/DevOps/backlog.md`, följ reglerna i filen: ersätt alltid hela raden och läs igenom tabellerna efteråt. **Öppna** har kolumnerna ID, Titel, Typ, Status, Prioritet, Skapad i nummerordning; **Klara** har ID, Titel, Typ, Prioritet, Klar med senast klar överst. Varje fil i `items/` ska finnas i exakt en tabell, och typ, status och datum ska matcha objektfilerna.
+
+## ⚠️ KRITISKT: Redigering av backlog-tabellerna
+
+Tabellerna i `Raski/DevOps/backlog.md` har gått sönder flera gånger. Ett känt fel: `oldString` matchade bara **slutet** av en rad (t.ex. `| Utveckling | Idé | – | 2026-10-22 |`), så att början av raden med ID och titel försvann. Följ därför ALLTID detta:
+
+1. Läs tabellen med radnummer **innan** du ändrar.
+2. `oldString` och `newString` ska bestå av **hela rader**, från `| [B-XXX](items/...)` till sista `|`. Matcha aldrig på ett radfragment eller på bara de sista kolumnerna.
+3. För att lägga till en rad: ta med hela föregående rad (inkl. ID-länken) i `oldString` och upprepa den oförändrad i `newString` följt av den nya raden.
+4. Läs tabellen igen **efter** ändringen och kontrollera rad för rad att varje rad börjar med `| [B-XXX](items/B-XXX-....md) |`, har rätt antal kolumner och att inga rader har försvunnit eller dubblerats.
+5. Rapportera aldrig arbetet som klart förrän denna kontroll är gjord och eventuella fel är rättade.
