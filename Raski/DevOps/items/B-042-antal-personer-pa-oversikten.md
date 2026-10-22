@@ -3,6 +3,7 @@
 - **Status:** Idé
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-14
 
 ## Beskrivning
 Översikten på resan ska visa hur många personer som är med.

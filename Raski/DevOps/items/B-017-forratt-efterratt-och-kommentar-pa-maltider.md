@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-01
+- **Klar:** 2026-10-01
 
 ## Beskrivning
 Måltidstypen kunde bara vara lunch eller middag. Man ska även kunna välja

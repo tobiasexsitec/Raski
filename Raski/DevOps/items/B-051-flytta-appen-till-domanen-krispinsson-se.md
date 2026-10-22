@@ -3,6 +3,7 @@
 - **Status:** Idé
 - **Typ:** Utveckling
 - **Prioritet:** –
+- **Skapad:** 2026-10-22
 
 ## Beskrivning
 Appen ska flyttas från nuvarande domän till en domän under krispinsson.se, som ägs

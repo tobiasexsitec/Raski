@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Utveckling
 - **Prioritet:** –
+- **Skapad:** 2026-09-30
+- **Klar:** 2026-09-30
 - **Beroenden:** B-012
 
 ## Beskrivning

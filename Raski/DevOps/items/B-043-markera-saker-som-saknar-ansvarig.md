@@ -3,6 +3,7 @@
 - **Status:** Idé
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-14
 
 ## Beskrivning
 Det ska tydligt framgå när något på en resa (t.ex. måltider eller "Vem tar med")

@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-14
+- **Klar:** 2026-10-14
 
 ## Beskrivning
 När en användare öppnar appen efter en ny version visas en popup "Nya features" med

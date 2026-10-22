@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-01
+- **Klar:** 2026-10-01
 
 ## Beskrivning
 I fältet Övrig info ska man kunna skapa rubriker i flera nivåer genom att inleda

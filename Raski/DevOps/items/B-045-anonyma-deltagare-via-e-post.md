@@ -3,6 +3,7 @@
 - **Status:** Idé
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-14
 
 ## Beskrivning
 Man ska kunna lägga till en deltagare på en resa med bara e-post, utan att personen

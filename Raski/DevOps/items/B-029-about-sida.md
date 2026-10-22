@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-04
+- **Klar:** 2026-10-04
 
 ## Beskrivning
 En About-sida med information om appen, nåbar via en länk i toppraden bredvid

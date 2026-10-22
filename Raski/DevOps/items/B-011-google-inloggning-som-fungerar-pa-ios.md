@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-09-30
+- **Klar:** 2026-09-30
 
 ## Beskrivning
 På iPhone (Chrome och Safari, båda WebKit) hängde inloggningen på "Loggar in…".

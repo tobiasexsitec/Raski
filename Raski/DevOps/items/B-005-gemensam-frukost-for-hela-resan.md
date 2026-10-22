@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-09-29
+- **Klar:** 2026-09-29
 
 ## Beskrivning
 Frukost är en måltid som äts varje dag, men innehållet är i regel detsamma alla

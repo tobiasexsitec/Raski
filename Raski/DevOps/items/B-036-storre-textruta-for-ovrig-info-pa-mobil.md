@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-05
+- **Klar:** 2026-10-05
 
 ## Beskrivning
 När texten i Övrig info blir längre är textrutan för liten på telefonen och det

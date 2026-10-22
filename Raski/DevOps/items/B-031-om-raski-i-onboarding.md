@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-04
+- **Klar:** 2026-10-04
 
 ## Beskrivning
 About-texten (B-029) visas som en del av onboardingen, uppdelad i några korta

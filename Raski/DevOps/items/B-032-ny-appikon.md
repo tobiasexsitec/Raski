@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-04
+- **Klar:** 2026-10-04
 
 ## Beskrivning
 En egen, snygg appikon för PWA:n (hemskärm, favicon) i stället för

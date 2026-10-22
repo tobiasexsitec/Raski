@@ -3,6 +3,7 @@
 - **Status:** Idé
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-14
 
 ## Beskrivning
 Man ska kunna registrera sina barn samt vilka man "hör ihop med" (t.ex. partner).

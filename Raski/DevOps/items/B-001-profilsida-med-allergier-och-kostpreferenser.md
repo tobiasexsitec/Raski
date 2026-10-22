@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-09-29
+- **Klar:** 2026-09-29
 
 ## Beskrivning
 Ny profilsida där användaren registrerar sina allergier och kostpreferenser.

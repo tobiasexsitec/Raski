@@ -3,6 +3,7 @@
 - **Status:** Redo
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-09-29
 - **Beroenden:** B-002, B-003
 
 ## User story

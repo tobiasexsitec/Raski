@@ -3,6 +3,7 @@
 - **Status:** Idé
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-14
 
 ## Beskrivning
 Man ska kunna välja ett tema för resan, t.ex. skidresa eller höstresa, som påverkar

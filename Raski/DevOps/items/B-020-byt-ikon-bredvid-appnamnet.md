@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-01
+- **Klar:** 2026-10-04
 
 ## Beskrivning
 Ikonen bredvid appnamnet uppe till vänster ska inte vara en morot.

@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-01
+- **Klar:** 2026-10-02
 
 ## User story
 Som resenär vill jag kunna skapa en omröstning med en fråga och svarsalternativ

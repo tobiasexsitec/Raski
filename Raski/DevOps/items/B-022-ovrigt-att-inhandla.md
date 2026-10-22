@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-01
+- **Klar:** 2026-10-14
 
 ## Beskrivning
 Man måste kunna lägga till övriga saker som ska inhandlas och som inte hör till

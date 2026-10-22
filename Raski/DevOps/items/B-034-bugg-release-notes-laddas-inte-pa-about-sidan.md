@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Bugg
 - **Prioritet:** Hög
+- **Skapad:** 2026-10-05
+- **Klar:** 2026-10-05
 
 ## Beskrivning
 About-sidan visar

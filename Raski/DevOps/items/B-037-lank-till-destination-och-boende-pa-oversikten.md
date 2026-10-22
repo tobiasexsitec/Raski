@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-05
+- **Klar:** 2026-10-05
 
 ## Beskrivning
 Det ska gå att lägga till en länk (t.ex. till Google Maps) för resans destination.

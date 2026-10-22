@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-01
+- **Klar:** 2026-10-01
 
 ## Beskrivning
 När man bjuder in någon till en resa ska man kunna välja bland användare som

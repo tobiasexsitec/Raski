@@ -3,6 +3,7 @@
 - **Status:** Redo
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-09-29
 - **Beroenden:** B-001 (förslagslistan)
 
 ## User story

@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-14
+- **Klar:** 2026-10-14
 
 ## Beskrivning
 En rad under "Vem tar med" ska kunna markeras med "Lägg till på inköpslista", så att

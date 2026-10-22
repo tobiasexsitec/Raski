@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-05
+- **Klar:** 2026-10-05
 
 ## Beskrivning
 Varje version i release notes på About-sidan visar ett datum bredvid badgen med

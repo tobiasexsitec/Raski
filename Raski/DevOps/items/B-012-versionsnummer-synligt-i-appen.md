@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-09-30
+- **Klar:** 2026-09-30
 
 ## Beskrivning
 Appens versionsnummer ska synas i GUI:t på alla sidor, så att man enkelt ser

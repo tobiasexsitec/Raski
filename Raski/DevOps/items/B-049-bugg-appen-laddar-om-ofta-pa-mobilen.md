@@ -3,6 +3,7 @@
 - **Status:** Idé
 - **Typ:** Bugg
 - **Prioritet:** Hög
+- **Skapad:** 2026-10-14
 
 ## Beskrivning
 Appen laddar om väldigt ofta på mobilen, t.ex. när man lägger till en ingrediens.

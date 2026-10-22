@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Utveckling
 - **Prioritet:** –
+- **Skapad:** 2026-10-02
+- **Klar:** 2026-10-04
 
 ## Beskrivning
 Appen är inte helt släppt ännu och versionsnumret ska därför vara 0.x.y.

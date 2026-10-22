@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-05
+- **Klar:** 2026-10-05
 
 ## Beskrivning
 Övrig info var begränsad till 2000 tecken, vilket är för kort. Dessutom gick det

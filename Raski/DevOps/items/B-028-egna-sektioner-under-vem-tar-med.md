@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-02
+- **Klar:** 2026-10-02
 - **Beroenden:** B-007
 
 ## Beskrivning

@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Utveckling
 - **Prioritet:** –
+- **Skapad:** 2026-10-22
+- **Klar:** 2026-10-22
 
 ## Beskrivning
 Inför [Conventional Commits](https://www.conventionalcommits.org/) i commit-meddelanden så att

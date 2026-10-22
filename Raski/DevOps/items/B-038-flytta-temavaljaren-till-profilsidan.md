@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-05
+- **Klar:** 2026-10-05
 
 ## Beskrivning
 Väljaren för ljust/mörkt tema ligger i dag i appens toppfält. Den flyttas till profilsidan

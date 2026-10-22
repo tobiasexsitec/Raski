@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-02
+- **Klar:** 2026-10-14
 
 ## User story
 Som användare vill jag kunna lämna önskemål om nya funktioner direkt i appen så

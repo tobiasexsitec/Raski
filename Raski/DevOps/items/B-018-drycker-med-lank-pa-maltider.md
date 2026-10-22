@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-01
+- **Klar:** 2026-10-01
 
 ## Beskrivning
 Man ska kunna lägga till en eller flera drycker på en måltid. Varje dryck ska

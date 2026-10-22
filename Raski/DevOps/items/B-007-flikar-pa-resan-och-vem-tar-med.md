@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-09-29
+- **Klar:** 2026-09-29
 
 ## Beskrivning
 Resans sida delas upp i flera flikar. En ny flik, **"Vem tar med"**, innehåller

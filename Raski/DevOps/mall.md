@@ -9,6 +9,8 @@ Kopiera till `items/B-XXX-titel-som-slug.md` och lägg till en rad i
 - **Status:** Idé
 - **Typ:** Funktion | Bugg | Utveckling
 - **Prioritet:** –
+- **Skapad:** ÅÅÅÅ-MM-DD
+- **Klar:** ÅÅÅÅ-MM-DD (läggs till när objektet blir Klar)
 
 ## Beskrivning
 Vad och varför.

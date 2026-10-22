@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-04
+- **Klar:** 2026-10-04
 
 ## Beskrivning
 Appnamnet ska visas som Raski™ (trademark) överallt där det syns för användaren.

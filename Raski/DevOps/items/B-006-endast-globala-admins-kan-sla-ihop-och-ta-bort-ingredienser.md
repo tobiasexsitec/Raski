@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-09-29
+- **Klar:** 2026-09-29
 
 ## Beskrivning
 Att slå ihop eller ta bort ingredienser påverkar data för alla användare och

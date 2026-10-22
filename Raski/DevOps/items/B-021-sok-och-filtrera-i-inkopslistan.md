@@ -3,6 +3,7 @@
 - **Status:** Idé
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-01
 
 ## User story
 Som resenär vill jag kunna söka och filtrera i inköpslistan så att jag snabbt

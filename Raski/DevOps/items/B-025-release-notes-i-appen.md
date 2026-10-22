@@ -3,6 +3,8 @@
 - **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
+- **Skapad:** 2026-10-02
+- **Klar:** 2026-10-05
 
 ## User story
 Som användare vill jag kunna se vad som är nytt i appen så att jag vet vilka
