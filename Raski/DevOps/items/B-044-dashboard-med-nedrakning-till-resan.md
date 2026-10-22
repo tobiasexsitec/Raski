@@ -1,6 +1,7 @@
 # B-044: Dashboard med nedräkning till resan
 
 - **Status:** Idé
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

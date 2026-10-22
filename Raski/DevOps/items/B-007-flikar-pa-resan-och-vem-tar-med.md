@@ -1,6 +1,7 @@
 # B-007: Flikar på resan och "Vem tar med"
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

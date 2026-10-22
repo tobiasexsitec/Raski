@@ -1,6 +1,7 @@
 # B-034: Bugg: Release notes laddas inte på About-sidan
 
 - **Status:** Klar
+- **Typ:** Bugg
 - **Prioritet:** Hög
 
 ## Beskrivning

@@ -53,6 +53,22 @@ ligger i security rules.
 dotnet run --project Raski/Raski/Raski.csproj
 ```
 
+### 4. Commit-meddelanden
+
+Commits följer [Conventional Commits](https://www.conventionalcommits.org/) och valideras
+lokalt med commitlint via en `commit-msg`-hook. Aktivera en gång per klon (kräver Node):
+
+```powershell
+npm install --prefix tools/commitlint
+git config core.hooksPath .githooks
+```
+
+| Typ | Används för | Version |
+| --- | --- | --- |
+| `feat` | Ny funktion | minor (`0.4.2` → `0.5.0`) |
+| `fix` | Buggfix | patch (`0.4.2` → `0.4.3`) |
+| `chore`, `docs`, `refactor`, `style`, `test`, `build`, `ci` | Utvecklarändringar | ingen höjning |
+
 ## Deploya security rules
 
 Reglerna ligger i `firestore.rules` i repots rot.

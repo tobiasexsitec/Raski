@@ -1,6 +1,7 @@
 # B-015: Rubriker och fet stil i Övrig info
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

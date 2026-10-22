@@ -1,6 +1,7 @@
 # B-029: About-sida
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

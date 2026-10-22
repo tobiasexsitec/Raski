@@ -1,6 +1,7 @@
 # B-032: Ny appikon
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

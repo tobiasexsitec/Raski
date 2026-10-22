@@ -1,6 +1,7 @@
 # B-019: Gemensam dryck för hela resan
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 - **Beroenden:** B-005, B-018
 

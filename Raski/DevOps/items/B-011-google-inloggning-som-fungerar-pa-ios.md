@@ -1,6 +1,7 @@
 # B-011: Google-inloggning som fungerar på iOS
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

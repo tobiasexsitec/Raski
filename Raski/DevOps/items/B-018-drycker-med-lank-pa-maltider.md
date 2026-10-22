@@ -1,6 +1,7 @@
 # B-018: Drycker med länk på måltider
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

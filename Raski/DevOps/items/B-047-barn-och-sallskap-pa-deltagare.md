@@ -1,6 +1,7 @@
 # B-047: Barn och sällskap på deltagare
 
 - **Status:** Idé
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

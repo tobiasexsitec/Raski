@@ -1,6 +1,7 @@
 # B-031: Om Raski™ i onboarding
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

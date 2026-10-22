@@ -1,6 +1,7 @@
 # B-010: Onboarding för nya användare
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 - **Beroenden:** B-001, B-009
 

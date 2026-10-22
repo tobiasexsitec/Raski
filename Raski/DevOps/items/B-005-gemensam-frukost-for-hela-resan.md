@@ -1,6 +1,7 @@
 # B-005: Gemensam frukost för hela resan
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

@@ -1,6 +1,7 @@
 # B-025: Release notes i appen
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## User story

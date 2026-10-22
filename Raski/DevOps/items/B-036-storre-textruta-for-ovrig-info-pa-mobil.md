@@ -1,6 +1,7 @@
 # B-036: Större textruta för Övrig info på mobil
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

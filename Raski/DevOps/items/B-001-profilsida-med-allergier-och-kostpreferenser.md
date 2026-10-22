@@ -1,6 +1,7 @@
 # B-001: Profilsida med allergier och kostpreferenser
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

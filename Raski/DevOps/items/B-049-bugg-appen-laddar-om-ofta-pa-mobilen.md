@@ -1,6 +1,7 @@
 # B-049: Bugg: Appen laddar om ofta på mobilen
 
 - **Status:** Idé
+- **Typ:** Bugg
 - **Prioritet:** Hög
 
 ## Beskrivning

@@ -1,6 +1,7 @@
 # B-043: Markera saker som saknar ansvarig
 
 - **Status:** Idé
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

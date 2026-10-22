@@ -1,6 +1,7 @@
 # B-023: Ange om man dricker alkohol
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

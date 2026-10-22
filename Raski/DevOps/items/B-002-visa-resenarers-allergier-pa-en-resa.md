@@ -1,6 +1,7 @@
 # B-002: Visa resenärers allergier på en resa
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 - **Beroenden:** B-001
 

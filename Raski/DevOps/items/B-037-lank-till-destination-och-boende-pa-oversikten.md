@@ -1,6 +1,7 @@
 # B-037: Länk till destination och boende på översikten
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

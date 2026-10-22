@@ -1,6 +1,7 @@
 # B-048: Popup med nyheter vid ny version
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

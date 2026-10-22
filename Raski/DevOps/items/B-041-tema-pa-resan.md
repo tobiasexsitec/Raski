@@ -1,6 +1,7 @@
 # B-041: Tema på resan
 
 - **Status:** Idé
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

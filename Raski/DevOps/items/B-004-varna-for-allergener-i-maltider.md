@@ -1,6 +1,7 @@
 # B-004: Varna för allergener i måltider
 
 - **Status:** Redo
+- **Typ:** Funktion
 - **Prioritet:** –
 - **Beroenden:** B-002, B-003
 

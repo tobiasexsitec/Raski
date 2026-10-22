@@ -1,6 +1,7 @@
 # B-022: Övrigt att inhandla
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

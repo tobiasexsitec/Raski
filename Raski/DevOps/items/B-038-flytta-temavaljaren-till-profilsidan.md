@@ -1,6 +1,7 @@
 # B-038: Flytta temaväljaren till profilsidan
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

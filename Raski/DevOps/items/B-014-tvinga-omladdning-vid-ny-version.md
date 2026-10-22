@@ -1,6 +1,7 @@
 # B-014: Tvinga omladdning vid ny version
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 - **Beroenden:** B-012
 

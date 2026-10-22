@@ -1,6 +1,7 @@
 # B-017: Förrätt, efterrätt och kommentar på måltider
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

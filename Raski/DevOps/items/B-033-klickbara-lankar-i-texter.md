@@ -1,6 +1,7 @@
 # B-033: Klickbara länkar i texter
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

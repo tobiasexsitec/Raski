@@ -1,6 +1,7 @@
 # B-030: Raski™ som varumärke
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

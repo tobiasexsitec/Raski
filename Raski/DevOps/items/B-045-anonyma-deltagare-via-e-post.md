@@ -1,6 +1,7 @@
 # B-045: Anonyma deltagare via e-post
 
 - **Status:** Idé
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

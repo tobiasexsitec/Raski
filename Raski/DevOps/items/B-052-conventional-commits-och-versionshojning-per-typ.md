@@ -1,6 +1,7 @@
 # B-052: Conventional commits och versionshöjning per typ
 
-- **Status:** Idé
+- **Status:** Klar
+- **Typ:** Utveckling
 - **Prioritet:** –
 
 ## Beskrivning
@@ -20,15 +21,15 @@ versionen bara höjs när användarna faktiskt får något nytt och så att rät
 Som användare vill jag bara se en ny version när något har ändrats för mig.
 
 ## Acceptanskriterier
-- [ ] Commit-meddelanden följer formatet `<typ>(<valfritt scope>): <beskrivning>`.
-- [ ] `feat` höjer minor-versionen och nollställer patch.
-- [ ] `fix` höjer patch-versionen.
-- [ ] Övriga typer (`chore`, `docs`, `refactor` m.fl.) höjer inte versionen och ger ingen ny release notes-post.
-- [ ] Konventionen är dokumenterad i `.github/copilot-instructions.md` (och ev. README).
-- [ ] Arbetsflödet för att markera backlog-objekt som "Klar" uppdateras så att versionshöjning beror på objektets typ i stället för att alltid höja minor.
-- [ ] Commit-meddelanden valideras med commitlint; commits som inte följer formatet stoppas.
-- [ ] Varje backlog-objekt har en **Typ** (Funktion, Bugg eller Utveckling) som avgör commit-typ och versionshöjning.
-- [ ] Befintliga backlog-objekt har fått en typ.
+- [x] Commit-meddelanden följer formatet `<typ>(<valfritt scope>): <beskrivning>`.
+- [x] `feat` höjer minor-versionen och nollställer patch.
+- [x] `fix` höjer patch-versionen.
+- [x] Övriga typer (`chore`, `docs`, `refactor` m.fl.) höjer inte versionen och ger ingen ny release notes-post.
+- [x] Konventionen är dokumenterad i `.github/copilot-instructions.md` (och ev. README).
+- [x] Arbetsflödet för att markera backlog-objekt som "Klar" uppdateras så att versionshöjning beror på objektets typ i stället för att alltid höja minor.
+- [x] Commit-meddelanden valideras med commitlint; commits som inte följer formatet stoppas.
+- [x] Varje backlog-objekt har en **Typ** (Funktion, Bugg eller Utveckling) som avgör commit-typ och versionshöjning.
+- [x] Befintliga backlog-objekt har fått en typ.
 
 ## Öppna frågor
 - –

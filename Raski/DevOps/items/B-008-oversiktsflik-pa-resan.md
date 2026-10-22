@@ -1,6 +1,7 @@
 # B-008: Översiktsflik på resan
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 - **Beroenden:** B-007
 

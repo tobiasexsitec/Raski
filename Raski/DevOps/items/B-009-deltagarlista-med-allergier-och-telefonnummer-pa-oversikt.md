@@ -1,6 +1,7 @@
 # B-009: Deltagarlista med allergier och telefonnummer på Översikt
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 - **Beroenden:** B-002, B-008
 

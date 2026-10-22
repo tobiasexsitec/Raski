@@ -1,6 +1,7 @@
 # B-050: Lägg till sak från "Vem tar med" på inköpslistan
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

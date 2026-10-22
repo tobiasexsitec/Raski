@@ -1,6 +1,7 @@
 # B-006: Endast globala admins kan slå ihop och ta bort ingredienser
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

@@ -1,6 +1,7 @@
 # B-051: Flytta appen till domänen krispinsson.se
 
 - **Status:** Idé
+- **Typ:** Utveckling
 - **Prioritet:** –
 
 ## Beskrivning

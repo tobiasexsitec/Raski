@@ -1,6 +1,7 @@
 # B-042: Antal personer på översikten
 
 - **Status:** Idé
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

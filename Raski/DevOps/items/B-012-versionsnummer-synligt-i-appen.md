@@ -1,6 +1,7 @@
 # B-012: Versionsnummer synligt i appen
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

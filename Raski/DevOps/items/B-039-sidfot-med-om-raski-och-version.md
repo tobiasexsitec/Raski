@@ -1,6 +1,7 @@
 # B-039: Sidfot med Om Raski™ och version
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

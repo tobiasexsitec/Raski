@@ -1,0 +1,12 @@
+#!/bin/sh
+# Validates the commit message against Conventional Commits (B-052).
+# Activate once per clone: git config core.hooksPath .githooks
+root="$(git rev-parse --show-toplevel)"
+dir="$root/tools/commitlint"
+
+if [ ! -d "$dir/node_modules" ]; then
+  echo "commitlint saknas. Kör: npm install --prefix tools/commitlint" >&2
+  exit 1
+fi
+
+exec node "$dir/node_modules/@commitlint/cli/cli.js" --config "$dir/commitlint.config.mjs" --edit "$1"

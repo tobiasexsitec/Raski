@@ -1,6 +1,7 @@
 # B-035: Längre text i Övrig info
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

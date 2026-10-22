@@ -1,6 +1,7 @@
 # B-021: Sök och filtrera i inköpslistan
 
 - **Status:** Idé
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## User story

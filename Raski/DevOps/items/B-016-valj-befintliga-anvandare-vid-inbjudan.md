@@ -1,6 +1,7 @@
 # B-016: Välj befintliga användare vid inbjudan
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

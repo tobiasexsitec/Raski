@@ -1,6 +1,7 @@
 # B-003: Märk ingredienser med allergener
 
 - **Status:** Redo
+- **Typ:** Funktion
 - **Prioritet:** –
 - **Beroenden:** B-001 (förslagslistan)
 

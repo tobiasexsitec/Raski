@@ -1,6 +1,7 @@
 # B-028: Egna sektioner under "Vem tar med"
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 - **Beroenden:** B-007
 

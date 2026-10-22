@@ -1,6 +1,7 @@
 # B-026: Lägga till feature requests i appen
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## User story

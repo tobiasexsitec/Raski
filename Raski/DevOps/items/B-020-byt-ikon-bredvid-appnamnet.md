@@ -1,6 +1,7 @@
 # B-020: Byt ikon bredvid appnamnet
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

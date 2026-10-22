@@ -1,6 +1,7 @@
 # B-040: Datum i release notes
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

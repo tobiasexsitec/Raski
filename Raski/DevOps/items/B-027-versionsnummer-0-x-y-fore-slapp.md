@@ -1,6 +1,7 @@
 # B-027: Versionsnummer 0.x.y före släpp
 
 - **Status:** Klar
+- **Typ:** Utveckling
 - **Prioritet:** –
 
 ## Beskrivning

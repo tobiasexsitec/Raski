@@ -1,6 +1,7 @@
 # B-046: Koppla anonym deltagare till befintlig användare
 
 - **Status:** Idé
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## Beskrivning

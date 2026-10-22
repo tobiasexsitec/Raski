@@ -1,6 +1,7 @@
 # B-013: Höj versionsnumret vid varje release
 
 - **Status:** Klar
+- **Typ:** Utveckling
 - **Prioritet:** –
 - **Beroenden:** B-012
 

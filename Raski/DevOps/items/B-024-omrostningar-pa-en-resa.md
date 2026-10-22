@@ -1,6 +1,7 @@
 # B-024: Omröstningar på en resa
 
 - **Status:** Klar
+- **Typ:** Funktion
 - **Prioritet:** –
 
 ## User story

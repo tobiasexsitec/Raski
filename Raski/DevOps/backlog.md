@@ -55,7 +55,7 @@
 | [B-049](items/B-049-bugg-appen-laddar-om-ofta-pa-mobilen.md) | Bugg: Appen laddar om ofta på mobilen | Idé | Hög |
 | [B-050](items/B-050-lagg-till-sak-fran-vem-tar-med-pa-inkopslistan.md) | Lägg till sak från "Vem tar med" på inköpslistan | Klar | – |
 | [B-051](items/B-051-flytta-appen-till-domanen-krispinsson-se.md) | Flytta appen till domänen krispinsson.se | Idé | – |
-| [B-052](items/B-052-conventional-commits-och-versionshojning-per-typ.md) | Conventional commits och versionshöjning per typ | Idé | – |
+| [B-052](items/B-052-conventional-commits-och-versionshojning-per-typ.md) | Conventional commits och versionshöjning per typ | Klar | – |
 
 ## Struktur
 
