@@ -6,6 +6,11 @@
 <section class="card">
     <h2>Deltagare</h2>
 
+    @if (members.Count > 0)
+    {
+        <p class="muted" aria-live="polite">👥 @ParticipantSummary</p>
+    }
+
     @if (members.Count == 0)
     {
         <p class="muted">Inga deltagare ännu.</p>
@@ -181,6 +186,10 @@
     [Parameter, EditorRequired] public string TripId { get; set; } = "";
     [Parameter] public bool IsAdmin { get; set; }
     [Parameter] public DateOnly StartDate { get; set; }
+    [Parameter] public EventCallback<string?> ParticipantSummaryChanged { get; set; }
+
+    private string? loadedTripId;
+    private string? reportedSummary;
 
     private sealed record MemberGroup(List<TripMember> Members, List<Child> Children);
 
@@ -197,9 +206,46 @@
     private string? statusMessage;
     private string? errorMessage;
 
+    private int AttendingChildCount =>
+        groups.SelectMany(g => g.Children).Count(c => !excludedChildIds.Contains(c.Id));
+
+    private string ParticipantSummary
+    {
+        get
+        {
+            var adults = members.Count;
+            var children = AttendingChildCount;
+            var total = adults + children;
+            var totalText = total == 1 ? "1 person" : $"{total} personer";
+            if (children == 0)
+            {
+                return totalText;
+            }
+
+            var adultText = adults == 1 ? "1 vuxen" : $"{adults} vuxna";
+            return $"{totalText} ({adultText}, {children} barn)";
+        }
+    }
+
     protected override async Task OnParametersSetAsync()
     {
+        if (loadedTripId == TripId)
+        {
+            return;
+        }
+
+        loadedTripId = TripId;
         await ReloadAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var summary = members.Count > 0 ? ParticipantSummary : null;
+        if (summary != reportedSummary)
+        {
+            reportedSummary = summary;
+            await ParticipantSummaryChanged.InvokeAsync(summary);
+        }
     }
 
     private async Task ReloadAsync()

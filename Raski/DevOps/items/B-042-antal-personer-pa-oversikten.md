@@ -1,6 +1,6 @@
 # B-042: Antal personer på översikten
 
-- **Status:** Idé
+- **Status:** Klar (0.27)
 - **Typ:** Funktion
 - **Prioritet:** –
 - **Skapad:** 2026-10-14
@@ -12,8 +12,8 @@
 Som resenär vill jag se antalet deltagare så att jag kan planera mängder.
 
 ## Acceptanskriterier
-- [ ] Översikten visar antal deltagare.
-- [ ] Antalet uppdateras när deltagare läggs till eller tas bort.
+- [x] Översikten visar antal deltagare.
+- [x] Antalet uppdateras
 
 ## Öppna frågor
 - Ska väntande inbjudningar och anonyma deltagare (B-045) räknas?
@@ -23,4 +23,6 @@ Som resenär vill jag se antalet deltagare så att jag kan planera mängder.
 - Räknas från `trips/{tripId}/members`. UI i `TripOverview`.
 
 ## Beslut
-- –
+- Väntande inbjudningar (konton som inte skapats än) räknas med.
+- Visas som totalt med uppdelning, t.ex. "11 personer (8 vuxna, 3 barn)". Barn som inte följer med räknas inte.
+- Antalet visas i Översikt-sektionen (kolumn 2, första raden) och överst i deltagarpanelen (`MembersPanel`).

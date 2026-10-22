@@ -64,6 +64,8 @@ else if (trip is not null)
         {
             <section class="card">
                 <h2>Översikt</h2>
+                <div class="overview-grid">
+                <div class="overview-details">
                 @if (!string.IsNullOrWhiteSpace(trip.Destination) || trip.DestinationUrl is not null)
                 {
                     <p>
@@ -87,6 +89,12 @@ else if (trip is not null)
                     <p>📞 Värd – <a href="tel:@trip.AccommodationPhone.Replace(" ", "")">@trip.AccommodationPhone</a></p>
                 }
                 <p>📅 @trip.StartDate.ToString("yyyy-MM-dd") – @trip.EndDate.ToString("yyyy-MM-dd")</p>
+                </div>
+                @if (participantSummary is not null)
+                {
+                    <p class="overview-participants">👥 @participantSummary</p>
+                }
+                </div>
             </section>
 
             @if (!string.IsNullOrWhiteSpace(trip.Notes))
@@ -97,7 +105,10 @@ else if (trip is not null)
                 </section>
             }
 
-            <MembersPanel TripId="@TripId" StartDate="@trip.StartDate" IsAdmin="@(IsAdmin || CurrentUser?.IsGlobalAdmin == true)" />
+            <MembersPanel TripId="@TripId"
+                          StartDate="@trip.StartDate"
+                          IsAdmin="@(IsAdmin || CurrentUser?.IsGlobalAdmin == true)"
+                          ParticipantSummaryChanged="s => participantSummary = s" />
         }
         else if (CurrentTab == Tab.Bring)
         {
@@ -125,6 +136,7 @@ else if (trip is not null)
     private Trip? trip;
     private bool isLoading = true;
     private string? errorMessage;
+    private string? participantSummary;
 
     private bool IsAdmin => trip?.IsOwner(CurrentUser?.Uid) == true;
 
