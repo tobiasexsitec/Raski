@@ -16,6 +16,25 @@
     background: var(--surface-alt);
 }
 
+.member-group {
+    padding: var(--space-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+.member-group.single {
+    padding: 0;
+    border: none;
+}
+
+.member-group .member-list {
+    margin: 0;
+}
+
+.child.absent {
+    opacity: 0.6;
+}
+
 .avatar {
     width: 2.25rem;
     height: 2.25rem;

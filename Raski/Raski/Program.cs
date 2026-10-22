@@ -17,6 +17,7 @@ builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<IThemeService, ThemeService>();
 builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddSingleton<IAllergyService, AllergyService>();
+builder.Services.AddSingleton<IHouseholdService, HouseholdService>();
 builder.Services.AddSingleton<ITripService, TripService>();
 builder.Services.AddSingleton<IIngredientService, IngredientService>();
 builder.Services.AddSingleton<IMealService, MealService>();

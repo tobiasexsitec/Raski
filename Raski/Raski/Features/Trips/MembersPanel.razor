@@ -1,6 +1,7 @@
 @inject ITripService TripService
 @inject IUserService UserService
 @inject IAuthService AuthService
+@inject IHouseholdService HouseholdService
 
 <section class="card">
     <h2>Deltagare</h2>
@@ -12,7 +13,11 @@
     else
     {
         <ul class="member-list">
-            @foreach (var member in members)
+            @foreach (var group in groups)
+            {
+            <li class="@(group.Members.Count > 1 || group.Children.Count > 0 ? "member-group" : "member-group single")">
+            <ul class="member-list">
+            @foreach (var member in group.Members)
             {
                 <li class="member">
                     @if (!string.IsNullOrEmpty(member.PhotoUrl))
@@ -81,6 +86,38 @@
                     }
                 </li>
             }
+            @foreach (var child in group.Children)
+            {
+                var attending = !excludedChildIds.Contains(child.Id);
+                <li class="member child @(attending ? "" : "absent")">
+                    <span class="avatar avatar-fallback" aria-hidden="true">🧒</span>
+                    <span class="member-info">
+                        <strong>@child.Name</strong>
+                        <span class="muted">@child.AgeOn(StartDate) år@(attending ? "" : " · följer inte med")</span>
+                        @if (child.Allergies.Count > 0)
+                        {
+                            <span class="allergy-tags" aria-label="Allergier och kostpreferenser för @child.Name">
+                                @foreach (var allergy in child.Allergies)
+                                {
+                                    <span class="tag">@allergy</span>
+                                }
+                            </span>
+                        }
+                    </span>
+                    @if (IsAdmin || group.Members.Any(m => m.Uid == AuthService.Current?.Uid))
+                    {
+                        <button type="button"
+                                class="btn btn-secondary btn-sm"
+                                aria-pressed="@(attending ? "true" : "false")"
+                                @onclick="() => SetChildAttendingAsync(child, !attending)">
+                            @(attending ? "Välj bort" : "Ta med")
+                        </button>
+                    }
+                </li>
+            }
+            </ul>
+            </li>
+            }
         </ul>
 
         <div class="allergy-summary">
@@ -143,6 +180,12 @@
 @code {
     [Parameter, EditorRequired] public string TripId { get; set; } = "";
     [Parameter] public bool IsAdmin { get; set; }
+    [Parameter] public DateOnly StartDate { get; set; }
+
+    private sealed record MemberGroup(List<TripMember> Members, List<Child> Children);
+
+    private List<MemberGroup> groups = [];
+    private IReadOnlySet<string> excludedChildIds = new HashSet<string>();
 
     private List<TripMember> members = [];
     private Dictionary<string, List<string>> allergiesByUid = [];
@@ -173,6 +216,97 @@
         }
 
         await LoadAllergiesAsync();
+        await LoadHouseholdsAsync();
+    }
+
+    private async Task LoadHouseholdsAsync()
+    {
+        groups = [.. members.Select(m => new MemberGroup([m], []))];
+
+        try
+        {
+            var uids = members.Where(m => !m.IsPending).Select(m => m.Uid).ToList();
+            IReadOnlyList<Household> households = uids.Count == 0 ? [] : await HouseholdService.GetForMembersAsync(uids);
+            excludedChildIds = await HouseholdService.GetExcludedChildIdsAsync(TripId);
+
+            var householdByUid = uids.ToDictionary(
+                uid => uid,
+                uid => households.Where(h => h.MemberUids.Contains(uid)).ToList() is { Count: > 0 } mine
+                    ? Raski.Services.HouseholdService.PickPrimary(mine)
+                    : null);
+
+            var seenChildIds = new HashSet<string>();
+            var byHousehold = new Dictionary<string, MemberGroup>();
+            groups = [];
+
+            foreach (var member in members)
+            {
+                if (householdByUid.GetValueOrDefault(member.Uid) is not { } household)
+                {
+                    groups.Add(new MemberGroup([member], []));
+                    continue;
+                }
+
+                if (byHousehold.TryGetValue(household.Id, out var existing))
+                {
+                    existing.Members.Add(member);
+                    continue;
+                }
+
+                // Children keep their id when a household is split, so they are only listed once.
+                var children = household.Children
+                    .Where(c => seenChildIds.Add(c.Id))
+                    .OrderBy(c => c.BirthDate)
+                    .ToList();
+                var group = new MemberGroup([member], children);
+                byHousehold[household.Id] = group;
+                groups.Add(group);
+            }
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte hämta deltagarnas barn.";
+        }
+
+        UpdateAllAllergies();
+    }
+
+    private void UpdateAllAllergies()
+    {
+        allAllergies = [.. allergiesByUid.Values
+            .SelectMany(a => a)
+            .Concat(groups.SelectMany(g => g.Children)
+                .Where(c => !excludedChildIds.Contains(c.Id))
+                .SelectMany(c => c.Allergies))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(a => a, StringComparer.CurrentCultureIgnoreCase)];
+    }
+
+    private async Task SetChildAttendingAsync(Child child, bool attending)
+    {
+        errorMessage = null;
+
+        try
+        {
+            await HouseholdService.SetChildAttendingAsync(TripId, child.Id, attending);
+            var updated = excludedChildIds.ToHashSet();
+
+            if (attending)
+            {
+                updated.Remove(child.Id);
+            }
+            else
+            {
+                updated.Add(child.Id);
+            }
+
+            excludedChildIds = updated;
+            UpdateAllAllergies();
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte spara om barnet följer med.";
+        }
     }
 
     private async Task LoadAllergiesAsync()
@@ -282,10 +416,7 @@
             members.Remove(member);
             allergiesByUid.Remove(member.Uid);
             phoneByUid.Remove(member.Uid);
-            allAllergies = [.. allergiesByUid.Values
-                .SelectMany(a => a)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(a => a, StringComparer.CurrentCultureIgnoreCase)];
+            await LoadHouseholdsAsync();
         }
         catch (Exception)
         {

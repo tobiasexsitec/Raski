@@ -39,6 +39,9 @@ public sealed class FirestoreFilter
     public static FirestoreFilter ArrayContains(string field, string value) =>
         new() { Field = field, Op = "array-contains", Value = ToElement(value) };
 
+    public static FirestoreFilter ArrayContainsAny(string field, IEnumerable<string> values) =>
+        new() { Field = field, Op = "array-contains-any", Value = JsonSerializer.SerializeToElement(values.ToArray()) };
+
     public static FirestoreFilter Equal(string field, string value) =>
         new() { Field = field, Op = "==", Value = ToElement(value) };
 

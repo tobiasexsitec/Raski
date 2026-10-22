@@ -1,9 +1,10 @@
 # B-047: Barn och sällskap på deltagare
 
-- **Status:** Idé
+- **Status:** Klar
 - **Typ:** Funktion
-- **Prioritet:** –
+- **Prioritet:** Hög
 - **Skapad:** 2026-10-14
+- **Klar:** 2026-10-22
 
 ## Beskrivning
 Man ska kunna registrera sina barn samt vilka man "hör ihop med" (t.ex. partner).
@@ -53,3 +54,10 @@ så att barnen räknas rätt, en gång, när vi planerar mat och boende på en r
 - Barn kan ha allergier och kostpreferenser.
 - Alla barn följer med på en resa som standard, men kan väljas bort, även när bara en förälder är med.
 - Barn räknas helt separat från vuxna ("antal personer" och "antal barn").
+- Partnern kopplas genom att ange partnerns e-post. Partnern måste redan ha ett konto.
+- När kopplingen tas bort får den som tar bort kopplingen ett nytt hushåll med en kopia av barnen.
+  Barnen behåller sina id:n, så att de fortfarande bara räknas en gång på en gemensam resa.
+- Barn och partner hanteras i en ny sektion på profilsidan.
+- Räkningen av vuxna och barn väntar till B-042. Nu visas barnen bara grupperat i deltagarlistan.
+- Bortvalda barn sparas per resa i `trips/{tripId}/excludedChildren/{childId}` och kan ändras av
+  hushållets medlemmar på resan.

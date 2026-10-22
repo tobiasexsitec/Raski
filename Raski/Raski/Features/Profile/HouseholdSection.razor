@@ -1,0 +1,329 @@
+@inject IHouseholdService HouseholdService
+@inject IUserService UserService
+@inject IAuthService AuthService
+
+<section class="card stack">
+    <h2>Hushåll och barn</h2>
+    <p class="muted">Barn hör till hushållet, så du och din partner ser och redigerar samma barn och de räknas bara en gång på en resa.</p>
+
+    @if (errorMessage is not null)
+    {
+        <div class="error-banner" role="alert">@errorMessage</div>
+    }
+
+    <h3>Partner</h3>
+    @if (partners.Count > 0)
+    {
+        <ul class="plain-list">
+            @foreach (var partner in partners)
+            {
+                <li class="row-inline">
+                    <span><strong>@partner.DisplayName</strong> <span class="muted">@partner.Email</span></span>
+                </li>
+            }
+        </ul>
+        <div>
+            <button type="button" class="btn btn-secondary btn-sm" disabled="@isSaving" @onclick="() => confirmUnlink = true">
+                Ta bort kopplingen
+            </button>
+        </div>
+    }
+    else
+    {
+        <form class="stack" @onsubmit="LinkAsync" @onsubmit:preventDefault>
+            <label class="field-label">Koppla ihop dig med någon som har ett konto</label>
+            <div class="row-inline nowrap">
+                <div class="grow">
+                    <AutoComplete TItem="UserProfile"
+                                  @bind-Value="partnerEmail"
+                                  SearchFunc="SearchUsersAsync"
+                                  DisplaySelector="u => u.Email"
+                                  MinimumLength="2"
+                                  Placeholder="Namn eller partner@example.com"
+                                  AriaLabel="Partnerns namn eller e-post">
+                        <ItemTemplate Context="user">
+                            <strong>@user.DisplayName</strong>
+                            <span class="muted">@user.Email</span>
+                        </ItemTemplate>
+                    </AutoComplete>
+                </div>
+                <button type="submit" class="btn btn-primary" disabled="@(isSaving || string.IsNullOrWhiteSpace(partnerEmail))">
+                    Koppla
+                </button>
+            </div>
+        </form>
+    }
+
+    <h3>Barn</h3>
+    @if (children.Count == 0)
+    {
+        <p class="muted">Inga barn registrerade.</p>
+    }
+    else
+    {
+        <ul class="plain-list stack">
+            @foreach (var child in children)
+            {
+                <li class="child">
+                    <div class="row-inline">
+                        <span class="grow">
+                            <strong>@child.Name</strong>
+                            <span class="muted">@child.AgeOn(Today) år · född @child.BirthDate.ToString("yyyy-MM-dd")</span>
+                        </span>
+                        <button type="button" class="btn btn-secondary btn-sm" disabled="@isSaving" @onclick="() => StartEdit(child)">
+                            Ändra
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm" disabled="@isSaving" @onclick="() => childToRemove = child">
+                            Ta bort
+                        </button>
+                    </div>
+                    @if (child.Allergies.Count > 0)
+                    {
+                        <span class="tag-row" aria-label="@($"Allergier och kostpreferenser för {child.Name}")">
+                            @foreach (var allergy in child.Allergies)
+                            {
+                                <span class="tag">@allergy</span>
+                            }
+                        </span>
+                    }
+                </li>
+            }
+        </ul>
+    }
+
+    @if (!showChildForm)
+    {
+        <div>
+            <button type="button" class="btn btn-secondary btn-sm" disabled="@isSaving" @onclick="StartAdd">
+                + Lägg till barn
+            </button>
+        </div>
+    }
+    else
+    {
+    <form class="stack child-form" @onsubmit="SaveChildAsync" @onsubmit:preventDefault>
+        <h4>@(editing is null ? "Lägg till barn" : $"Ändra {editing.Name}")</h4>
+        <div class="field">
+            <label class="field-label" for="child-name">Namn</label>
+            <input id="child-name" type="text" @bind="childName" @bind:event="oninput" />
+        </div>
+        <div class="field">
+            <label class="field-label" for="child-birth">Födelsedag</label>
+            <input id="child-birth" type="date" max="@Today.ToString("yyyy-MM-dd")" @bind="childBirthDate" />
+        </div>
+        <div class="field">
+            <label class="field-label" for="child-allergies">Allergier och kostpreferenser (kommaseparerade)</label>
+            <input id="child-allergies" type="text" placeholder="t.ex. gluten, laktos" @bind="childAllergies" @bind:event="oninput" />
+        </div>
+        <div class="row-inline">
+            <button type="submit" class="btn btn-primary" disabled="@(isSaving || string.IsNullOrWhiteSpace(childName) || childBirthDate is null)">
+                @(editing is null ? "Lägg till" : "Spara")
+            </button>
+            <button type="button" class="btn btn-secondary" @onclick="ResetForm">Avbryt</button>
+        </div>
+    </form>
+    }
+</section>
+
+@if (confirmUnlink)
+{
+    <div class="backdrop">
+        <div class="dialog card stack" role="dialog" aria-modal="true" aria-labelledby="unlink-title">
+            <h3 id="unlink-title">Ta bort kopplingen?</h3>
+            <p>Ni får varsitt hushåll. Barnen finns kvar hos er båda.</p>
+            <div class="row-inline">
+                <button type="button" class="btn btn-danger" disabled="@isSaving" @onclick="UnlinkAsync">Ta bort</button>
+                <button type="button" class="btn btn-secondary" @onclick="() => confirmUnlink = false">Avbryt</button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (childToRemove is not null)
+{
+    <div class="backdrop">
+        <div class="dialog card stack" role="dialog" aria-modal="true" aria-labelledby="remove-child-title">
+            <h3 id="remove-child-title">Ta bort @childToRemove.Name?</h3>
+            <p>Barnet tas bort för alla i hushållet.</p>
+            <div class="row-inline">
+                <button type="button" class="btn btn-danger" disabled="@isSaving" @onclick="RemoveChildAsync">Ta bort</button>
+                <button type="button" class="btn btn-secondary" @onclick="() => childToRemove = null">Avbryt</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private Household? household;
+    private List<Child> children = [];
+    private List<UserProfile> partners = [];
+    private string partnerEmail = "";
+    private Child? editing;
+    private Child? childToRemove;
+    private string childName = "";
+    private DateOnly? childBirthDate;
+    private string childAllergies = "";
+    private bool confirmUnlink;
+    private bool isSaving;
+    private string? errorMessage;
+
+    private static DateOnly Today => DateOnly.FromDateTime(DateTime.Today);
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await ApplyAsync(await HouseholdService.GetMineAsync());
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Kunde inte hämta hushållet. {ex.Message}";
+        }
+    }
+
+    private async Task ApplyAsync(Household? updated)
+    {
+        household = updated;
+        children = [.. (updated?.Children ?? []).OrderBy(c => c.BirthDate)];
+
+        var me = AuthService.Current?.Uid;
+        var partnerUids = (updated?.MemberUids ?? []).Where(uid => uid != me).ToList();
+        var profiles = await Task.WhenAll(partnerUids.Select(uid => UserService.GetAsync(uid)));
+        partners = [.. profiles.OfType<UserProfile>()];
+    }
+
+    private IReadOnlyList<UserProfile>? allUsers;
+
+    private async Task<IReadOnlyList<UserProfile>> SearchUsersAsync(string text)
+    {
+        var query = text.Trim();
+
+        try
+        {
+            allUsers ??= await UserService.GetAllAsync();
+        }
+        catch (Exception)
+        {
+            return [];
+        }
+
+        var me = AuthService.Current?.Uid;
+
+        return [.. allUsers
+            .Where(u => !string.IsNullOrWhiteSpace(u.Email) && u.Uid != me)
+            .Where(u => u.DisplayName.Contains(query, StringComparison.CurrentCultureIgnoreCase)
+                     || u.Email.Contains(query, StringComparison.OrdinalIgnoreCase))
+            .Take(8)];
+    }
+
+    private async Task LinkAsync() =>
+        await RunAsync(async () =>
+        {
+            await ApplyAsync(await HouseholdService.LinkPartnerAsync(partnerEmail));
+            partnerEmail = "";
+        }, "Kunde inte koppla ihop er.");
+
+    private async Task UnlinkAsync() =>
+        await RunAsync(async () =>
+        {
+            await ApplyAsync(await HouseholdService.UnlinkAsync());
+            confirmUnlink = false;
+        }, "Kunde inte ta bort kopplingen.");
+
+    private bool showChildForm;
+
+    private void StartAdd()
+    {
+        ResetForm();
+        showChildForm = true;
+    }
+
+    private void StartEdit(Child child)
+    {
+        showChildForm = true;
+        editing = child;
+        childName = child.Name;
+        childBirthDate = child.BirthDate;
+        childAllergies = string.Join(", ", child.Allergies);
+    }
+
+    private void ResetForm()
+    {
+        showChildForm = false;
+        editing = null;
+        childName = "";
+        childBirthDate = null;
+        childAllergies = "";
+    }
+
+    private async Task SaveChildAsync()
+    {
+        if (string.IsNullOrWhiteSpace(childName) || childBirthDate is not { } birthDate)
+        {
+            return;
+        }
+
+        if (birthDate > Today)
+        {
+            errorMessage = "Födelsedagen kan inte vara i framtiden.";
+            return;
+        }
+
+        var child = new Child
+        {
+            Id = editing?.Id ?? "",
+            Name = childName,
+            BirthDate = birthDate,
+            Allergies = [.. childAllergies.Split(',').Select(AllergyNames.Normalize).Where(a => a.Length > 0)]
+        };
+
+        await RunAsync(async () =>
+        {
+            await ApplyAsync(await HouseholdService.SaveChildAsync(child));
+            ResetForm();
+        }, "Kunde inte spara barnet.");
+    }
+
+    private async Task RemoveChildAsync()
+    {
+        if (childToRemove is not { } child)
+        {
+            return;
+        }
+
+        await RunAsync(async () =>
+        {
+            await ApplyAsync(await HouseholdService.RemoveChildAsync(child.Id));
+            childToRemove = null;
+
+            if (editing?.Id == child.Id)
+            {
+                ResetForm();
+            }
+        }, "Kunde inte ta bort barnet.");
+    }
+
+    private async Task RunAsync(Func<Task> action, string failure)
+    {
+        if (isSaving)
+        {
+            return;
+        }
+
+        errorMessage = null;
+        isSaving = true;
+
+        try
+        {
+            await action();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"{failure} {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+}

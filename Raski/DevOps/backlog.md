@@ -12,7 +12,6 @@
 | [B-043](items/B-043-markera-saker-som-saknar-ansvarig.md) | Markera saker som saknar ansvarig | Funktion | Idé | – | 2026-10-14 |
 | [B-044](items/B-044-dashboard-med-nedrakning-till-resan.md) | Dashboard med nedräkning till resan | Funktion | Idé | – | 2026-10-14 |
 | [B-046](items/B-046-koppla-anonym-deltagare-till-befintlig-anvandare.md) | Koppla anonym deltagare till befintlig användare | Funktion | Idé | – | 2026-10-14 |
-| [B-047](items/B-047-barn-och-sallskap-pa-deltagare.md) | Barn och sällskap på deltagare | Funktion | Idé | – | 2026-10-14 |
 | [B-049](items/B-049-bugg-appen-laddar-om-ofta-pa-mobilen.md) | Bugg: Appen laddar om ofta på mobilen | Bugg | Idé | Hög | 2026-10-14 |
 | [B-051](items/B-051-flytta-appen-till-domanen-krispinsson-se.md) | Flytta appen till domänen krispinsson.se | Utveckling | Idé | – | 2026-10-22 |
 | [B-054](items/B-054-onboarding-vid-inbjudan-till-ny-resa.md) | Onboarding vid inbjudan till ny resa | Funktion | Idé | – | 2026-10-22 |
@@ -21,6 +20,7 @@
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-047](items/B-047-barn-och-sallskap-pa-deltagare.md) | Barn och sällskap på deltagare | Funktion | Hög | 2026-10-22 |
 | [B-045](items/B-045-anonyma-deltagare-via-e-post.md) | Anonyma deltagare via e-post | Funktion | – | 2026-10-22 |
 | [B-053](items/B-053-dela-upp-backloggen-i-oppna-och-klara-med-datum.md) | Dela upp backloggen i öppna och klara med datum | Utveckling | – | 2026-10-22 |
 | [B-052](items/B-052-conventional-commits-och-versionshojning-per-typ.md) | Conventional commits och versionshöjning per typ | Utveckling | – | 2026-10-22 |

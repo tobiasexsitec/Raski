@@ -57,6 +57,44 @@ internal sealed class UserDocument
     };
 }
 
+internal sealed class HouseholdDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("memberUids")] public List<string>? MemberUids { get; set; }
+    [JsonPropertyName("children")] public List<ChildDocument>? Children { get; set; }
+
+    public Household ToModel() => new()
+    {
+        Id = Id,
+        MemberUids = MemberUids ?? [],
+        Children = [.. (Children ?? []).Select(c => c.ToModel())]
+    };
+}
+
+internal sealed class ChildDocument
+{
+    [JsonPropertyName("id")] public string? Id { get; set; }
+    [JsonPropertyName("name")] public string? Name { get; set; }
+    [JsonPropertyName("birthDate")] public string? BirthDate { get; set; }
+    [JsonPropertyName("allergies")] public List<string>? Allergies { get; set; }
+
+    public Child ToModel() => new()
+    {
+        Id = Id ?? "",
+        Name = Name ?? "",
+        BirthDate = FirestoreFormat.ParseDate(BirthDate),
+        Allergies = AllergyNames.Distinct(Allergies)
+    };
+
+    public static object From(Child child) => new
+    {
+        id = child.Id,
+        name = child.Name,
+        birthDate = FirestoreFormat.ToIso(child.BirthDate),
+        allergies = child.Allergies
+    };
+}
+
 internal sealed class FeatureRequestDocument
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";
