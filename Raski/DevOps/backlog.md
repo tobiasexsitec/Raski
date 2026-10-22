@@ -8,8 +8,7 @@
 | [B-004](items/B-004-varna-for-allergener-i-maltider.md) | Varna för allergener i måltider | Funktion | Redo | – | 2026-09-29 |
 | [B-021](items/B-021-sok-och-filtrera-i-inkopslistan.md) | Sök och filtrera i inköpslistan | Funktion | Idé | – | 2026-10-01 |
 | [B-041](items/B-041-tema-pa-resan.md) | Tema på resan | Funktion | Idé | – | 2026-10-14 |
-| Antal personer på översikten | Funktion | Klar (0.27) |
-| [B-043](items/B-043-markera-saker-som-saknar-ansvarig.md) | Markera saker som saknar ansvarig | Funktion | Idé | – | 2026-10-14 |
+| [B-043]
 | [B-044](items/B-044-dashboard-med-nedrakning-till-resan.md) | Dashboard med nedräkning till resan | Funktion | Idé | – | 2026-10-14 |
 | [B-046](items/B-046-koppla-anonym-deltagare-till-befintlig-anvandare.md) | Koppla anonym deltagare till befintlig användare | Funktion | Idé | – | 2026-10-14 |
 | [B-049](items/B-049-bugg-appen-laddar-om-ofta-pa-mobilen.md) | Bugg: Appen laddar om ofta på mobilen | Bugg | Idé | Hög | 2026-10-14 |
@@ -20,6 +19,7 @@
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-042](items/B-042-antal-personer-pa-oversikten.md) | Antal personer på översikten | Funktion | – | 2026-10-22 |
 | [B-055](items/B-055-onboarding-for-partner-och-barn-till-befintliga-anvandare.md) | Onboarding för partner och barn till befintliga användare | Funktion | Hög | 2026-10-22 |
 | [B-047](items/B-047-barn-och-sallskap-pa-deltagare.md) | Barn och sällskap på deltagare | Funktion | Hög | 2026-10-22 |
 | [B-045](items/B-045-anonyma-deltagare-via-e-post.md) | Anonyma deltagare via e-post | Funktion | – | 2026-10-22 |

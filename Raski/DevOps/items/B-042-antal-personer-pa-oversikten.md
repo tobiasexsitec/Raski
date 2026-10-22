@@ -1,9 +1,10 @@
 # B-042: Antal personer på översikten
 
-- **Status:** Klar (0.27)
+- **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
 - **Skapad:** 2026-10-14
+- **Klar:** 2026-10-22
 
 ## Beskrivning
 Översikten på resan ska visa hur många personer som är med.
