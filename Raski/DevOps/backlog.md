@@ -54,6 +54,7 @@
 | [B-048](#b-048-popup-med-nyheter-vid-ny-version) | Popup med nyheter vid ny version | Klar | – |
 | [B-049](#b-049-bugg-appen-laddar-om-ofta-på-mobilen) | Bugg: Appen laddar om ofta på mobilen | Idé | Hög |
 | [B-050](#b-050-lägg-till-sak-från-vem-tar-med-på-inköpslistan) | Lägg till sak från "Vem tar med" på inköpslistan | Klar | – |
+| [B-051](#b-051-flytta-appen-till-domänen-krispinssonse) | Flytta appen till domänen krispinsson.se | Idé | – |
 
 >
 > 1. Läs översiktstabellen **före** ändringen.
@@ -1696,27 +1697,53 @@ Som admin vill jag koppla ihop en anonym deltagare med ett konto så att ansvar 
 - **Prioritet:** –
 
 ### Beskrivning
-Man ska kunna ange om man har med sig barn samt vilka man "hör ihop med"
-(t.ex. partner/familj).
+Man ska kunna registrera sina barn samt vilka man "hör ihop med" (t.ex. partner).
+Barn registreras med födelsedag så att åldern räknas ut automatiskt och följer med
+över tid, i stället för att en ålder anges och blir inaktuell.
+
+Barn ska höra till ett hushåll och inte till en enskild person, så att två
+partner inte behöver registrera samma barn var för sig och barnen då räknas dubbelt.
 
 ### User story
-Som resenär vill jag ange barn och sällskap så att planering av mat och boende blir rätt.
+Som förälder vill jag registrera mina barn en gång och koppla ihop mig med min partner
+så att barnen räknas rätt, en gång, när vi planerar mat och boende på en resa.
 
 ### Acceptanskriterier
-- [ ] Man kan ange antal barn (ev. ålder) på resan.
-- [ ] Man kan välja andra deltagare som man hör ihop med.
-- [ ] Grupperingen syns i deltagarlistan på översikten.
+- [ ] Man kan registrera barn med namn och födelsedag.
+- [ ] Barnets ålder räknas ut från födelsedagen, t.ex. per resans startdatum.
+- [ ] Man kan koppla ihop sig med en annan användare (partner), och båda ser och kan redigera samma barn.
+- [ ] Ett barn räknas bara en gång på en resa, även om båda föräldrarna är med.
+- [ ] Barn och sällskap syns grupperat i deltagarlistan på översikten.
+- [ ] Kopplingen till en partner gäller direkt, utan godkännande.
+- [ ] Båda parter kan ta bort kopplingen.
+- [ ] När kopplingen tas bort finns barnen kvar hos båda föräldrarna.
+- [ ] Barn kan ha allergier och kostpreferenser på samma sätt som vuxna (B-001).
+- [ ] Alla barn följer med på en resa som standard, även om bara en förälder är med.
+- [ ] Man kan välja bort enskilda eller alla barn för en resa.
+- [ ] Barn räknas separat från vuxna: resan visar "antal personer" och "antal barn" var för sig (B-042).
 
 ### Öppna frågor
-- Är barn egna deltagare (med namn/allergier) eller bara ett antal?
-- Ska det anges på profilen eller per resa?
-- Ska "hör ihop med" vara ömsesidigt automatiskt?
+- –
 
 ### Tekniska noteringar
-- Påverkar `members`-dokument och ev. `UserProfile`.
+- Förslag: nytt hushåll-dokument (t.ex. `households/{id}`) med medlemmar (uid:n) och barn
+  (namn, födelsedag som ISO-datum, ev. allergier). `UserProfile` får referens till hushållet.
+- Per resa: lista över medföljande barn, t.ex. på `members`-dokumentet eller i en egen
+  subcollection, så att barn dedupliceras på barn-id.
+- `DateOnly` i modellen, ISO-sträng i Firestore via `FirestoreFormat`.
+- `firestore.rules` måste ge hushållsmedlemmar läs-/skrivrätt till hushållet, och resans
+  medlemmar läsrätt till medföljande barn.
 
 ### Beslut
-- –
+- Barn registreras med födelsedag, inte ålder, så att åldern stämmer över tid.
+- Barn hör till ett hushåll som delas med partnern, så att de inte registreras eller räknas dubbelt.
+- Kopplingen kräver inget godkännande, men båda parter kan ta bort den.
+- Barn finns kvar när kopplingen tas bort. De blir en sorts "anonyma" användare,
+  ett begrepp som införs i en senare feature (jfr B-045).
+- Båda föräldrarna behåller barnen när kopplingen tas bort.
+- Barn kan ha allergier och kostpreferenser.
+- Alla barn följer med på en resa som standard, men kan väljas bort, även när bara en förälder är med.
+- Barn räknas helt separat från vuxna ("antal personer" och "antal barn").
 
 ---
 
@@ -1810,3 +1837,37 @@ det hamnar på inköpslistan och inte glöms bort.
 - Saken flyttas helt till inköpslistan i stället för att länkas, så den inte finns på två ställen.
 - Antal förs över som mängd med enheten "st".
 - Släppt i version 0.23.0.
+
+## B-051: Flytta appen till domänen krispinsson.se
+
+- **Status:** Idé
+- **Prioritet:** –
+
+### Beskrivning
+Appen ska flyttas från nuvarande domän till en domän under krispinsson.se, som ägs
+sedan tidigare, så att den har en egen och lättare igenkännbar adress.
+
+### User story
+Som användare vill jag nå appen via en adress under krispinsson.se så att den är lätt
+att komma ihåg och känns som en egen tjänst.
+
+### Acceptanskriterier
+- [ ] Appen nås via en adress under krispinsson.se med giltigt HTTPS-certifikat.
+- [ ] Inloggning (e-post och Google, även på iOS) fungerar på den nya domänen.
+- [ ] Den gamla adressen skickar vidare till den nya, eller informerar om flytten.
+- [ ] PWA:n går att installera från den nya domänen.
+
+### Öppna frågor
+- Ska appen ligga på en subdomän (t.ex. raski.krispinsson.se) eller direkt på krispinsson.se?
+- Hur hanteras användare som installerat PWA:n från den gamla domänen?
+- Ska den gamla adressen vara kvar en tid parallellt?
+
+### Tekniska noteringar
+- DNS-poster hos domänleverantören för krispinsson.se (A/TXT eller CNAME) enligt Firebase Hosting.
+- Lägg till domänen under "Authorized domains" i Firebase Authentication.
+- Kontrollera `authDomain` i `wwwroot/appsettings.json` och redirect-URI:er för Google-inloggning (B-011).
+- PWA och service worker är bundna till origin – installerade appar och cache följer inte med automatiskt.
+- Local storage (t.ex. tema och senast sedda version) följer inte med till ny origin.
+
+### Beslut
+- –
