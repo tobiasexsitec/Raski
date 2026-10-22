@@ -242,7 +242,8 @@
                                      BackLabel="@(catchUp ? "Senare" : "Tillbaka")"
                                      OnBack="@(catchUp ? Postpone : Back)"
                                      OnDone="FinishAsync"
-                                     IsSaving="isSaving" />
+                                     IsSaving="isSaving"
+                                     ShowIntro="catchUp" />
             }
         </main>
 

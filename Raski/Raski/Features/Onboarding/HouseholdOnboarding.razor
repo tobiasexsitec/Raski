@@ -36,9 +36,23 @@ else if (page == Page.Partner)
             <ul class="chips">
                 @foreach (var partner in partners)
                 {
-                    <li><span class="chip selected">@partner.DisplayName</span></li>
+                    <li>
+                        <button type="button" class="chip selected" disabled="@isSaving"
+                                aria-label="@($"Ta bort kopplingen till {partner.DisplayName}")"
+                                @onclick="() => confirmUnlink = true">
+                            @partner.DisplayName ✕
+                        </button>
+                    </li>
                 }
             </ul>
+            @if (confirmUnlink)
+            {
+                <div class="confirm" role="alert">
+                    <p>Ta bort kopplingen? Ni får varsitt hushåll och barnen finns kvar hos er båda.</p>
+                    <button type="button" class="btn btn-danger" disabled="@isSaving" @onclick="UnlinkAsync">Ta bort</button>
+                    <button type="button" class="btn btn-secondary" disabled="@isSaving" @onclick="() => confirmUnlink = false">Avbryt</button>
+                </div>
+            }
         }
         else
         {
@@ -63,7 +77,7 @@ else if (page == Page.Partner)
         }
 
         <div class="actions">
-            <button type="button" class="btn btn-secondary" @onclick="() => Go(Page.Intro)" disabled="@isSaving">Tillbaka</button>
+            <button type="button" class="btn btn-secondary" @onclick="PartnerBack" disabled="@isSaving">@(ShowIntro ? "Tillbaka" : BackLabel)</button>
             <button type="button" class="btn btn-primary mega" @onclick="() => Go(Page.Children)" disabled="@isSaving">
                 @(partners.Count > 0 ? "Nästa" : "Hoppa över") <span class="arrow" aria-hidden="true">✨</span>
             </button>
@@ -76,14 +90,33 @@ else if (page == Page.Children)
         <div class="hero-emoji wobble" aria-hidden="true">🧒</div>
         <h1 class="shimmer">@(children.Count == 0 ? "Har du barn?" : "Något mer barn?")</h1>
 
+        @if (errorMessage is not null)
+        {
+            <div class="error-banner shake" role="alert">@errorMessage</div>
+        }
+
         @if (children.Count > 0)
         {
             <ul class="chips">
                 @foreach (var child in children)
                 {
-                    <li><span class="chip selected">@child.Name, @child.AgeOn(Today) år</span></li>
+                    <li>
+                        <button type="button" class="chip selected" disabled="@isSaving"
+                                aria-label="@($"Ta bort {child.Name}")"
+                                @onclick="() => childToRemove = child">
+                            @child.Name, @child.AgeOn(Today) år ✕
+                        </button>
+                    </li>
                 }
             </ul>
+            @if (childToRemove is not null)
+            {
+                <div class="confirm" role="alert">
+                    <p>Ta bort @childToRemove.Name? Barnet tas bort för alla i hushållet.</p>
+                    <button type="button" class="btn btn-danger" disabled="@isSaving" @onclick="RemoveChildAsync">Ta bort</button>
+                    <button type="button" class="btn btn-secondary" disabled="@isSaving" @onclick="() => childToRemove = null">Avbryt</button>
+                </div>
+            }
         }
         else
         {
@@ -147,6 +180,9 @@ else
     [Parameter] public EventCallback OnDone { get; set; }
     [Parameter] public bool IsSaving { get; set; }
 
+    /// <summary>Shows the explanation page first; only needed for users catching up on new questions.</summary>
+    [Parameter] public bool ShowIntro { get; set; }
+
     private Page page;
     private List<Child> children = [];
     private List<UserProfile> partners = [];
@@ -156,6 +192,8 @@ else
     private DateOnly? childBirthDate;
     private string childAllergies = "";
     private bool isSaving;
+    private bool confirmUnlink;
+    private Child? childToRemove;
     private string? errorMessage;
 
     private bool Busy => isSaving || IsSaving;
@@ -163,6 +201,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        page = ShowIntro ? Page.Intro : Page.Partner;
         try
         {
             await ApplyAsync(await HouseholdService.GetMineAsync());
@@ -177,6 +216,17 @@ else
     {
         errorMessage = null;
         page = target;
+    }
+
+    private Task PartnerBack()
+    {
+        if (ShowIntro)
+        {
+            Go(Page.Intro);
+            return Task.CompletedTask;
+        }
+
+        return OnBack.InvokeAsync();
     }
 
     private void StartChild()
@@ -225,6 +275,22 @@ else
             await ApplyAsync(await HouseholdService.LinkPartnerAsync(partnerEmail));
             partnerEmail = "";
         }, "Kunde inte koppla ihop er.");
+
+    private Task UnlinkAsync() =>
+        RunAsync(async () =>
+        {
+            await ApplyAsync(await HouseholdService.UnlinkAsync());
+            confirmUnlink = false;
+        }, "Kunde inte ta bort kopplingen.");
+
+    private Task RemoveChildAsync() =>
+        childToRemove is not { } child
+            ? Task.CompletedTask
+            : RunAsync(async () =>
+            {
+                await ApplyAsync(await HouseholdService.RemoveChildAsync(child.Id));
+                childToRemove = null;
+            }, "Kunde inte ta bort barnet.");
 
     private async Task SaveChildAsync()
     {
