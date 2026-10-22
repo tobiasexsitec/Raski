@@ -94,6 +94,7 @@ internal sealed class TripDocument
     [JsonPropertyName("notes")] public string? Notes { get; set; }
     [JsonPropertyName("ownerUid")] public string? OwnerUid { get; set; }
     [JsonPropertyName("memberUids")] public List<string>? MemberUids { get; set; }
+    [JsonPropertyName("pendingEmails")] public List<string>? PendingEmails { get; set; }
 
     public Trip ToModel() => new()
     {

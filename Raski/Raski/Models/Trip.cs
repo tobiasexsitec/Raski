@@ -39,6 +39,17 @@ public sealed class TripMember
     public AlcoholPreference? Alcohol { get; set; }
 
     public bool IsAdmin => Role == MemberRoles.Admin;
+
+    /// <summary>True for a participant added by email who has not signed in yet.</summary>
+    public bool IsPending => IsPendingId(Uid);
+
+    public const string PendingPrefix = "pending-";
+
+    /// <summary>Member document id used until the person signs in with this email.</summary>
+    public static string PendingId(string emailKey) => PendingPrefix + emailKey;
+
+    public static bool IsPendingId(string? uid) =>
+        uid is not null && uid.StartsWith(PendingPrefix, StringComparison.Ordinal);
 }
 
 public static class MemberRoles

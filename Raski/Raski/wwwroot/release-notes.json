@@ -1,5 +1,5 @@
 [
-  { "version": "0.25.0", "date": "2026-10-14", "notes": [ "En popup visar vad som är nytt sedan du var här sist." ] },
+  { "version": "0.26.0", "date": "2026-10-22", "notes": [ "Lägg till deltagare med bara e-post, även om de saknar konto. De kopplas automatiskt när de loggar in." ] },  { "version": "0.25.0", "date": "2026-10-14", "notes": [ "En popup visar vad som är nytt sedan du var här sist." ] },
   { "version": "0.24.0", "date": "2026-10-14", "notes": [ "Fältet för att lägga till övriga varor ligger nu högst upp på inköpslistan." ] },
   { "version": "0.23.0", "date": "2026-10-14", "notes": [ "Saker under \"Vem tar med\" kan flyttas till inköpslistan." ] },
   { "version": "0.22.0", "date": "2026-10-14", "notes": [ "Lägg till övrigt att handla direkt på inköpslistan." ] },

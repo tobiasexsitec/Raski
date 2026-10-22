@@ -12,10 +12,11 @@ public interface ITripService
     Task<IReadOnlyList<TripMember>> GetMembersAsync(string tripId, CancellationToken ct = default);
 
     /// <summary>
-    /// Adds a member by email. Returns true when the user was added directly,
-    /// false when an invitation was stored for a not yet registered user.
+    /// Adds a member by email. Returns true when an existing user was added,
+    /// false when a pending participant without an account was added. The pending
+    /// participant is linked automatically when they sign in with the same email.
     /// </summary>
-    Task<bool> AddMemberAsync(string tripId, string email, CancellationToken ct = default);
+    Task<bool> AddMemberAsync(string tripId, string email, string? displayName = null, CancellationToken ct = default);
 
     /// <summary>Overrides the signed-in user's alcohol preference for one trip only.</summary>
     Task SetMyAlcoholAsync(string tripId, AlcoholPreference preference, CancellationToken ct = default);

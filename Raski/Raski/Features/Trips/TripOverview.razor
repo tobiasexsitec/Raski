@@ -97,7 +97,7 @@ else if (trip is not null)
                 </section>
             }
 
-            <MembersPanel TripId="@TripId" IsAdmin="IsAdmin" />
+            <MembersPanel TripId="@TripId" IsAdmin="@(IsAdmin || CurrentUser?.IsGlobalAdmin == true)" />
         }
         else if (CurrentTab == Tab.Bring)
         {

@@ -52,6 +52,7 @@ public sealed class AuthService(FirebaseInterop interop) : IAuthService, IAsyncD
         {
             Current = await EnsureUserDocumentAsync(user);
             await ClaimInviteAsync(Current);
+            await ClaimPendingMembershipsAsync(Current);
         }
 
         IsInitialized = true;
@@ -163,6 +164,81 @@ public sealed class AuthService(FirebaseInterop interop) : IAuthService, IAsyncD
         catch (JSException)
         {
             // Invitations are best-effort; a rules rejection must not block sign-in.
+        }
+    }
+
+    /// <summary>
+    /// Participants added without an account are stored as trips/{tripId}/members/pending-{email}
+    /// and listed in the trip's pendingEmails. On sign-in the user joins each such trip, takes
+    /// over the pending member document and any responsibilities assigned to it.
+    /// </summary>
+    private async Task ClaimPendingMembershipsAsync(UserProfile profile)
+    {
+        if (string.IsNullOrWhiteSpace(profile.Email))
+        {
+            return;
+        }
+
+        var emailKey = profile.Email.ToLowerInvariant();
+        var pendingId = TripMember.PendingId(emailKey);
+
+        List<TripDocument> trips;
+
+        try
+        {
+            trips = await interop.QueryAsync<TripDocument>("trips", new FirestoreQuery
+            {
+                Where = [FirestoreFilter.ArrayContains("pendingEmails", emailKey)]
+            });
+        }
+        catch (JSException)
+        {
+            return;
+        }
+
+        foreach (var trip in trips)
+        {
+            try
+            {
+                // Joining first grants member access to the rest of the trip.
+                await interop.AddToArrayAsync($"trips/{trip.Id}", "memberUids", profile.Uid);
+
+                await interop.SetDocumentAsync($"trips/{trip.Id}/members/{profile.Uid}", new
+                {
+                    displayName = profile.DisplayName,
+                    email = profile.Email,
+                    photoUrl = profile.PhotoUrl,
+                    role = MemberRoles.Member,
+                    alcohol = profile.Alcohol?.ToFirestore()
+                });
+
+                await ReassignResponsibilitiesAsync<MealDocument>($"trips/{trip.Id}/meals", d => d.Id, pendingId, profile.Uid, profile.DisplayName);
+                await ReassignResponsibilitiesAsync<BringItemDocument>($"trips/{trip.Id}/bringItems", d => d.Id, pendingId, profile.Uid, profile.DisplayName);
+
+                await interop.DeleteDocumentAsync($"trips/{trip.Id}/members/{pendingId}");
+                await interop.RemoveFromArrayAsync($"trips/{trip.Id}", "pendingEmails", emailKey);
+            }
+            catch (JSException)
+            {
+                // Best-effort per trip; a failure must not block sign-in or other trips.
+            }
+        }
+    }
+
+    private async Task ReassignResponsibilitiesAsync<T>(string collectionPath, Func<T, string> idOf, string fromUid, string toUid, string? toName)
+    {
+        var documents = await interop.QueryAsync<T>(collectionPath, new FirestoreQuery
+        {
+            Where = [FirestoreFilter.Equal("responsibleUid", fromUid)]
+        });
+
+        foreach (var document in documents)
+        {
+            await interop.UpdateDocumentAsync($"{collectionPath}/{idOf(document)}", new
+            {
+                responsibleUid = toUid,
+                responsibleName = toName ?? ""
+            });
         }
     }
 

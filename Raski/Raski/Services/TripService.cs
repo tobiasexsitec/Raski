@@ -79,7 +79,7 @@ public sealed class TripService(FirebaseInterop interop, IAuthService authServic
         return documents.Select(d => d.ToModel()).ToList();
     }
 
-    public async Task<bool> AddMemberAsync(string tripId, string email, CancellationToken ct = default)
+    public async Task<bool> AddMemberAsync(string tripId, string email, string? displayName = null, CancellationToken ct = default)
     {
         var emailKey = email.Trim().ToLowerInvariant();
 
@@ -88,7 +88,7 @@ public sealed class TripService(FirebaseInterop interop, IAuthService authServic
             return false;
         }
 
-        var trip = await GetAsync(tripId, ct)
+        _ = await GetAsync(tripId, ct)
             ?? throw new InvalidOperationException("Resan hittades inte.");
 
         // Look for an existing account so the member can be added straight away.
@@ -115,16 +115,20 @@ public sealed class TripService(FirebaseInterop interop, IAuthService authServic
             return true;
         }
 
-        // Firestore rules cannot map an email to a uid, so the invitation waits
-        // under invites/{email}/trips/{tripId} until that user signs in.
-        await interop.SetDocumentAsync($"invites/{emailKey}/trips/{tripId}", new
+        // Without an account the participant is stored under a pending id so they can
+        // be shown and given responsibilities. pendingEmails lets them find and claim
+        // the trip on sign-in, since Firestore rules cannot map an email to a uid.
+        var name = displayName?.Trim();
+
+        await interop.SetDocumentAsync($"trips/{tripId}/members/{TripMember.PendingId(emailKey)}", new
         {
-            tripId,
-            tripName = trip.Name,
+            displayName = string.IsNullOrEmpty(name) ? emailKey : name,
             email = emailKey,
-            invitedByUid = CurrentUid,
-            createdAt = FirestoreFormat.UtcNow()
+            photoUrl = "",
+            role = MemberRoles.Member
         }, ct: ct);
+
+        await interop.AddToArrayAsync($"trips/{tripId}", "pendingEmails", emailKey, ct);
 
         return false;
     }
@@ -137,7 +141,15 @@ public sealed class TripService(FirebaseInterop interop, IAuthService authServic
 
     public async Task RemoveMemberAsync(string tripId, string uid, CancellationToken ct = default)
     {
-        await interop.RemoveFromArrayAsync($"trips/{tripId}", "memberUids", uid, ct);
+        if (TripMember.IsPendingId(uid))
+        {
+            await interop.RemoveFromArrayAsync($"trips/{tripId}", "pendingEmails", uid[TripMember.PendingPrefix.Length..], ct);
+        }
+        else
+        {
+            await interop.RemoveFromArrayAsync($"trips/{tripId}", "memberUids", uid, ct);
+        }
+
         await interop.DeleteDocumentAsync($"trips/{tripId}/members/{uid}", ct);
     }
 }

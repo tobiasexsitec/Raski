@@ -62,6 +62,11 @@
                         }
                     </span>
 
+                    @if (member.IsPending)
+                    {
+                        <span class="tag">Inget konto än</span>
+                    }
+
                     @if (member.IsAdmin)
                     {
                         <span class="tag tag-accent">Admin</span>
@@ -114,6 +119,10 @@
                     </ItemTemplate>
                 </AutoComplete>
             </div>
+            <div class="field">
+                <label for="invite-name">Namn (valfritt)</label>
+                <input id="invite-name" type="text" @bind="inviteName" placeholder="Används om personen saknar konto" />
+            </div>
             <button type="submit" class="btn btn-primary" disabled="@isAdding">
                 @(isAdding ? "Lägger till…" : "Lägg till")
             </button>
@@ -140,6 +149,7 @@
     private Dictionary<string, string> phoneByUid = [];
     private List<string> allAllergies = [];
     private string inviteEmail = "";
+    private string inviteName = "";
     private bool isAdding;
     private string? statusMessage;
     private string? errorMessage;
@@ -169,7 +179,7 @@
     {
         try
         {
-            var profiles = await Task.WhenAll(members.Select(m => UserService.GetAsync(m.Uid)));
+            var profiles = await Task.WhenAll(members.Where(m => !m.IsPending).Select(m => UserService.GetAsync(m.Uid)));
 
             allergiesByUid = profiles
                 .Where(p => p is not null)
@@ -242,13 +252,14 @@
 
         try
         {
-            var added = await TripService.AddMemberAsync(TripId, inviteEmail);
+            var added = await TripService.AddMemberAsync(TripId, inviteEmail, inviteName);
 
             statusMessage = added
                 ? $"{inviteEmail} lades till i resan."
-                : $"{inviteEmail} har inget konto än – inbjudan sparad och kopplas vid första inloggningen.";
+                : $"{inviteEmail} har inget konto än – lades till som deltagare och kopplas vid första inloggningen.";
 
             inviteEmail = "";
+            inviteName = "";
             await ReloadAsync();
         }
         catch (Exception)
