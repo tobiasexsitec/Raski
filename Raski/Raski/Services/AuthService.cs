@@ -100,6 +100,7 @@ public sealed class AuthService(FirebaseInterop interop) : IAuthService, IAsyncD
             Allergies = AllergyNames.Distinct(existing?.Allergies),
             Phone = existing?.Phone ?? "",
             OnboardingCompleted = existing is not null && (existing.OnboardingCompleted ?? true),
+            OnboardingVersion = existing?.OnboardingVersion ?? 1,
             LastSeenVersion = existing?.LastSeenVersion
         };
 

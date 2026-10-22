@@ -56,7 +56,7 @@ else if (AllowAnonymous)
 
             Navigation.NavigateTo($"login?returnUrl={returnUrl}", replace: true);
         }
-        else if (!AuthService.Current.OnboardingCompleted && !IsOnboardingPage())
+        else if (AuthService.Current.NeedsOnboarding && !IsOnboardingPage())
         {
             Navigation.NavigateTo("on-boarding", replace: true);
         }

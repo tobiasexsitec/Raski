@@ -20,6 +20,7 @@
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-055](items/B-055-onboarding-for-partner-och-barn-till-befintliga-anvandare.md) | Onboarding för partner och barn till befintliga användare | Funktion | Hög | 2026-10-22 |
 | [B-047](items/B-047-barn-och-sallskap-pa-deltagare.md) | Barn och sällskap på deltagare | Funktion | Hög | 2026-10-22 |
 | [B-045](items/B-045-anonyma-deltagare-via-e-post.md) | Anonyma deltagare via e-post | Funktion | – | 2026-10-22 |
 | [B-053](items/B-053-dela-upp-backloggen-i-oppna-och-klara-med-datum.md) | Dela upp backloggen i öppna och klara med datum | Utveckling | – | 2026-10-22 |

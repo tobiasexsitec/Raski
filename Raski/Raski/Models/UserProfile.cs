@@ -21,6 +21,20 @@ public sealed class UserProfile
     /// <summary>New users are sent through onboarding until this is set.</summary>
     public bool OnboardingCompleted { get; set; } = true;
 
+    /// <summary>
+    /// Onboarding revision the user has completed. Bump <see cref="CurrentOnboardingVersion"/>
+    /// when a step is added so existing users are asked the new questions.
+    /// </summary>
+    public int OnboardingVersion { get; set; } = CurrentOnboardingVersion;
+
+    /// <summary>2: partner and children (B-047).</summary>
+    public const int CurrentOnboardingVersion = 2;
+
+    /// <summary>Not persisted: the user chose "Senare" this session, so new steps are asked again at next sign-in.</summary>
+    public bool OnboardingPostponed { get; set; }
+
+    public bool NeedsOnboarding => !OnboardingCompleted || (OnboardingVersion < CurrentOnboardingVersion && !OnboardingPostponed);
+
     /// <summary>App version whose news the user has seen; null if never recorded.</summary>
     public string? LastSeenVersion { get; set; }
 }

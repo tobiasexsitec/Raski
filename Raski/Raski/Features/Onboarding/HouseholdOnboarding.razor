@@ -1,0 +1,279 @@
+@using Raski.Features.Profile
+@inject IHouseholdService HouseholdService
+@inject IUserService UserService
+@inject IAuthService AuthService
+
+@if (page == Page.Intro)
+{
+    <section class="card-3d" @key="@("household-intro")">
+        <div class="hero-emoji wobble" aria-hidden="true">👨‍👩‍👧</div>
+        <h1 class="shimmer">@Title</h1>
+        <p class="lead">Reser du med partner eller barn? Koppla ihop er och lägg till barnen, så räknas de med på resorna.</p>
+        <p class="lead">Du kan alltid ändra det under din profil.</p>
+
+        <div class="actions">
+            <button type="button" class="btn btn-secondary" @onclick="OnBack" disabled="@Busy">@BackLabel</button>
+            <button type="button" class="btn btn-primary mega" @onclick="() => Go(Page.Partner)" disabled="@Busy">
+                Kom igång <span class="arrow" aria-hidden="true">✨</span>
+            </button>
+        </div>
+    </section>
+}
+else if (page == Page.Partner)
+{
+    <section class="card-3d" @key="@("household-partner")">
+        <div class="hero-emoji wobble" aria-hidden="true">💑</div>
+        <h1 class="shimmer">Har du en partner?</h1>
+
+        @if (errorMessage is not null)
+        {
+            <div class="error-banner shake" role="alert">@errorMessage</div>
+        }
+
+        @if (partners.Count > 0)
+        {
+            <p class="lead">Ni är ihopkopplade med</p>
+            <ul class="chips">
+                @foreach (var partner in partners)
+                {
+                    <li><span class="chip selected">@partner.DisplayName</span></li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p class="lead">Sök på namn eller e-post. Din partner behöver ha ett konto i Raski™.</p>
+            <form class="household-form" @onsubmit="LinkAsync" @onsubmit:preventDefault>
+                <AutoComplete TItem="UserProfile"
+                              @bind-Value="partnerEmail"
+                              SearchFunc="SearchUsersAsync"
+                              DisplaySelector="u => u.Email"
+                              MinimumLength="2"
+                              Placeholder="Namn eller e-post"
+                              AriaLabel="Partnerns namn eller e-post">
+                    <ItemTemplate Context="user">
+                        <strong>@user.DisplayName</strong>
+                        <span class="muted">@user.Email</span>
+                    </ItemTemplate>
+                </AutoComplete>
+                <button type="submit" class="btn btn-primary" disabled="@(isSaving || string.IsNullOrWhiteSpace(partnerEmail))">
+                    @(isSaving ? "Kopplar…" : "Koppla ihop oss")
+                </button>
+            </form>
+        }
+
+        <div class="actions">
+            <button type="button" class="btn btn-secondary" @onclick="() => Go(Page.Intro)" disabled="@isSaving">Tillbaka</button>
+            <button type="button" class="btn btn-primary mega" @onclick="() => Go(Page.Children)" disabled="@isSaving">
+                @(partners.Count > 0 ? "Nästa" : "Hoppa över") <span class="arrow" aria-hidden="true">✨</span>
+            </button>
+        </div>
+    </section>
+}
+else if (page == Page.Children)
+{
+    <section class="card-3d" @key="@("household-children")">
+        <div class="hero-emoji wobble" aria-hidden="true">🧒</div>
+        <h1 class="shimmer">@(children.Count == 0 ? "Har du barn?" : "Något mer barn?")</h1>
+
+        @if (children.Count > 0)
+        {
+            <ul class="chips">
+                @foreach (var child in children)
+                {
+                    <li><span class="chip selected">@child.Name, @child.AgeOn(Today) år</span></li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p class="lead">Lägg till ett barn i taget.</p>
+        }
+
+        <button type="button" class="btn btn-secondary" @onclick="StartChild" disabled="@Busy">
+            + Lägg till @(children.Count == 0 ? "ett barn" : "ett barn till")
+        </button>
+
+        <div class="actions">
+            <button type="button" class="btn btn-secondary" @onclick="() => Go(Page.Partner)" disabled="@Busy">Tillbaka</button>
+            <button type="button" class="btn btn-primary mega" @onclick="OnDone" disabled="@Busy">
+                @(Busy ? "Sparar…" : "Klar!") <span class="arrow" aria-hidden="true">🎊</span>
+            </button>
+        </div>
+    </section>
+}
+else
+{
+    <section class="card-3d" @key="@($"household-child-{children.Count}")">
+        <div class="hero-emoji wobble" aria-hidden="true">🧸</div>
+        <h1 class="shimmer">@(children.Count == 0 ? "Ditt barn" : "Nästa barn")</h1>
+
+        @if (errorMessage is not null)
+        {
+            <div class="error-banner shake" role="alert">@errorMessage</div>
+        }
+
+        <form id="household-child-form" class="household-form" @onsubmit="SaveChildAsync" @onsubmit:preventDefault>
+            <label class="field-label" for="onb-child-name">Namn</label>
+            <div class="glow-input">
+                <input id="onb-child-name" type="text" @bind="childName" @bind:event="oninput" />
+            </div>
+            <label class="field-label" for="onb-child-birth">Födelsedag</label>
+            <div class="glow-input">
+                <input id="onb-child-birth" type="date" max="@Today.ToString("yyyy-MM-dd")" @bind="childBirthDate" />
+            </div>
+            <label class="field-label" for="onb-child-allergies">Allergier (valfritt, kommaseparerade)</label>
+            <div class="glow-input">
+                <input id="onb-child-allergies" type="text" placeholder="t.ex. gluten, laktos" @bind="childAllergies" @bind:event="oninput" />
+            </div>
+        </form>
+
+        <div class="actions">
+            <button type="button" class="btn btn-secondary" @onclick="() => Go(Page.Children)" disabled="@isSaving">Avbryt</button>
+            <button type="submit" form="household-child-form" class="btn btn-primary mega"
+                    disabled="@(isSaving || string.IsNullOrWhiteSpace(childName) || childBirthDate is null)">
+                @(isSaving ? "Sparar…" : "Spara barn")
+            </button>
+        </div>
+    </section>
+}
+
+@code {
+    private enum Page { Intro, Partner, Children, Child }
+
+    [Parameter] public string Title { get; set; } = "Partner och barn";
+    [Parameter] public string BackLabel { get; set; } = "Tillbaka";
+    [Parameter] public EventCallback OnBack { get; set; }
+    [Parameter] public EventCallback OnDone { get; set; }
+    [Parameter] public bool IsSaving { get; set; }
+
+    private Page page;
+    private List<Child> children = [];
+    private List<UserProfile> partners = [];
+    private IReadOnlyList<UserProfile>? allUsers;
+    private string partnerEmail = "";
+    private string childName = "";
+    private DateOnly? childBirthDate;
+    private string childAllergies = "";
+    private bool isSaving;
+    private string? errorMessage;
+
+    private bool Busy => isSaving || IsSaving;
+    private static DateOnly Today => DateOnly.FromDateTime(DateTime.Today);
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await ApplyAsync(await HouseholdService.GetMineAsync());
+        }
+        catch (Exception)
+        {
+            // Starting empty is fine; saving reports any real problem.
+        }
+    }
+
+    private void Go(Page target)
+    {
+        errorMessage = null;
+        page = target;
+    }
+
+    private void StartChild()
+    {
+        childName = "";
+        childBirthDate = null;
+        childAllergies = "";
+        Go(Page.Child);
+    }
+
+    private async Task ApplyAsync(Household? updated)
+    {
+        children = [.. (updated?.Children ?? []).OrderBy(c => c.BirthDate)];
+
+        var me = AuthService.Current?.Uid;
+        var partnerUids = (updated?.MemberUids ?? []).Where(uid => uid != me).ToList();
+        var profiles = await Task.WhenAll(partnerUids.Select(uid => UserService.GetAsync(uid)));
+        partners = [.. profiles.OfType<UserProfile>()];
+    }
+
+    private async Task<IReadOnlyList<UserProfile>> SearchUsersAsync(string text)
+    {
+        var query = text.Trim();
+
+        try
+        {
+            allUsers ??= await UserService.GetAllAsync();
+        }
+        catch (Exception)
+        {
+            return [];
+        }
+
+        var me = AuthService.Current?.Uid;
+
+        return [.. allUsers
+            .Where(u => !string.IsNullOrWhiteSpace(u.Email) && u.Uid != me)
+            .Where(u => u.DisplayName.Contains(query, StringComparison.CurrentCultureIgnoreCase)
+                     || u.Email.Contains(query, StringComparison.OrdinalIgnoreCase))
+            .Take(8)];
+    }
+
+    private Task LinkAsync() =>
+        RunAsync(async () =>
+        {
+            await ApplyAsync(await HouseholdService.LinkPartnerAsync(partnerEmail));
+            partnerEmail = "";
+        }, "Kunde inte koppla ihop er.");
+
+    private async Task SaveChildAsync()
+    {
+        if (string.IsNullOrWhiteSpace(childName) || childBirthDate is not { } birthDate)
+        {
+            return;
+        }
+
+        if (birthDate > Today)
+        {
+            errorMessage = "Födelsedagen kan inte vara i framtiden.";
+            return;
+        }
+
+        var child = new Child
+        {
+            Name = childName,
+            BirthDate = birthDate,
+            Allergies = [.. childAllergies.Split(',').Select(AllergyNames.Normalize).Where(a => a.Length > 0)]
+        };
+
+        await RunAsync(async () =>
+        {
+            await ApplyAsync(await HouseholdService.SaveChildAsync(child));
+            page = Page.Children;
+        }, "Kunde inte spara barnet.");
+    }
+
+    private async Task RunAsync(Func<Task> action, string failure)
+    {
+        if (isSaving)
+        {
+            return;
+        }
+
+        errorMessage = null;
+        isSaving = true;
+
+        try
+        {
+            await action();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"{failure} {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+}

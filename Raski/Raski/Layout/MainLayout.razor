@@ -61,7 +61,7 @@
 
     <NavMenu />
 
-    @if (AuthService.Current is { OnboardingCompleted: true })
+    @if (AuthService.Current is { NeedsOnboarding: false })
     {
         <WhatsNewDialog />
     }

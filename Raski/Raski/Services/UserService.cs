@@ -37,18 +37,28 @@ public sealed class UserService(FirebaseInterop interop, IAuthService authServic
         var uid = authService.Current?.Uid ?? throw new InvalidOperationException("Ingen inloggad användare.");
 
         // New users have nothing to catch up on, so the news popup starts from the current version.
-        var version = AppInfo.Version;
+        // Existing users repeating new onboarding steps keep their news history.
+        var isNewUser = authService.Current?.OnboardingCompleted != true;
+        var version = isNewUser ? AppInfo.Version : authService.Current?.LastSeenVersion;
 
-        await interop.UpdateDocumentAsync($"users/{uid}", new
+        var data = new Dictionary<string, object?>
         {
-            onboardingCompleted = true,
-            lastSeenVersion = version,
-            updatedAt = FirestoreFormat.UtcNow()
-        }, ct);
+            ["onboardingCompleted"] = true,
+            ["onboardingVersion"] = UserProfile.CurrentOnboardingVersion,
+            ["updatedAt"] = FirestoreFormat.UtcNow()
+        };
+
+        if (isNewUser)
+        {
+            data["lastSeenVersion"] = version;
+        }
+
+        await interop.UpdateDocumentAsync($"users/{uid}", data, ct);
 
         authService.UpdateCachedProfile(p =>
         {
             p.OnboardingCompleted = true;
+            p.OnboardingVersion = UserProfile.CurrentOnboardingVersion;
             p.LastSeenVersion = version;
         });
     }

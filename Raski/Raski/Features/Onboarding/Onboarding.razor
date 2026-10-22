@@ -5,6 +5,7 @@
 @inject IUserService UserService
 @inject IAllergyService AllergyService
 @inject NavigationManager Navigation
+@using Raski.Features.Profile
 
 <PageTitle>Välkommen – Raski™</PageTitle>
 
@@ -31,7 +32,7 @@
             }
         </div>
 
-        @if (!finished)
+        @if (!finished && !catchUp)
         {
             <div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="@TotalCount" aria-valuenow="@(Position + 1)" aria-label="Steg @(Position + 1) av @TotalCount">
                 <div class="progress-fill" style="width:@(((Position + 1) * 100) / TotalCount)%"></div>
@@ -52,7 +53,7 @@
                     </div>
                     <div class="trophy" aria-hidden="true">🎉</div>
                     <h1 class="shimmer">Du är redo!</h1>
-                    <p class="lead">Välkommen till Raski™, @FirstName. Nu kan resan börja.</p>
+                    <p class="lead">@(catchUp ? $"Tack, {FirstName}! Nu är du uppdaterad." : $"Välkommen till Raski™, {FirstName}. Nu kan resan börja.")</p>
                     <div class="fireworks" aria-hidden="true">
                         @for (var i = 0; i < 5; i++)
                         {
@@ -95,6 +96,7 @@
                         <li style="--d:0">📞 Hur man når dig</li>
                         <li style="--d:1">🍷 Om du dricker alkohol</li>
                         <li style="--d:2">🥜 Vad du inte tål</li>
+                        <li style="--d:3">👨‍👩‍👧 Vem du reser med</li>
                     </ul>
                     <div class="actions">
                         <button type="button" class="btn btn-secondary" @onclick="Back">Tillbaka</button>
@@ -171,7 +173,7 @@
                     </div>
                 </section>
             }
-            else
+            else if (step == 3)
             {
                 <section class="card-3d" @key="@("step-3")">
                     <div class="hero-emoji wobble" aria-hidden="true">🥗</div>
@@ -223,12 +225,24 @@
 
                     <div class="actions">
                         <button type="button" class="btn btn-secondary" @onclick="Back" disabled="@isSaving">Tillbaka</button>
-                        <button type="button" class="btn btn-primary mega" @onclick="FinishAsync" disabled="@isSaving">
-                            @(isSaving ? "Sparar…" : "Klar!")
-                            <span class="arrow" aria-hidden="true">🎊</span>
+                        <button type="button" class="btn btn-primary mega" @onclick="SaveAllergiesAsync" disabled="@isSaving">
+                            Nästa <span class="arrow" aria-hidden="true">✨</span>
                         </button>
                     </div>
                 </section>
+            }
+            else
+            {
+                @if (errorMessage is not null)
+                {
+                    <div class="error-banner shake" role="alert">@errorMessage</div>
+                }
+
+                <HouseholdOnboarding Title="@(catchUp ? $"Något nytt, {FirstName}!" : "Partner och barn")"
+                                     BackLabel="@(catchUp ? "Senare" : "Tillbaka")"
+                                     OnBack="@(catchUp ? Postpone : Back)"
+                                     OnDone="FinishAsync"
+                                     IsSaving="isSaving" />
             }
         </main>
 
@@ -239,7 +253,8 @@
 @code {
     private static readonly string[] FloaterEmojis = ["🥕", "🍕", "🥑", "🏕️", "🍓", "🧀", "🌮", "🥐", "🍉", "🎒"];
 
-    private const int StepCount = 4;
+    private const int StepCount = 5;
+    private const int HouseholdStep = 4;
     private static int IntroCount => AboutContent.Sections.Count;
     private static int TotalCount => IntroCount + StepCount;
 
@@ -249,6 +264,7 @@
     private bool InIntro => intro < IntroCount;
     private int Position => InIntro ? intro : IntroCount + step;
     private bool finished;
+    private bool catchUp;
     private bool isSaving;
     private string phone = "";
     private AlcoholPreference? alcohol;
@@ -286,6 +302,14 @@
         phone = AuthService.Current?.Phone ?? "";
         alcohol = AuthService.Current?.Alcohol;
         allergies = [.. AuthService.Current?.Allergies ?? []];
+
+        // Users who finished an earlier onboarding only see the steps added since.
+        if (AuthService.Current is { OnboardingCompleted: true, NeedsOnboarding: true })
+        {
+            catchUp = true;
+            intro = IntroCount;
+            step = HouseholdStep;
+        }
 
         try
         {
@@ -418,7 +442,13 @@
         newAllergy = "";
     }
 
-    private async Task FinishAsync()
+    private void Postpone()
+    {
+        AuthService.UpdateCachedProfile(p => p.OnboardingPostponed = true);
+        Navigation.NavigateTo("", replace: true);
+    }
+
+    private async Task SaveAllergiesAsync()
     {
         if (isSaving)
         {
@@ -431,6 +461,30 @@
         try
         {
             await AllergyService.SaveMyAllergiesAsync(allergies);
+            step++;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Kunde inte spara. {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task FinishAsync()
+    {
+        if (isSaving)
+        {
+            return;
+        }
+
+        errorMessage = null;
+        isSaving = true;
+
+        try
+        {
             await UserService.CompleteOnboardingAsync();
         }
         catch (Exception ex)

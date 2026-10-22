@@ -60,7 +60,7 @@
 
     private async Task CheckAsync()
     {
-        if (checkedForUid || AuthService.Current is not { OnboardingCompleted: true } user)
+        if (checkedForUid || AuthService.Current is not { NeedsOnboarding: false } user)
         {
             return;
         }
