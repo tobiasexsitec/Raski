@@ -61,3 +61,4 @@ så att barnen räknas rätt, en gång, när vi planerar mat och boende på en r
 - Räkningen av vuxna och barn väntar till B-042. Nu visas barnen bara grupperat i deltagarlistan.
 - Bortvalda barn sparas per resa i `trips/{tripId}/excludedChildren/{childId}` och kan ändras av
   hushållets medlemmar på resan.
+- Släppt i version 0.27.0.

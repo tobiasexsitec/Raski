@@ -40,4 +40,5 @@ de räknas med på mina resor utan att jag själv behöver hitta inställningen.
 ## Beslut
 - 2026-10-22: Eget objekt i stället för tillägg i B-047. Typ Funktion.
 - 2026-10-22: Versionsnummer på onboardingen i stället för att nollställa `OnboardingCompleted`.
-- 2026-10-22: "Senare" sparas inte, frågan kommer tillbaka vid nästa inloggning.
+frågan kommer tillbaka vid nästa inloggning.
+- Släppt i version 0.27.0.

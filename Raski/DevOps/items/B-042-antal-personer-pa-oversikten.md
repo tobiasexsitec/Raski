@@ -25,4 +25,5 @@ Som resenär vill jag se antalet deltagare så att jag kan planera mängder.
 ## Beslut
 - Väntande inbjudningar (konton som inte skapats än) räknas med.
 - Visas som totalt med uppdelning, t.ex. "11 personer (8 vuxna, 3 barn)". Barn som inte följer med räknas inte.
-- Antalet visas i Översikt-sektionen (kolumn 2, första raden) och överst i deltagarpanelen (`MembersPanel`).
+och överst i deltagarpanelen (`MembersPanel`).
+- Släppt i version 0.27.0.
