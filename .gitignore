@@ -74,3 +74,7 @@ secrets.json
 *~
 .DS_Store
 Thumbs.db
+
+# Firebase service account keys
+*-service-account*.json
+serviceAccount*.json
