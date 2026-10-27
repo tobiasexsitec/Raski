@@ -17,8 +17,13 @@ Under bygget ersätts `Raski/Raski/wwwroot/appsettings.json` med `deploy/test/ap
 3. **Registrera en webbapp** (Projektinställningar → Dina appar → Webb) och kopiera konfigurationen
    till `deploy/test/appsettings.json`.
 4. **Google-inloggning:** kopiera *Web client ID* (Authentication → Sign-in method → Google →
-   Web SDK configuration) till `googleClientId`. Lägg till `https://<projekt-id>.web.app` under
-   *Authorized JavaScript origins* för klienten i Google Cloud Console → APIs & Services → Credentials.
+   Web SDK configuration) till `googleClientId`. I Google Cloud Console → APIs & Services → Credentials,
+   öppna klienten och lägg till:
+   - *Authorized JavaScript origins:* `https://<projekt-id>.web.app` och `https://<projekt-id>.firebaseapp.com`.
+   - *Authorized redirect URIs:* `https://<projekt-id>.firebaseapp.com/__/auth/handler`.
+
+   Fyll även i OAuth consent screen (appnamn och e-postadresser) och publicera appen, eller lägg till
+   testanvändare. Annars stoppar Google inloggningen med "appen följer inte Googles OAuth 2.0-policy".
 5. **Tjänstekonto för GitHub Actions:** Google Cloud Console → IAM → Service Accounts (projekt `raski-test`)
    → skapa ett konto, t.ex. `github-deploy`, med rollerna:
    - *Firebase Admin* – hosting och Firestore-regler.
