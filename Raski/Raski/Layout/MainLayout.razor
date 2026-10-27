@@ -2,6 +2,7 @@
 @implements IDisposable
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
+@inject AppEnvironmentOptions Environment
 
 <div class="shell">
     <a class="skip-link" href="#main">Hoppa till innehållet</a>
@@ -11,6 +12,11 @@
             <span class="brand-mark" aria-hidden="true">🕶️</span>
             <span class="brand-name">Raski™</span>
         </a>
+
+        @if (!Environment.IsProduction)
+        {
+            <span class="tag tag-accent env-tag" role="status" title="Du använder testmiljön – data här påverkar inte produktion">@Environment.Name</span>
+        }
 
         <div class="spacer"></div>
 

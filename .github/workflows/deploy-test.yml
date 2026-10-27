@@ -1,0 +1,48 @@
+name: Deploy to test environment
+
+on:
+  push:
+    branches: [ develop ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-environment
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # Swapped in before publish so the service worker asset hashes match the deployed file.
+      - name: Use test configuration
+        run: |
+          cp deploy/test/appsettings.json Raski/Raski/wwwroot/appsettings.json
+          PROJECT_ID=$(jq -r '.Firebase.projectId' deploy/test/appsettings.json)
+          if [[ -z "$PROJECT_ID" || "$PROJECT_ID" == REPLACE_WITH* ]]; then
+            echo "::error::deploy/test/appsettings.json saknar testprojektets Firebase-konfiguration."
+            exit 1
+          fi
+          echo "PROJECT_ID=$PROJECT_ID" >> "$GITHUB_ENV"
+
+      - name: Publish
+        run: dotnet publish Raski/Raski/Raski.csproj -c Release
+
+      - name: Deploy hosting and Firestore rules/indexes
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_RASKI_TEST }}
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          npx --yes firebase-tools@latest deploy --only hosting,firestore --project "$PROJECT_ID" --non-interactive

@@ -36,6 +36,12 @@
     font-size: 1.3rem;
 }
 
+.env-tag {
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
 .app-footer {
     display: flex;
     align-items: center;

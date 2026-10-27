@@ -12,6 +12,10 @@ var firebaseOptions = builder.Configuration.GetSection(FirebaseOptions.SectionNa
     ?? new FirebaseOptions();
 builder.Services.AddSingleton(firebaseOptions);
 
+var environmentOptions = builder.Configuration.GetSection(AppEnvironmentOptions.SectionName).Get<AppEnvironmentOptions>()
+    ?? new AppEnvironmentOptions();
+builder.Services.AddSingleton(environmentOptions);
+
 builder.Services.AddSingleton<FirebaseInterop>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<IThemeService, ThemeService>();
