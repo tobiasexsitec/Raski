@@ -1,9 +1,10 @@
-# B-058: Testmiljö före produktion
+﻿# B-058: Testmiljö före produktion
 
-- **Status:** Pågår
+- **Status:** Klar
 - **Typ:** Utveckling
 - **Prioritet:** –
 - **Skapad:** 2026-10-26
+- **Klar:** 2026-10-27
 
 ## Beskrivning
 Nya funktioner ska först publiceras till en separat testmiljö på en egen adress, där de kan
@@ -15,11 +16,11 @@ Som utvecklare vill jag kunna publicera och testa nya funktioner i en testmiljö
 produktion, så att fel upptäcks innan användarna påverkas.
 
 ## Acceptanskriterier
-- [ ] Det finns en testmiljö på en egen adress, skild från produktion.
-- [ ] Pipelinen publicerar automatiskt till testmiljön från en angiven branch (t.ex. release-branchen).
-- [ ] Produktion publiceras fortfarande bara från `main`.
-- [ ] Det syns tydligt i appen att man är i testmiljön (t.ex. en banner eller märkning).
-- [ ] Testmiljön påverkar inte produktionsdata.
+- [x] Det finns en testmiljö på en egen adress, skild från produktion.
+- [x] Pipelinen publicerar automatiskt till testmiljön från en angiven branch (t.ex. release-branchen).
+- [x] Produktion publiceras fortfarande bara från `main`.
+- [x] Det syns tydligt i appen att man är i testmiljön (t.ex. en banner eller märkning).
+- [x] Testmiljön påverkar inte produktionsdata.
 
 ## Öppna frågor
 - Var ska testmiljön ligga – Firebase Hosting (preview channel/egen site), eget GitHub Pages-repo eller en subdomän (t.ex. `test.krispinsson.se`, jfr B-051)?

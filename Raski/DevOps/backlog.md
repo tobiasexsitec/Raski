@@ -16,7 +16,6 @@
 | [B-054](items/B-054-onboarding-vid-inbjudan-till-ny-resa.md) | Onboarding vid inbjudan till ny resa | Funktion | Idé | – | 2026-10-22 |
 | [B-056](items/B-056-policyer-for-resan.md) | Policyer för resan | Funktion | Idé | – | 2026-10-26 |
 | [B-057](items/B-057-dela-kostnader-pa-resan.md) | Dela kostnader på resan | Funktion | Idé | – | 2026-10-26 |
-| [B-058](items/B-058-testmiljo-fore-produktion.md) | Testmiljö före produktion | Utveckling | Pågår | – | 2026-10-26 |
 | [B-059](items/B-059-mallar-for-vem-tar-med.md) | Mallar för "Vem tar med" | Funktion | Idé | – | 2026-10-26 |
 | [B-060](items/B-060-installerbar-app-upplevelse-ren-pwa.md) | Installerbar app-upplevelse (ren PWA) | Funktion | Idé | – | 2026-10-26 |
 
@@ -24,6 +23,7 @@
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-058](items/B-058-testmiljo-fore-produktion.md) | Testmiljö före produktion | Utveckling | – | 2026-10-27 |
 | [B-042](items/B-042-antal-personer-pa-oversikten.md) | Antal personer på översikten | Funktion | – | 2026-10-22 |
 | [B-055](items/B-055-onboarding-for-partner-och-barn-till-befintliga-anvandare.md) | Onboarding för partner och barn till befintliga användare | Funktion | Hög | 2026-10-22 |
 | [B-047](items/B-047-barn-och-sallskap-pa-deltagare.md) | Barn och sällskap på deltagare | Funktion | Hög | 2026-10-22 |
