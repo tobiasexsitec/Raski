@@ -19,9 +19,13 @@ Under bygget ersätts `Raski/Raski/wwwroot/appsettings.json` med `deploy/test/ap
 4. **Google-inloggning:** kopiera *Web client ID* (Authentication → Sign-in method → Google →
    Web SDK configuration) till `googleClientId`. Lägg till `https://<projekt-id>.web.app` under
    *Authorized JavaScript origins* för klienten i Google Cloud Console → APIs & Services → Credentials.
-5. **Tjänstekonto för GitHub Actions:** Google Cloud Console → IAM → Service Accounts → skapa ett konto
-   med rollerna *Firebase Hosting Admin*, *Firebase Rules Admin* och *Cloud Datastore Index Admin*
-   (eller *Firebase Admin*). Skapa en JSON-nyckel.
+5. **Tjänstekonto för GitHub Actions:** Google Cloud Console → IAM → Service Accounts (projekt `raski-test`)
+   → skapa ett konto, t.ex. `github-deploy`, med rollerna:
+   - *Firebase Admin* – hosting och Firestore-regler.
+   - *Cloud Datastore Index Admin* – Firestore-index.
+   - *Service Usage Consumer* – Firebase CLI kontrollerar aktiverade API:er.
+
+   Skapa sedan en JSON-nyckel (kontot → Keys → Add key → JSON). Lägg den aldrig i repot.
 6. **GitHub:** Settings → Environments → skapa `test`. Lägg JSON-nyckeln som secret
    `FIREBASE_SERVICE_ACCOUNT_RASKI_TEST` i environmentet.
 7. **Skapa branchen** `develop` och pusha. Appen nås sedan på `https://<projekt-id>.web.app`.
