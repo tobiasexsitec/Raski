@@ -38,4 +38,5 @@ produktion, så att fel upptäcks innan användarna påverkas.
 - Testmiljön får ett eget Firebase-projekt (egen Auth och Firestore) och publiceras med Firebase Hosting.
 - Testpublicering triggas av push till `develop`. Produktion publiceras som tidigare vid push till `main`, utan manuellt godkännande.
 Till en början används Firebase standardadress (`<projekt-id>.web.app`).
-- Firebase Hosting används för testmiljön så länge. Azure (t.ex. Static Web Apps) övervägs när det behövs, t.ex. för ett delat API mellan appar; ett värdbyte påverkar inte användarna så länge adressen är densamma.
+Azure (t.ex. Static Web Apps) övervägs när det behövs, t.ex. för ett delat API mellan appar; ett värdbyte påverkar inte användarna så länge adressen är densamma.
+- Branchflöde: feature-branchar skapas från `develop` och mergas dit; `develop` mergas till `main` vid release. Ersätter release-branchar (t.ex. `release/0.27`).

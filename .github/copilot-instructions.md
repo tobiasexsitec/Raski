@@ -104,7 +104,7 @@ Mönstret finns i `MealService.ObserveMeals` / `ShoppingListService`: en bounded
   - `Utveckling` (övriga typer): **ingen** versionshöjning och ingen release notes-post.
   - Innehåller en release både `feat` och `fix` höjs minor. Major höjs endast när användaren uttryckligen säger till; `BREAKING CHANGE`/`!` styr inte versionen.
   - Vid versionshöjning: ange den nya versionen under **Beslut** i objektfilen (t.ex. `- Släppt i version 0.5.0.`). Release notes och nyhets-popupen ska bara innehålla `feat`/`fix`. Appen är inte släppt ännu, så versionen ligger på 0.x.y tills 1.0.0 släpps.
-- Flera funktioner samlas i en release-branch (t.ex. release/0.27) som mergas till main vid release; versionen bumpas först vid release, inte per backlog-objekt när användaren säger det.
+- Branchflöde: nya funktioner utvecklas i en feature-branch (t.ex. `feature/B-058-testmiljo`) som skapas från `develop` och mergas tillbaka till `develop`. Push till `develop` publicerar testmiljön (`.github/workflows/deploy-test.yml`, se `deploy/test/README.md`). Vid release mergas `develop` till `main`, som publicerar produktion. Versionen bumpas först vid release, inte per backlog-objekt när användaren säger det.
 - När du redigerar tabellerna i `Raski/DevOps/backlog.md`, följ reglerna i filen: ersätt alltid hela raden och läs igenom tabellerna efteråt. **Öppna** har kolumnerna ID, Titel, Typ, Status, Prioritet, Skapad i nummerordning; **Klara** har ID, Titel, Typ, Prioritet, Klar med senast klar överst. Varje fil i `items/` ska finnas i exakt en tabell, och typ, status och datum ska matcha objektfilerna.
 
 ## ⚠️ KRITISKT: Redigering av backlog-tabellerna
