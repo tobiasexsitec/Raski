@@ -30,6 +30,9 @@ att komma ihåg och känns som en egen tjänst.
 - Kontrollera `authDomain` i `wwwroot/appsettings.json` och redirect-URI:er för Google-inloggning (B-011).
 - PWA och service worker är bundna till origin – installerade appar och cache följer inte med automatiskt.
 - Local storage (t.ex. tema och senast sedda version) följer inte med till ny origin.
+- Allt i webbläsaren (PWA-installation, service worker, inloggningssession, local storage) är bundet till adressen, inte till värden. Därför ska domänbytet bara göras en gång: när appen väl ligger på `raski.krispinsson.se` kan värden (GitHub Pages, Firebase Hosting, Azure Static Web Apps) bytas genom att bara ändra DNS, utan att användarna märker något.
+- Att byta backend (Firebase Auth/Firestore) märks däremot för användarna: lösenordshashar kan inte importeras rakt av till t.ex. Azure Entra (e-postanvändare måste troligen återställa lösenord), alla måste logga in igen, data måste migreras och `firestore.rules` måste ersättas av ett API.
+- Testmiljön (B-058) ligger på Firebase Hosting och ska på sikt nås via `test.raski.krispinsson.se`.
 
 ## Beslut
 - –

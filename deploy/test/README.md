@@ -1,0 +1,34 @@
+# Testmiljö
+
+Testmiljön publiceras automatiskt vid push till `develop` av `.github/workflows/deploy-test.yml`.
+Den använder ett eget Firebase-projekt (egen Auth och Firestore) och påverkar inte produktion.
+Produktion publiceras som tidigare från `main` till GitHub Pages.
+
+Under bygget ersätts `Raski/Raski/wwwroot/appsettings.json` med `deploy/test/appsettings.json`.
+`AppEnvironment.Name` gör att appen visar en märkning ("Test") i appbaren.
+
+## Engångsuppsättning
+
+1. **Skapa Firebase-projektet** i [Firebase-konsolen](https://console.firebase.google.com), t.ex. `raski-test`.
+2. **Aktivera tjänster:**
+   - Authentication → Sign-in method: aktivera *E-post/lösenord* och *Google*.
+   - Firestore Database: skapa databasen (production mode, region `eur3` eller samma som produktion).
+   - Hosting: klicka *Kom igång* (inga lokala steg behövs).
+3. **Registrera en webbapp** (Projektinställningar → Dina appar → Webb) och kopiera konfigurationen
+   till `deploy/test/appsettings.json`.
+4. **Google-inloggning:** kopiera *Web client ID* (Authentication → Sign-in method → Google →
+   Web SDK configuration) till `googleClientId`. Lägg till `https://<projekt-id>.web.app` under
+   *Authorized JavaScript origins* för klienten i Google Cloud Console → APIs & Services → Credentials.
+5. **Tjänstekonto för GitHub Actions:** Google Cloud Console → IAM → Service Accounts → skapa ett konto
+   med rollerna *Firebase Hosting Admin*, *Firebase Rules Admin* och *Cloud Datastore Index Admin*
+   (eller *Firebase Admin*). Skapa en JSON-nyckel.
+6. **GitHub:** Settings → Environments → skapa `test`. Lägg JSON-nyckeln som secret
+   `FIREBASE_SERVICE_ACCOUNT_RASKI_TEST` i environmentet.
+7. **Skapa branchen** `develop` och pusha. Appen nås sedan på `https://<projekt-id>.web.app`.
+8. **Grunddata:** ingredienser, enheter och admin-användare behöver läggas upp i testprojektet.
+
+## Egen domän (senare)
+
+Hosting → Lägg till anpassad domän → `test.raski.krispinsson.se`. Lägg in DNS-posterna som visas,
+och lägg till domänen under Authentication → Settings → Authorized domains samt som
+JavaScript origin för Google-klienten.
