@@ -1,7 +1,6 @@
 @page "/resor/ny"
 @page "/resor/{TripId}/redigera"
 @inject ITripService TripService
-@inject IAuthService AuthService
 @inject NavigationManager Navigation
 
 <PageTitle>@(IsNew ? "Ny resa" : "Redigera resa") – Raski™</PageTitle>
@@ -118,12 +117,6 @@ else
     {
         if (IsNew)
         {
-            if (!AuthService.IsGlobalAdmin)
-            {
-                loadError = "Bara globala admins kan skapa resor.";
-                return;
-            }
-
             model.StartDate = DateTime.Today;
             model.EndDate = DateTime.Today.AddDays(2);
             return;
