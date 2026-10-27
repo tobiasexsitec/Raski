@@ -33,3 +33,4 @@ Som inloggad användare vill jag kunna skapa en egen resa så att jag kan planer
 - 2026-10-27: Typen Funktion bekräftad av användaren.
 - 2026-10-27: Ingen gräns för antal resor per användare.
 - 2026-10-27: Bara användare med konto (inte anonyma) kan skapa resor; reglerna ska kräva en icke-anonym inloggning.
+- Släppt i version 0.28.0.
