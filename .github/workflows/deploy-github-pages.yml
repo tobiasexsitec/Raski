@@ -15,6 +15,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  firestore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Rules go out before the app so new app code never runs against old rules.
+      - name: Deploy Firestore rules/indexes
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_RASKI }}
+        run: |
+          if [[ -z "$FIREBASE_SERVICE_ACCOUNT" ]]; then
+            echo "::error::Hemligheten FIREBASE_SERVICE_ACCOUNT_RASKI saknas."
+            exit 1
+          fi
+          PROJECT_ID=$(jq -r '.Firebase.projectId' Raski/Raski/wwwroot/appsettings.json)
+          echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          npx --yes firebase-tools@latest deploy --only firestore --project "$PROJECT_ID" --non-interactive
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -39,7 +58,7 @@ jobs:
           path: publish/wwwroot
 
   deploy:
-    needs: build
+    needs: [ firestore, build ]
     runs-on: ubuntu-latest
     environment:
       name: github-pages
