@@ -75,9 +75,10 @@ Reglerna ligger i `firestore.rules` i repots rot.
 
 Push till `main` deployar regler och index (`firestore.rules`,
 `firestore.indexes.json`) till produktion innan appen publiceras, och push till
-`develop` gör detsamma för testmiljön. Produktionsjobbet kräver hemligheten
-`FIREBASE_SERVICE_ACCOUNT_RASKI` (JSON-nyckel för ett tjänstekonto med rollerna
-*Firebase Rules Admin* och *Cloud Datastore Index Admin*). Misslyckas regeldeployen
+Produktionsjobbet kräver hemligheten
+`FIREBASE_SERVICE_ACCOUNT_RASKI` (som *environment secret* i `github-pages`)
+`github-deploy`, med rollerna *Firebase Rules Admin*, *Cloud Datastore Index Admin*
+och *Service Usage Consumer*). Misslyckas regeldeployen
 publiceras inte appen. Manuell deploy:
 ```powershell
 npm install -g firebase-tools
