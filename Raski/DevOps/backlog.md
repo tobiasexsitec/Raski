@@ -16,7 +16,8 @@
 | [B-054](items/B-054-onboarding-vid-inbjudan-till-ny-resa.md) | Onboarding vid inbjudan till ny resa | Funktion | Idé | – | 2026-10-22 |
 | [B-057](items/B-057-dela-kostnader-pa-resan.md) | Dela kostnader på resan | Funktion | Idé | – | 2026-10-26 |
 | [B-059](items/B-059-mallar-for-vem-tar-med.md) | Mallar för "Vem tar med" | Funktion | Idé | – | 2026-10-26 |
-| [B-060](items/B-060-installerbar-app-upplevelse-ren-pwa.md) | Installerbar app-upplevelse (ren PWA) | Funktion | Idé | – | 2026-10-26 |
+| [B-060](items/B-060-installerbar-app-upplevelse-ren-pwa.md) | Installerbar app-upplevelse (ren PWA) | Funktion | Redo | Hög | 2026-10-26 |
+| [B-063](items/B-063-ios-splash-och-google-inloggning-i-installerad-app.md) | iOS-splash och Google-inloggning i installerad app | Funktion | Idé | – | 2026-10-27 |
 
 ## Klara
 
