@@ -107,16 +107,11 @@ Mönstret finns i `MealService.ObserveMeals` / `ShoppingListService`: en bounded
 - Branchflöde (förenklad Git Flow):
   - **Feature:** nya funktioner och ändringar utvecklas i en feature-branch (t.ex. `feature/B-058-testmiljo`) som skapas från `develop` och mergas tillbaka till `develop` först när arbetet är klart. `develop` ska alltid gå att släppa; stora funktioner delas upp eller döljs bakom en konfigurationsflagga.
   - **Test:** push till `develop` publicerar testmiljön (`.github/workflows/deploy-test.yml`, se `deploy/test/README.md`).
-  - **Release:** merga `develop` till `main` (gärna via en pull request). Höj sedan versionen, uppdatera release notes och skriv in versionen i objektfilerna i en commit på `main`, och tagga den med `vX.Y.Z` (t.ex. `v0.28.0`). Push till `main` publicerar produktion. Merga därefter `main` tillbaka till `develop` så att versionen finns där. Versionen höjs **aldrig** direkt på `develop` eller i feature-branchar.
+  - **Release:** skapa `release/vX.Y.Z` från `develop`. Höj versionen, uppdatera release notes och skriv in versionen i objektfilerna i en commit på release-branchen. Öppna en PR `release/vX.Y.Z` → `main` och merga den. Tagga sedan den mergade committen på `main` med `vX.Y.Z` (t.ex. `v0.28.0`). Push till `main` publicerar produktion (en enda körning). Öppna därefter en PR `release/vX.Y.Z` → `develop` så att versionen finns där. Versionen höjs **aldrig** direkt på `develop` eller i feature-branchar.
   - **Hotfix:** brådskande buggfixar i produktion görs i `hotfix/<B-XXX-beskrivning>` från `main`. Merga till `main`, höj patch i en commit på `main`, tagga, och merga sedan `main` tillbaka till `develop` så att fixen och versionen inte försvinner. En hotfix-branch kan provas i testmiljön först genom att köra arbetsflödet manuellt (*Run workflow*).
 - När du redigerar tabellerna i `Raski/DevOps/backlog.md`, följ reglerna i filen: ersätt alltid hela raden och läs igenom tabellerna efteråt. **Öppna** har kolumnerna ID, Titel, Typ, Status, Prioritet, Skapad i nummerordning; **Klara** har ID, Titel, Typ, Prioritet, Klar med senast klar överst. Varje fil i `items/` ska finnas i exakt en tabell, och typ, status och datum ska matcha objektfilerna.
 
-## ⚠️ KRITISKT: Redigering av backlog-tabellerna
+## Pull Request-hantering
 
-Tabellerna i `Raski/DevOps/backlog.md` har gått sönder flera gånger. Ett känt fel: `oldString` matchade bara **slutet** av en rad (t.ex. `| Utveckling | Idé | – | 2026-10-22 |`), så att början av raden med ID och titel försvann. Följ därför ALLTID detta:
-
-1. Läs tabellen med radnummer **innan** du ändrar.
-2. `oldString` och `newString` ska bestå av **hela rader**, från `| [B-XXX](items/...)` till sista `|`. Matcha aldrig på ett radfragment eller på bara de sista kolumnerna.
-3. För att lägga till en rad: ta med hela föregående rad (inkl. ID-länken) i `oldString` och upprepa den oförändrad i `newString` följt av den nya raden.
-4. Läs tabellen igen **efter** ändringen och kontrollera rad för rad att varje rad börjar med `| [B-XXX](items/B-XXX-....md) |`, har rätt antal kolumner och att inga rader har försvunnit eller dubblerats.
-5. Rapportera aldrig arbetet som klart förrän denna kontroll är gjord och eventuella fel är rättade.
+- Merga pull requests med rebase (inga merge commits): skapa en PR och merga den med rebase-metoden, för funktioner in i develop och för releaser in i main.
+- Om rebase inte fungerar bra (t.ex. konflikter, eller att `develop` och `main` glider isär efter en release), använd en vanlig merge commit i stället. Releasen följer flödet med `release/vX.Y.Z` ovan.
