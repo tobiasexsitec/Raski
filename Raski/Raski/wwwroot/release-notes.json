@@ -1,4 +1,5 @@
 [
+  { "version": "0.28.0", "date": "2026-10-27", "notes": [ "Alla med konto kan nu skapa egna resor och blir administratör för dem." ] },
   { "version": "0.27.1", "date": "2026-10-22", "notes": [ "Popupen med nyheter och release notes på Om Raski™ visas igen." ] },
   { "version": "0.27.0", "date": "2026-10-22", "notes": [ "Lägg till partner och barn i din profil. De visas tillsammans med dig som deltagare i resor.", "Har du redan ett konto guidas du nu genom att lägga till partner och barn. Du kan också ta bort dem direkt där.", "Resöversikten visar hur många personer som är med." ] },
   { "version": "0.26.0", "date": "2026-10-22", "notes": [ "Lägg till deltagare med bara e-post, även om de saknar konto. De kopplas automatiskt när de loggar in." ] },
