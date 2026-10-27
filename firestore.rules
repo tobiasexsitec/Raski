@@ -7,6 +7,10 @@ service cloud.firestore {
 	  return request.auth != null;
 	}
 
+	function hasAccount() {
+	  return isSignedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous';
+	}
+
 	function myEmail() {
 	  return request.auth.token.email.lower();
 	}
@@ -117,13 +121,14 @@ service cloud.firestore {
 					&& resource.data.memberUids == [request.auth.uid];
 	}
 
-	// Trips are created by global admins, readable and writable by their
-	// members; only the owner may change membership or delete the trip.
+	// Any user with an account may create a trip and becomes its owner. Trips are
+	// readable and writable by their members; only the owner may change
+	// membership or delete the trip.
 	match /trips/{tripId} {
 	  allow read: if isSignedIn()
 				  && (request.auth.uid in resource.data.memberUids || isPendingEmail(resource.data));
 
-	  allow create: if isGlobalAdmin()
+	  allow create: if hasAccount()
 					&& request.resource.data.ownerUid == request.auth.uid
 					&& request.auth.uid in request.resource.data.memberUids;
 

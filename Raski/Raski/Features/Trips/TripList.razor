@@ -1,16 +1,12 @@
 @page "/"
 @inject ITripService TripService
-@inject IAuthService AuthService
 @inject NavigationManager Navigation
 
 <PageTitle>Mina resor – Raski™</PageTitle>
 
 <div class="page-header">
     <h1>Mina resor</h1>
-    @if (AuthService.IsGlobalAdmin)
-    {
-        <a class="btn btn-primary" href="resor/ny">Ny resa</a>
-    }
+    <a class="btn btn-primary" href="resor/ny">Ny resa</a>
 </div>
 
 @if (isLoading)
@@ -25,15 +21,8 @@ else if (trips.Count == 0)
 {
     <div class="empty-state card">
         <p><strong>Inga resor än.</strong></p>
-        @if (AuthService.IsGlobalAdmin)
-        {
-            <p>Skapa din första resa så kan ni börja planera maten tillsammans.</p>
-            <a class="btn btn-primary" href="resor/ny">Skapa resa</a>
-        }
-        else
-        {
-            <p>Be en global admin att skapa en resa och bjuda in dig.</p>
-        }
+        <p>Skapa din första resa så kan ni börja planera maten tillsammans.</p>
+        <a class="btn btn-primary" href="resor/ny">Skapa resa</a>
     </div>
 }
 else

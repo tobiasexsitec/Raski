@@ -1,6 +1,6 @@
 # B-061: Alla kan skapa egna resor
 
-- **Status:** Idé
+- **Status:** Pågår
 - **Typ:** Funktion
 - **Prioritet:** –
 - **Skapad:** 2026-10-27
