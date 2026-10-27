@@ -104,7 +104,11 @@ Mönstret finns i `MealService.ObserveMeals` / `ShoppingListService`: en bounded
   - `Utveckling` (övriga typer): **ingen** versionshöjning och ingen release notes-post.
   - Innehåller en release både `feat` och `fix` höjs minor. Major höjs endast när användaren uttryckligen säger till; `BREAKING CHANGE`/`!` styr inte versionen.
   - Vid versionshöjning: ange den nya versionen under **Beslut** i objektfilen (t.ex. `- Släppt i version 0.5.0.`). Release notes och nyhets-popupen ska bara innehålla `feat`/`fix`. Appen är inte släppt ännu, så versionen ligger på 0.x.y tills 1.0.0 släpps.
-- Branchflöde: nya funktioner utvecklas i en feature-branch (t.ex. `feature/B-058-testmiljo`) som skapas från `develop` och mergas tillbaka till `develop`. Push till `develop` publicerar testmiljön (`.github/workflows/deploy-test.yml`, se `deploy/test/README.md`). Vid release mergas `develop` till `main`, som publicerar produktion. Versionen bumpas först vid release, inte per backlog-objekt när användaren säger det.
+- Branchflöde (förenklad Git Flow):
+  - **Feature:** nya funktioner och ändringar utvecklas i en feature-branch (t.ex. `feature/B-058-testmiljo`) som skapas från `develop` och mergas tillbaka till `develop` först när arbetet är klart. `develop` ska alltid gå att släppa; stora funktioner delas upp eller döljs bakom en konfigurationsflagga.
+  - **Test:** push till `develop` publicerar testmiljön (`.github/workflows/deploy-test.yml`, se `deploy/test/README.md`).
+  - **Release:** höj versionen på `develop`, merga `develop` till `main` (gärna via en pull request) och tagga merge-commiten på `main` med `vX.Y.Z` (t.ex. `v0.28.0`). Push till `main` publicerar produktion. Versionen bumpas först vid release, inte per backlog-objekt när användaren säger det.
+  - **Hotfix:** brådskande buggfixar i produktion görs i `hotfix/<B-XXX-beskrivning>` från `main`. Höj patch, merga till `main`, tagga, och merga sedan `main` tillbaka till `develop` så att fixen inte försvinner. En hotfix-branch kan provas i testmiljön först genom att köra arbetsflödet manuellt (*Run workflow*).
 - När du redigerar tabellerna i `Raski/DevOps/backlog.md`, följ reglerna i filen: ersätt alltid hela raden och läs igenom tabellerna efteråt. **Öppna** har kolumnerna ID, Titel, Typ, Status, Prioritet, Skapad i nummerordning; **Klara** har ID, Titel, Typ, Prioritet, Klar med senast klar överst. Varje fil i `items/` ska finnas i exakt en tabell, och typ, status och datum ska matcha objektfilerna.
 
 ## ⚠️ KRITISKT: Redigering av backlog-tabellerna
