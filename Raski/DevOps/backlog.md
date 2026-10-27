@@ -14,17 +14,17 @@
 | [B-049](items/B-049-bugg-appen-laddar-om-ofta-pa-mobilen.md) | Bugg: Appen laddar om ofta på mobilen | Bugg | Idé | Hög | 2026-10-14 |
 | [B-051](items/B-051-flytta-appen-till-domanen-krispinsson-se.md) | Flytta appen till domänen krispinsson.se | Utveckling | Idé | – | 2026-10-22 |
 | [B-054](items/B-054-onboarding-vid-inbjudan-till-ny-resa.md) | Onboarding vid inbjudan till ny resa | Funktion | Idé | – | 2026-10-22 |
-| [B-056](items/B-056-policyer-for-resan.md) | Policyer för resan | Funktion | Idé | – | 2026-10-26 |
 | [B-057](items/B-057-dela-kostnader-pa-resan.md) | Dela kostnader på resan | Funktion | Idé | – | 2026-10-26 |
 | [B-059](items/B-059-mallar-for-vem-tar-med.md) | Mallar för "Vem tar med" | Funktion | Idé | – | 2026-10-26 |
 | [B-060](items/B-060-installerbar-app-upplevelse-ren-pwa.md) | Installerbar app-upplevelse (ren PWA) | Funktion | Idé | – | 2026-10-26 |
-| [B-061](items/B-061-alla-kan-skapa-egna-resor.md) | Alla kan skapa egna resor | Funktion | Pågår | – | 2026-10-27 |
-| [B-062](items/B-062-produktionspipelinen-deployar-firestore-regler.md) | Produktionspipelinen deployar Firestore-regler | Utveckling | Pågår | – | 2026-10-27 |
 
 ## Klara
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-056](items/B-056-policyer-for-resan.md) | Policyer för resan | Funktion | – | 2026-10-27 |
+| [B-062](items/B-062-produktionspipelinen-deployar-firestore-regler.md) | Produktionspipelinen deployar Firestore-regler | Utveckling | – | 2026-10-27 |
+| [B-061](items/B-061-alla-kan-skapa-egna-resor.md) | Alla kan skapa egna resor | Funktion | – | 2026-10-27 |
 | [B-058](items/B-058-testmiljo-fore-produktion.md) | Testmiljö före produktion | Utveckling | – | 2026-10-27 |
 | [B-042](items/B-042-antal-personer-pa-oversikten.md) | Antal personer på översikten | Funktion | – | 2026-10-22 |
 | [B-055](items/B-055-onboarding-for-partner-och-barn-till-befintliga-anvandare.md) | Onboarding för partner och barn till befintliga användare | Funktion | Hög | 2026-10-22 |

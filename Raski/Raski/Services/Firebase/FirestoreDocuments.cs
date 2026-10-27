@@ -162,6 +162,7 @@ internal sealed class TripMemberDocument
     [JsonPropertyName("photoUrl")] public string? PhotoUrl { get; set; }
     [JsonPropertyName("role")] public string? Role { get; set; }
     [JsonPropertyName("alcohol")] public string? Alcohol { get; set; }
+    [JsonPropertyName("canManagePolicies")] public bool? CanManagePolicies { get; set; }
 
     public TripMember ToModel() => new()
     {
@@ -170,7 +171,8 @@ internal sealed class TripMemberDocument
         Email = Email ?? "",
         PhotoUrl = PhotoUrl ?? "",
         Role = Role == MemberRoles.Admin ? MemberRoles.Admin : MemberRoles.Member,
-        Alcohol = AlcoholPreferenceExtensions.ParseAlcoholPreference(Alcohol)
+        Alcohol = AlcoholPreferenceExtensions.ParseAlcoholPreference(Alcohol),
+        CanManagePolicies = CanManagePolicies == true
     };
 }
 
@@ -319,6 +321,27 @@ internal sealed class PollDocument
         CreatedByUid = CreatedByUid ?? "",
         CreatedByName = CreatedByName ?? "",
         CreatedAt = CreatedAt ?? ""
+    };
+}
+
+internal sealed class TripPolicyDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("title")] public string? Title { get; set; }
+    [JsonPropertyName("text")] public string? Text { get; set; }
+    [JsonPropertyName("createdAt")] public string? CreatedAt { get; set; }
+    [JsonPropertyName("updatedAt")] public string? UpdatedAt { get; set; }
+    [JsonPropertyName("acceptedBy")] public Dictionary<string, string>? AcceptedBy { get; set; }
+
+    public TripPolicy ToModel(string tripId) => new()
+    {
+        Id = Id,
+        TripId = tripId,
+        Title = Title ?? "",
+        Text = Text ?? "",
+        CreatedAt = CreatedAt ?? "",
+        UpdatedAt = UpdatedAt ?? "",
+        AcceptedBy = AcceptedBy ?? []
     };
 }
 

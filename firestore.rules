@@ -32,6 +32,14 @@ service cloud.firestore {
 	  return isTripOwner(tripId) || (isTripMember(tripId) && isGlobalAdmin());
 	}
 
+	// Policies (B-056) are managed by those who manage members, or by a member
+	// who has been granted the permission on their member document.
+	function canManagePolicies(tripId) {
+	  return canManageMembers(tripId)
+			 || (isTripMember(tripId)
+				 && get(/databases/$(database)/documents/trips/$(tripId)/members/$(request.auth.uid)).data.get('canManagePolicies', false) == true);
+	}
+
 	function isPendingEmail(data) {
 	  return isSignedIn() && myEmail() in data.get('pendingEmails', []);
 	}
@@ -221,6 +229,19 @@ service cloud.firestore {
 		  allow delete: if (isTripMember(tripId) && request.auth.uid == voterUid)
 						  || isPollCreator(tripId, pollId);
 		}
+	  }
+
+	  // Trip policies (B-056): read by all members, managed by the owner or
+	  // a global admin. A member may only add their own acceptance.
+	  match /policies/{policyId} {
+		allow read: if isTripMember(tripId);
+		allow create, delete: if canManagePolicies(tripId);
+		allow update: if canManagePolicies(tripId)
+						|| (isTripMember(tripId)
+							&& request.resource.data.diff(resource.data).affectedKeys().hasOnly(['acceptedBy'])
+							&& request.resource.data.get('acceptedBy', {})
+								 .diff(resource.data.get('acceptedBy', {}))
+								 .affectedKeys().hasOnly([request.auth.uid]));
 	  }
 
 	  // Shared check-off state for the shopping list.

@@ -4,6 +4,7 @@
 @page "/resor/{TripId}/vem-tar-med"
 @page "/resor/{TripId}/omrostningar"
 @inject ITripService TripService
+@inject ITripPolicyService PolicyService
 @inject NavigationManager Navigation
 
 <PageTitle>@(trip?.Name ?? "Resa") – Raski™</PageTitle>
@@ -89,6 +90,16 @@ else if (trip is not null)
                     <p>📞 Värd – <a href="tel:@trip.AccommodationPhone.Replace(" ", "")">@trip.AccommodationPhone</a></p>
                 }
                 <p>📅 @trip.StartDate.ToString("yyyy-MM-dd") – @trip.EndDate.ToString("yyyy-MM-dd")</p>
+                @if (policies.Count > 0 || IsAdmin || CurrentUser?.IsGlobalAdmin == true)
+                {
+                    <p>
+                        📜 <a href="@($"resor/{TripId}/policyer")">Policyer</a>
+                        @if (UnacceptedPolicyCount > 0)
+                        {
+                            <text> – </text><strong>@UnacceptedPolicyCount att bekräfta</strong>
+                        }
+                    </p>
+                }
                 </div>
                 @if (participantSummary is not null)
                 {
@@ -137,6 +148,9 @@ else if (trip is not null)
     private bool isLoading = true;
     private string? errorMessage;
     private string? participantSummary;
+    private List<TripPolicy> policies = [];
+
+    private int UnacceptedPolicyCount => policies.Count(p => !p.IsAcceptedBy(CurrentUser?.Uid));
 
     private bool IsAdmin => trip?.IsOwner(CurrentUser?.Uid) == true;
 
@@ -181,6 +195,10 @@ else if (trip is not null)
             {
                 errorMessage = "Resan hittades inte.";
             }
+            else
+            {
+                await LoadPoliciesAsync();
+            }
         }
         catch (Exception)
         {
@@ -189,6 +207,19 @@ else if (trip is not null)
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task LoadPoliciesAsync()
+    {
+        try
+        {
+            policies = [.. await PolicyService.GetAsync(TripId)];
+        }
+        catch (Exception)
+        {
+            // Policies are secondary on the overview; the page still works without them.
+            policies = [];
         }
     }
 }
