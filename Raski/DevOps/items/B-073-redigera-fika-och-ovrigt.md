@@ -1,9 +1,10 @@
 # B-073: Redigera fika och övrigt
 
-- **Status:** Idé
+- **Status:** Klar
 - **Typ:** Patch
 - **Prioritet:** –
 - **Skapad:** 2026-10-28
+- **Klar:** 2026-10-28
 
 ## Beskrivning
 Just nu kan man bara ta bort saker som man har lagt till under Fika/Snacks och under Övrigt. Man måste också kunna redigera dem, t.ex. ändra mängd, enhet eller ingrediens, utan att behöva ta bort och lägga till på nytt.
@@ -33,3 +34,5 @@ Som deltagare på en resa vill jag kunna redigera det jag lagt till under Fika/S
 - 2026-10-28: Typ bekräftad som Patch.
 - 2026-10-28: Redigeringen sker i en modaldialog.
 - 2026-10-28: Alla fält ska gå att ändra.
+- Kategori (Fika/Snacks eller Övrigt) går också att ändra i dialogen.
+- En rad som summerats från flera poster slås ihop till en post vid redigering (första posten uppdateras, övriga tas bort).
