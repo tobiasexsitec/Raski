@@ -18,7 +18,6 @@
 | [B-059](items/B-059-mallar-for-vem-tar-med.md) | Mallar för "Vem tar med" | Funktion | Idé | – | 2026-10-26 |
 | [B-060](items/B-060-installerbar-app-upplevelse-ren-pwa.md) | Installerbar app-upplevelse (ren PWA) | Funktion | Idé | – | 2026-10-26 |
 | [B-063](items/B-063-ios-splash-och-google-inloggning-i-installerad-app.md) | iOS-splash och Google-inloggning i installerad app | Funktion | Idé | – | 2026-10-27 |
-| [B-070](items/B-070-profil-i-avatarmenyn.md) | Profil i avatarmenyn | Patch | Idé | – | 2026-10-28 |
 | [B-071](items/B-071-admin-flik-for-global-administration.md) | Admin-flik för global administration | Patch | Idé | – | 2026-10-28 |
 | [B-072](items/B-072-snygg-ikon-nar-appen-installeras.md) | Snygg ikon när appen installeras | Bugg | Idé | – | 2026-10-28 |
 
@@ -26,6 +25,7 @@
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-070](items/B-070-profil-i-avatarmenyn.md) | Profil i avatarmenyn | Patch | – | 2026-10-28 |
 | [B-069](items/B-069-singular-och-plural-for-enheter.md) | Singular och plural för enheter | Funktion | – | 2026-10-28 |
 | [B-068](items/B-068-ovrigt-under-maltider.md) | Övrigt under Måltider | Funktion | – | 2026-10-28 |
 | [B-067](items/B-067-luft-mellan-kort-och-lagg-till-knapp-pa-oversikten.md) | Luft mellan kort och Lägg till-knapp på översikten | Bugg | – | 2026-10-28 |
