@@ -1,0 +1,208 @@
+@inject IShoppingListService ShoppingListService
+@inject IBringItemService BringItemService
+
+<section class="card other-items" aria-labelledby="@HeadingId">
+	<h2 id="@HeadingId">@ExtraCategories.Display(Category)</h2>
+	<p class="muted">@Description</p>
+
+	@if (errorMessage is not null)
+	{
+		<div class="error-banner">@errorMessage</div>
+	}
+
+	@if (isLoading)
+	{
+		<p class="muted">Hämtar…</p>
+	}
+	else if (items.Count == 0)
+	{
+		<p class="muted">Inget tillagt än.</p>
+	}
+	else
+	{
+		<ul class="other-list">
+			@foreach (var item in items)
+			{
+				<li>
+					<span class="name">@item.Name</span>
+					@if (item.Amounts.Count > 0)
+					{
+						<span class="muted">@FormatAmounts(item)</span>
+					}
+					<span class="spacer"></span>
+					@if (ShowTakeButton && CurrentUser is not null)
+					{
+						<button type="button"
+								class="btn btn-secondary btn-sm"
+								aria-label="@($"Jag tar med {item.Name}")"
+								disabled="@isSaving"
+								@onclick="() => TakeAsync(item)">Jag tar med</button>
+					}
+					<button type="button"
+							class="btn btn-icon btn-sm"
+							aria-label="@($"Ta bort {item.Name}")"
+							disabled="@isSaving"
+							@onclick="() => DeleteAsync(item)">✕</button>
+				</li>
+			}
+		</ul>
+	}
+
+	<ExtraItemForm Placeholder="@Placeholder"
+				   AriaLabel="@($"Vara till {ExtraCategories.Display(Category)}")"
+				   IsSaving="isSaving"
+				   OnAdd="AddAsync" />
+</section>
+
+@code {
+	[Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
+	[Parameter, EditorRequired] public string Category { get; set; } = ExtraCategories.Other;
+	[Parameter] public EventCallback OnChanged { get; set; }
+
+	/// <summary>Bumped by the parent when extras were added elsewhere so the list reloads.</summary>
+	[Parameter] public int RefreshKey { get; set; }
+
+	private int loadedRefreshKey;
+
+	/// <summary>Shows a "Jag tar med" button that moves the item from the shopping list to the bring list.</summary>
+	[Parameter] public bool ShowTakeButton { get; set; }
+
+	[CascadingParameter(Name = "CurrentUser")]
+	private UserProfile? CurrentUser { get; set; }
+
+	private IReadOnlyList<ShoppingListItem> items = [];
+	private string? loadedTripId;
+	private bool isLoading = true;
+	private bool isSaving;
+	private string? errorMessage;
+
+	private string HeadingId => $"extra-heading-{Category}";
+
+	private string Description => Category == ExtraCategories.Snacks
+		? "Fika och snacks som inte hör till en måltid. Allt här kommer med på inköpslistan."
+		: "Annat som behövs, t.ex. diskmaskinstabletter eller tomtebloss. Allt här kommer med på inköpslistan.";
+
+	private string Placeholder => Category == ExtraCategories.Snacks
+		? "T.ex. kanelbullar eller chips"
+		: "T.ex. diskmaskinstabletter";
+
+	protected override async Task OnParametersSetAsync()
+	{
+		if (loadedTripId == Trip.Id && loadedRefreshKey == RefreshKey)
+		{
+			return;
+		}
+
+		loadedRefreshKey = RefreshKey;
+		loadedTripId = Trip.Id;
+		isLoading = true;
+		errorMessage = null;
+
+		try
+		{
+			await LoadAsync();
+		}
+		catch (Exception)
+		{
+			errorMessage = "Kunde inte hämta listan.";
+			items = [];
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private async Task LoadAsync() =>
+		items = [.. (await ShoppingListService.GetExtrasAsync(Trip.Id)).Where(i => i.ExtraCategory == Category)];
+
+	private async Task<bool> AddAsync(string name, decimal? amount, string unit)
+	{
+		if (string.IsNullOrWhiteSpace(name))
+		{
+			errorMessage = "Skriv vad som ska handlas.";
+			return false;
+		}
+
+		await SaveAsync(
+			() => ShoppingListService.AddExtraAsync(Trip.Id, name, amount, unit, Category),
+			"Kunde inte lägga till varan.");
+
+		return errorMessage is null;
+	}
+
+	private Task DeleteAsync(ShoppingListItem item) =>
+		SaveAsync(
+			async () =>
+			{
+				foreach (var extraId in item.ExtraIds)
+				{
+					await ShoppingListService.DeleteExtraAsync(Trip.Id, extraId);
+				}
+			},
+			"Kunde inte ta bort varan.");
+
+	private Task TakeAsync(ShoppingListItem item)
+	{
+		if (CurrentUser is not { } user)
+		{
+			return Task.CompletedTask;
+		}
+
+		// Bring items only have a whole-number quantity, so other units fall back to 1.
+		var quantity = item.Amounts.Count == 1 && item.Amounts[0].Unit is "" or "st"
+			? Math.Max(1, (int)Math.Ceiling(item.Amounts[0].Amount))
+			: 1;
+
+		return SaveAsync(
+			async () =>
+			{
+				await BringItemService.SaveAsync(new BringItem
+				{
+					TripId = Trip.Id,
+					SectionId = "",
+					Name = item.Name,
+					Quantity = quantity,
+					ResponsibleUid = user.Uid,
+					ResponsibleName = user.DisplayName
+				});
+
+				foreach (var extraId in item.ExtraIds)
+				{
+					await ShoppingListService.DeleteExtraAsync(Trip.Id, extraId);
+				}
+			},
+			"Kunde inte flytta varan.");
+	}
+
+	private async Task SaveAsync(Func<Task> save, string failureMessage)
+	{
+		isSaving = true;
+		errorMessage = null;
+
+		try
+		{
+			await save();
+			await LoadAsync();
+			await OnChanged.InvokeAsync();
+		}
+		catch (Exception)
+		{
+			errorMessage = failureMessage;
+		}
+		finally
+		{
+			isSaving = false;
+			StateHasChanged();
+		}
+	}
+
+	private static string FormatAmounts(ShoppingListItem item) =>
+		string.Join(" + ", item.Amounts.Select(a =>
+			string.IsNullOrWhiteSpace(a.Unit)
+				? Format(a.Amount)
+				: $"{Format(a.Amount)} {a.Unit}"));
+
+	private static string Format(decimal value) =>
+		value == decimal.Truncate(value) ? ((long)value).ToString() : value.ToString("0.##");
+}

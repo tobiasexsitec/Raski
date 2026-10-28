@@ -56,7 +56,13 @@ public sealed class ShoppingListService(
             .GroupBy(s => s.Id, StringComparer.Ordinal)
             .ToDictionary(g => g.Key, g => g.First().Checked, StringComparer.Ordinal);
 
-        var items = ShoppingListAggregator.Aggregate(meals.Concat(drinkMeals), registry, checkedState);
+        var extras = await GetExtraEntriesAsync(tripId, ct);
+
+        var items = ShoppingListAggregator.Aggregate([.. meals, .. drinkMeals, .. ExtrasAsMeals(extras)], registry, checkedState);
+
+        // Rows that only come from extras stay in their own section so they can be removed there;
+        // rows shared with a meal are summed into the meal's row.
+        AttachExtras(items, extras, registry, onlyExtraRows: true);
 
         var drinkNames = drinkMeals
             .SelectMany(m => m.Ingredients)
@@ -71,35 +77,102 @@ public sealed class ShoppingListService(
             }
         }
 
-        var extras = await interop.QueryAsync<ShoppingExtraDocument>(ExtrasPath(tripId), new FirestoreQuery(), ct);
-
-        var extraItems = extras
-            .Where(e => !string.IsNullOrWhiteSpace(e.Name))
-            .Select(e => new ShoppingListItem
-            {
-                IngredientId = ExtraStateKey(e.Id),
-                ExtraId = e.Id,
-                Name = e.Name?.Trim() ?? "",
-                Amounts = e.Amount is > 0 ? [new AmountPerUnit(e.Unit?.Trim() ?? "", e.Amount.Value)] : [],
-                Checked = checkedState.TryGetValue(ExtraStateKey(e.Id), out var isChecked) && isChecked
-            })
-            .OrderBy(i => i.Name, StringComparer.CurrentCultureIgnoreCase);
-
-        return [.. items, .. extraItems];
+        return items;
     }
 
-    public Task AddExtraAsync(string tripId, string name, decimal? amount, string unit, CancellationToken ct = default)
+    private sealed record ExtraEntry(string Id, string Category, MealIngredient Ingredient);
+
+    private async Task<List<ExtraEntry>> GetExtraEntriesAsync(string tripId, CancellationToken ct) =>
+    [
+        .. (await interop.QueryAsync<ShoppingExtraDocument>(ExtrasPath(tripId), new FirestoreQuery(), ct))
+            .Where(e => !string.IsNullOrWhiteSpace(e.Name))
+            .Select(e => new ExtraEntry(e.Id, ExtraCategories.Normalize(e.Category), ToMealIngredient(e)))
+    ];
+
+    private static IEnumerable<Meal> ExtrasAsMeals(IEnumerable<ExtraEntry> extras) =>
+        extras
+            .GroupBy(e => e.Category)
+            .Select(g => new Meal { Title = ExtraCategories.Display(g.Key), Ingredients = [.. g.Select(e => e.Ingredient)] });
+
+    private static void AttachExtras(
+        IEnumerable<ShoppingListItem> items,
+        IReadOnlyList<ExtraEntry> extras,
+        IReadOnlyDictionary<string, Ingredient> registry,
+        bool onlyExtraRows)
     {
+        var extraTitles = new[] { ExtraCategories.Display(ExtraCategories.Snacks), ExtraCategories.Display(ExtraCategories.Other) };
+        var byKey = extras
+            .GroupBy(e => ShoppingListAggregator.ResolveKey(e.Ingredient, registry), StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.Ordinal);
+
+        foreach (var item in items)
+        {
+            if (!byKey.TryGetValue(item.IngredientId, out var entries)
+                || (onlyExtraRows && !item.UsedInMeals.All(extraTitles.Contains)))
+            {
+                continue;
+            }
+
+            item.ExtraIds = [.. entries.Select(e => e.Id)];
+            item.ExtraCategory = entries.Any(e => e.Category == ExtraCategories.Snacks)
+                ? ExtraCategories.Snacks
+                : ExtraCategories.Other;
+        }
+    }
+
+    private static MealIngredient ToMealIngredient(ShoppingExtraDocument extra) => new()
+    {
+        IngredientId = extra.IngredientId ?? "",
+        Name = extra.Name?.Trim() ?? "",
+        Amount = extra.Amount is > 0 ? extra.Amount.Value : 0,
+        Unit = extra.Unit?.Trim() ?? ""
+    };
+
+    public async Task<IReadOnlyList<ShoppingListItem>> GetExtrasAsync(string tripId, CancellationToken ct = default)
+    {
+        var extras = await GetExtraEntriesAsync(tripId, ct);
+
+        var registry = (await ingredientService.GetAllAsync(ct))
+            .GroupBy(i => i.Id, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+
+        // Each category is summed on its own so the same item can be listed in both cards.
+        return
+        [
+            .. extras
+                .GroupBy(e => e.Category)
+                .SelectMany(g =>
+                {
+                    var categoryExtras = g.ToList();
+                    var items = ShoppingListAggregator.Aggregate(ExtrasAsMeals(categoryExtras), registry, new Dictionary<string, bool>(StringComparer.Ordinal));
+                    AttachExtras(items, categoryExtras, registry, onlyExtraRows: false);
+                    foreach (var item in items)
+                    {
+                        item.ExtraCategory = g.Key;
+                    }
+                    return items;
+                })
+                .OrderBy(i => i.Name, StringComparer.CurrentCultureIgnoreCase)
+        ];
+    }
+
+    public async Task AddExtraAsync(string tripId, string name, decimal? amount, string unit, string category, CancellationToken ct = default)
+    {
+        // Registering extras as ingredients lets them sum with the same ingredient on meals.
+        var ingredient = await ingredientService.GetOrCreateAsync(name, unit, ct);
+
         var data = new Dictionary<string, object?>
         {
-            ["name"] = name.Trim(),
+            ["ingredientId"] = ingredient.Id,
+            ["category"] = ExtraCategories.Normalize(category),
+            ["name"] = ingredient.Name,
             ["amount"] = amount is > 0 ? amount : null,
             ["unit"] = unit.Trim(),
             ["createdAt"] = FirestoreFormat.UtcNow(),
             ["createdByUid"] = authService.Current?.Uid ?? ""
         };
 
-        return interop.AddDocumentAsync(ExtrasPath(tripId), data, ct);
+        await interop.AddDocumentAsync(ExtrasPath(tripId), data, ct);
     }
 
     public async Task DeleteExtraAsync(string tripId, string extraId, CancellationToken ct = default)

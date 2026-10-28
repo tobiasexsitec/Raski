@@ -1,0 +1,71 @@
+@inject IIngredientService IngredientService
+
+<form class="extra-form" @onsubmit="SubmitAsync">
+    <div class="extra-name">
+        <AutoComplete TItem="Ingredient"
+                      Value="@name"
+                      ValueChanged="value => name = value"
+                      SearchFunc="SearchIngredientsAsync"
+                      DisplaySelector="i => i.Name"
+                      OnItemSelected="OnIngredientSelected"
+                      AriaLabel="@AriaLabel"
+                      Placeholder="@Placeholder" />
+    </div>
+    <input class="field extra-quantity"
+           type="number"
+           step="any"
+           min="0"
+           inputmode="decimal"
+           placeholder="Mängd"
+           aria-label="Mängd"
+           @bind="amount" />
+    <div class="extra-unit">
+        <AutoComplete TItem="string"
+                      Value="@unit"
+                      ValueChanged="value => unit = value"
+                      SearchFunc="SearchUnitsAsync"
+                      DisplaySelector="u => u"
+                      MinimumLength="1"
+                      AriaLabel="Enhet"
+                      Placeholder="Enhet" />
+    </div>
+    <button type="submit" class="btn btn-primary" disabled="@IsSaving">Lägg till</button>
+</form>
+
+@code {
+    [Parameter] public string Placeholder { get; set; } = "";
+    [Parameter] public string AriaLabel { get; set; } = "Vara";
+    [Parameter] public bool IsSaving { get; set; }
+
+    /// <summary>Returns true when the item was saved so the form can be cleared.</summary>
+    [Parameter, EditorRequired] public Func<string, decimal?, string, Task<bool>> OnAdd { get; set; } = default!;
+
+    private string name = "";
+    private decimal? amount;
+    private string unit = "";
+
+    private async Task SubmitAsync()
+    {
+        if (await OnAdd(name, amount, unit))
+        {
+            name = "";
+            amount = null;
+            unit = "";
+        }
+    }
+
+    private async Task<IReadOnlyList<Ingredient>> SearchIngredientsAsync(string term) =>
+        [.. (await IngredientService.SearchAsync(term, 8))];
+
+    private void OnIngredientSelected(Ingredient ingredient)
+    {
+        name = ingredient.Name;
+        if (string.IsNullOrWhiteSpace(unit) && !string.IsNullOrWhiteSpace(ingredient.DefaultUnit))
+        {
+            unit = ingredient.DefaultUnit;
+        }
+    }
+
+    private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
+        IngredientService.SearchUnitsAsync(term);
+}

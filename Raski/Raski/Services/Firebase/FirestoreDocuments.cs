@@ -430,6 +430,8 @@ internal sealed class ShoppingExtraDocument
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";
     [JsonPropertyName("name")] public string? Name { get; set; }
+    [JsonPropertyName("ingredientId")] public string? IngredientId { get; set; }
+    [JsonPropertyName("category")] public string? Category { get; set; }
     [JsonPropertyName("amount")] public decimal? Amount { get; set; }
     [JsonPropertyName("unit")] public string? Unit { get; set; }
 }

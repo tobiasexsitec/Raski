@@ -6,7 +6,10 @@
     <p class="muted">Gemensamma saker som alla har nytta av på resan.</p>
 </section>
 
-<BringList Trip="Trip" Title="Allmänt" />
+<h2 class="bring-group-heading">Ta med hemifrån</h2>
+<p class="muted">Det här tar någon med sig hemifrån.</p>
+
+<BringList Trip="Trip" Title="Allmänt" RefreshKey="bringRefreshKey" OnMovedToShoppingList="() => extrasRefreshKey++" />
 
 @if (errorMessage is not null)
 {
@@ -20,7 +23,7 @@
         var index = i;
         var section = sections[i];
 
-        <BringList @key="section.Id" Trip="Trip" SectionId="@section.Id" Title="@section.Name">
+        <BringList @key="section.Id" Trip="Trip" SectionId="@section.Id" Title="@section.Name" OnMovedToShoppingList="() => extrasRefreshKey++">
             <HeaderContent>
                 @if (renaming is not null && renaming.Id == section.Id)
                 {
@@ -122,7 +125,14 @@
     </div>
 }
 
+<h2 class="bring-group-heading shopping-heading">Inköpslista</h2>
+<p class="muted">Det här handlas och hamnar på inköpslistan.</p>
+
+<OtherItemsPanel Trip="Trip" Category="@ExtraCategories.Other" RefreshKey="extrasRefreshKey" ShowTakeButton="true" OnChanged="() => bringRefreshKey++" />
+
 @code {
+    private int extrasRefreshKey;
+    private int bringRefreshKey;
     [Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
 
     private List<BringSection> sections = [];

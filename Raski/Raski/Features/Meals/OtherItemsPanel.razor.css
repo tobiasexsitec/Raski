@@ -1,0 +1,21 @@
+.other-items {
+    margin-bottom: var(--space-4);
+}
+
+.other-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.other-list li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.other-list .name {
+    font-weight: 600;
+}
