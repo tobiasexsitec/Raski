@@ -19,6 +19,7 @@
 | [B-060](items/B-060-installerbar-app-upplevelse-ren-pwa.md) | Installerbar app-upplevelse (ren PWA) | Funktion | Idé | – | 2026-10-26 |
 | [B-063](items/B-063-ios-splash-och-google-inloggning-i-installerad-app.md) | iOS-splash och Google-inloggning i installerad app | Funktion | Idé | – | 2026-10-27 |
 | [B-064](items/B-064-appkansla-i-installerat-lage.md) | Appkänsla i installerat läge: ingen dubbeltrycks-zoom och temafärgat statusfält | Funktion | Redo | – | 2026-10-27 |
+| [B-065](items/B-065-dra-for-att-uppdatera.md) | Dra för att uppdatera | Funktion | Pågår | – | 2026-10-27 |
 
 ## Klara
 
