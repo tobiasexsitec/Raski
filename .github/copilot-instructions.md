@@ -42,6 +42,7 @@ Raski/                        # repo-rot
 | `/resor/{TripId}` | `Features/Trips/TripOverview.razor` |
 | `/resor/{TripId}/inkopslista` | `Features/ShoppingList/ShoppingListView.razor` |
 | `/ingredienser` | `Features/Admin/IngredientAdmin.razor` |
+| `/admin` | `Features/Admin/AdminHome.razor` |
 | `/not-found` | `Pages/NotFound.razor` |
 
 Routes är på svenska. Följ det mönstret vid nya sidor.

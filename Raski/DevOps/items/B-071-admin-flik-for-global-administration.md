@@ -1,23 +1,26 @@
-# B-071: Admin-flik för global administration
+# B-071: Admin-flik med administrationslådor
 
-- **Status:** Idé
+- **Status:** Klar
 - **Typ:** Patch
 - **Prioritet:** –
 - **Skapad:** 2026-10-28
+- **Klar:** 2026-10-28
 
 ## Beskrivning
-I dag visas flikarna Användare och Enheter direkt i den nedre menyraden för globala administratörer. De ersätts med en enda flik **Admin** som leder till en samlingssida för all global administration. Det håller menyraden ren och ger ett naturligt ställe för framtida adminfunktioner.
+I dag visas flikarna Användare och Enheter direkt i den nedre menyraden för globala administratörer. De ersätts med en enda flik **Admin** som visas för alla användare och leder till en samlingssida. Sidan består av lådor (två per rad på telefon) där varje låda länkar till en administrationssida. Vilka lådor som visas beror på behörighet.
 
 ## User story
-Som global administratör vill jag ha en Admin-flik där alla globala inställningar (t.ex. användare och enheter) finns samlade, så att menyraden inte fylls av adminflikar.
+Som användare vill jag ha en Admin-flik där allt jag kan administrera finns samlat i lådor, så att menyraden hålls ren.
 
 ## Acceptanskriterier
-- [ ] Den nedre menyraden visar fliken **Admin** endast för globala administratörer.
+- [ ] Den nedre menyraden visar fliken **Admin** för alla inloggade användare.
 - [ ] Flikarna Användare och Enheter tas bort från menyraden.
-- [ ] Fliken Admin går till en ny sida (`/admin`) med kort/länkar till **Användare** (`/admin/anvandare`) och **Enheter** (`/admin/enheter`).
+- [ ] Fliken Admin går till en ny sida (`/admin`) med lådor, två per rad på telefon.
+- [ ] Lådan **Profil** (`/profil`) visas för alla användare.
+- [ ] Lådorna **Användare** (`/admin/anvandare`) och **Enheter** (`/admin/enheter`) visas bara för globala administratörer.
 - [ ] Fliken Admin markeras som aktiv även på undersidorna under `/admin/...`.
-- [ ] Sidan `/admin` skyddas på samma sätt som de befintliga adminsidorna.
-- [ ] Undersidorna har en väg tillbaka till `/admin`.
+- [ ] Alla sidor som nås via lådorna (även Profil) har en Tillbaka-knapp till `/admin`.
+- [ ] Profil tas bort ur avatarmenyn (ersätter B-070), så att Profil bara nås via Admin och Tillbaka alltid stämmer.
 
 ## Öppna frågor
 - Ska Ingredienser också flyttas in under Admin, eller ligga kvar som egen flik?
@@ -32,3 +35,4 @@ Som global administratör vill jag ha en Admin-flik där alla globala inställni
 ## Beslut
 - 2026-10-28: Delad i två objekt: B-070 (Profil i avatarmenyn) och detta (Admin-flik).
 - 2026-10-28: Typ föreslagen som Patch (mindre förbättring av navigeringen).
+- 2026-10-28: Admin-fliken visas för alla användare; sidan består av lådor (Profil för alla, Användare och Enheter bara för globala admins). Branchen bygger på B-070.

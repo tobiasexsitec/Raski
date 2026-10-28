@@ -12,17 +12,10 @@
             <span class="tab-icon" aria-hidden="true">🥬</span>
             <span class="tab-label">Ingredienser</span>
         </NavLink>
-        @if (AuthService.IsGlobalAdmin)
-        {
-            <NavLink class="tab" href="admin/anvandare">
-                <span class="tab-icon" aria-hidden="true">👥</span>
-                <span class="tab-label">Användare</span>
-            </NavLink>
-            <NavLink class="tab" href="admin/enheter">
-                <span class="tab-icon" aria-hidden="true">⚖️</span>
-                <span class="tab-label">Enheter</span>
-            </NavLink>
-        }
+        <NavLink class="tab" href="admin" Match="NavLinkMatch.Prefix">
+            <span class="tab-icon" aria-hidden="true">⚙️</span>
+            <span class="tab-label">Admin</span>
+        </NavLink>
     </nav>
 }
 
