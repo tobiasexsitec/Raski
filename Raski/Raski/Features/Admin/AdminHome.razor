@@ -1,0 +1,52 @@
+@page "/admin"
+@implements IDisposable
+@inject IAuthService AuthService
+
+<PageTitle>Admin – Raski™</PageTitle>
+
+<div class="page-header">
+    <div>
+        <h1>Admin</h1>
+        <p class="muted">Välj vad du vill administrera.</p>
+    </div>
+</div>
+
+<nav aria-label="Administration">
+    <ul class="admin-grid">
+        <li>
+            <a class="card card-interactive admin-tile" href="profil">
+                <span class="admin-icon" aria-hidden="true">👤</span>
+                <span class="admin-label">Profil</span>
+            </a>
+        </li>
+        @if (AuthService.IsGlobalAdmin)
+        {
+            <li>
+                <a class="card card-interactive admin-tile" href="admin/anvandare">
+                    <span class="admin-icon" aria-hidden="true">👥</span>
+                    <span class="admin-label">Användare</span>
+                </a>
+            </li>
+            <li>
+                <a class="card card-interactive admin-tile" href="admin/enheter">
+                    <span class="admin-icon" aria-hidden="true">⚖️</span>
+                    <span class="admin-label">Enheter</span>
+                </a>
+            </li>
+        }
+    </ul>
+</nav>
+
+@code {
+    protected override void OnInitialized()
+    {
+        AuthService.StateChanged += OnStateChanged;
+    }
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        AuthService.StateChanged -= OnStateChanged;
+    }
+}
