@@ -1,7 +1,7 @@
 # B-065: Dra för att uppdatera
 
 - **Status:** Klar
-- **Typ:** Funktion
+- **Typ:** Patch
 - **Prioritet:** –
 - **Skapad:** 2026-10-27
 - **Klar:** 2026-10-27

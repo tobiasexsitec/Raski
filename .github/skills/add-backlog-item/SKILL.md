@@ -24,7 +24,7 @@ Backloggen består av indexfilen `Raski/DevOps/backlog.md` (tabellerna **Öppna*
    - Kör `Get-Date -Format yyyy-MM-dd` i terminalen. Gissa aldrig datumet.
 
 4. **Bestäm typ – fråga användaren**
-   - Föreslå en typ (`Funktion`, `Bugg` eller `Utveckling`) med kort motivering och låt
+   - Föreslå en typ (`Funktion`, `Patch`, `Bugg` eller `Utveckling`) med kort motivering och låt
 	 användaren bekräfta innan typen sätts.
 
 5. **Skapa objektfilen**
