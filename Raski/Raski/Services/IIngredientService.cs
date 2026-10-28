@@ -17,6 +17,12 @@ public interface IIngredientService
     Task UpdateUnitAsync(UnitDefinition unit, CancellationToken ct = default);
 
     /// <summary>
+    /// Lowercases all units in the register and ingredient default units, and merges
+    /// units that only differ in case. Returns the number of changed documents.
+    /// </summary>
+    Task<int> NormalizeUnitsAsync(CancellationToken ct = default);
+
+    /// <summary>
     /// Returns the singular or plural form of the unit for the amount. Uses the cached
     /// register, so call GetUnitsAsync first; unknown units are returned unchanged.
     /// </summary>

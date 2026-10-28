@@ -27,6 +27,20 @@ else
         <div class="error-banner">@errorMessage</div>
     }
 
+    <div class="card stack">
+        <p class="muted">Enheter sparas alltid med små bokstäver. Gör om befintliga enheter och ingrediensernas standardenheter till små bokstäver och slå ihop dubbletter.</p>
+        <div class="row-inline">
+            <button type="button"
+                    class="btn btn-secondary btn-sm"
+                    disabled="@(isSaving || isLoading)"
+                    @onclick="NormalizeAsync">Gör om till små bokstäver</button>
+            @if (normalizeResult is not null)
+            {
+                <span class="muted" role="status">@normalizeResult</span>
+            }
+        </div>
+    </div>
+
     @if (isLoading)
     {
         <p class="muted">Hämtar enheter…</p>
@@ -70,13 +84,36 @@ else
         public string Name { get; set; } = "";
         public string Plural { get; set; } = "";
 
-        public bool IsDirty => Name.Trim() != Original || Plural.Trim() != OriginalPlural;
+        public bool IsDirty => UnitDefinition.Normalize(Name) != Original || UnitDefinition.Normalize(Plural) != OriginalPlural;
     }
 
     private List<UnitRow> rows = [];
     private bool isLoading = true;
     private bool isSaving;
     private string? errorMessage;
+    private string? normalizeResult;
+
+    private async Task NormalizeAsync()
+    {
+        isSaving = true;
+        errorMessage = null;
+        normalizeResult = null;
+
+        try
+        {
+            var changes = await IngredientService.NormalizeUnitsAsync();
+            normalizeResult = changes == 0 ? "Allt var redan i små bokstäver." : $"{changes} dokument uppdaterades.";
+            await LoadAsync();
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte göra om enheterna.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {

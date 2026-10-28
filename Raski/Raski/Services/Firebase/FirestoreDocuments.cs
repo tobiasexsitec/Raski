@@ -217,7 +217,7 @@ internal sealed class MealIngredientDocument
         IngredientId = IngredientId ?? "",
         Name = Name ?? "",
         Amount = (decimal)Amount,
-        Unit = Unit ?? ""
+        Unit = UnitDefinition.Normalize(Unit)
     };
 }
 
@@ -252,7 +252,7 @@ internal sealed class BreakfastIngredientDocument
         IngredientId = IngredientId ?? "",
         Name = Name ?? "",
         Amount = (decimal)Amount,
-        Unit = Unit ?? "",
+        Unit = UnitDefinition.Normalize(Unit),
         Scope = BreakfastAmountScopeExtensions.ParseBreakfastAmountScope(Scope)
     };
 }
@@ -392,7 +392,7 @@ internal sealed class IngredientDocument
         Name = Name ?? "",
         NameLower = NameLower ?? (Name ?? "").ToLowerInvariant(),
         Tags = Tags ?? [],
-        DefaultUnit = DefaultUnit,
+        DefaultUnit = string.IsNullOrWhiteSpace(DefaultUnit) ? DefaultUnit : UnitDefinition.Normalize(DefaultUnit),
         MergedIntoId = MergedIntoId
     };
 }

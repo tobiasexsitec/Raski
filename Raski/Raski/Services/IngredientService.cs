@@ -78,7 +78,7 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
 
     public async Task UpdateUnitAsync(UnitDefinition unit, CancellationToken ct = default)
     {
-        var name = unit.Name.Trim();
+        var name = UnitDefinition.Normalize(unit.Name);
 
         if (name.Length == 0)
         {
@@ -88,11 +88,68 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
         await interop.UpdateDocumentAsync($"units/{unit.Id}", new
         {
             name,
-            nameLower = name.ToLowerInvariant(),
-            plural = unit.Plural?.Trim() ?? ""
+            nameLower = name,
+            plural = UnitDefinition.Normalize(unit.Plural)
         }, ct);
 
         Invalidate();
+    }
+
+    public async Task<int> NormalizeUnitsAsync(CancellationToken ct = default)
+    {
+        await EnsureLoadedAsync(ct);
+
+        var changes = 0;
+
+        foreach (var group in _units!.GroupBy(u => UnitDefinition.Normalize(u.Name)))
+        {
+            var units = group.ToList();
+            var keeper = units.FirstOrDefault(u => u.Id == group.Key) ?? units[0];
+            var plural = units
+                .Select(u => UnitDefinition.Normalize(u.Plural))
+                .FirstOrDefault(p => p.Length > 0) ?? "";
+
+            if (keeper.Name != group.Key || (keeper.Plural ?? "") != plural)
+            {
+                await interop.UpdateDocumentAsync($"units/{keeper.Id}", new
+                {
+                    name = group.Key,
+                    nameLower = group.Key,
+                    plural
+                }, ct);
+                changes++;
+            }
+
+            // Units are referenced by name, not id, so duplicates can simply be removed.
+            foreach (var duplicate in units.Where(u => u != keeper))
+            {
+                await interop.DeleteDocumentAsync($"units/{duplicate.Id}", ct);
+                changes++;
+            }
+        }
+
+        // The cached models are already normalized on read, so compare against the raw documents.
+        var ingredients = await interop.QueryAsync<IngredientDocument>("ingredients", new FirestoreQuery(), ct);
+
+        foreach (var ingredient in ingredients)
+        {
+            var raw = ingredient.DefaultUnit ?? "";
+            var normalized = UnitDefinition.Normalize(raw);
+
+            if (raw == normalized)
+            {
+                continue;
+            }
+
+            await interop.UpdateDocumentAsync($"ingredients/{ingredient.Id}", new
+            {
+                defaultUnit = normalized
+            }, ct);
+            changes++;
+        }
+
+        Invalidate();
+        return changes;
     }
 
     public string FormatUnit(string? unit, decimal amount)
@@ -123,6 +180,7 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
     {
         await EnsureLoadedAsync(ct);
 
+        var normalizedUnit = UnitDefinition.Normalize(unit);
         var trimmed = Capitalize(name.Trim());
         var nameLower = IngredientFilter.Normalize(trimmed);
 
@@ -144,7 +202,7 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
             name = trimmed,
             nameLower,
             tags = defaultTags.ToArray(),
-            defaultUnit = unit ?? "",
+            defaultUnit = normalizedUnit,
             createdAt = FirestoreFormat.UtcNow()
         }, ct);
 
@@ -154,11 +212,11 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
             Name = trimmed,
             NameLower = nameLower,
             Tags = [.. defaultTags],
-            DefaultUnit = unit
+            DefaultUnit = normalizedUnit.Length > 0 ? normalizedUnit : null
         };
 
         _ingredients!.Add(created);
-        await EnsureUnitAsync(unit, ct);
+        await EnsureUnitAsync(normalizedUnit, ct);
         Changed?.Invoke();
 
         return created;
@@ -167,16 +225,17 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
     public async Task UpdateAsync(Ingredient ingredient, CancellationToken ct = default)
     {
         var trimmed = Capitalize(ingredient.Name.Trim());
+        var defaultUnit = UnitDefinition.Normalize(ingredient.DefaultUnit);
 
         await interop.UpdateDocumentAsync($"ingredients/{ingredient.Id}", new
         {
             name = trimmed,
             nameLower = IngredientFilter.Normalize(trimmed),
             tags = ingredient.Tags.ToArray(),
-            defaultUnit = ingredient.DefaultUnit ?? ""
+            defaultUnit
         }, ct);
 
-        await EnsureUnitAsync(ingredient.DefaultUnit, ct);
+        await EnsureUnitAsync(defaultUnit, ct);
         Invalidate();
     }
 
@@ -231,17 +290,15 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
 
     private async Task EnsureUnitAsync(string? unit, CancellationToken ct)
     {
-        var trimmed = (unit ?? "").Trim();
+        var nameLower = UnitDefinition.Normalize(unit);
 
-        if (trimmed.Length == 0)
+        if (nameLower.Length == 0)
         {
             return;
         }
 
-        var nameLower = trimmed.ToLowerInvariant();
-
         // A plural form typed by the user must not become a unit of its own.
-        if (_units!.Any(u => u.Matches(trimmed)))
+        if (_units!.Any(u => u.Matches(nameLower)))
         {
             return;
         }
@@ -249,11 +306,11 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
         // The document id is the normalized name, which makes the write idempotent.
         await interop.SetDocumentAsync($"units/{nameLower}", new
         {
-            name = trimmed,
+            name = nameLower,
             nameLower
         }, ct: ct);
 
-        _units!.Add(new UnitDefinition { Id = nameLower, Name = trimmed });
+        _units!.Add(new UnitDefinition { Id = nameLower, Name = nameLower });
     }
 
     private async Task EnsureLoadedAsync(CancellationToken ct)
