@@ -20,13 +20,27 @@ export function getStoredTheme() {
 }
 
 export function applyTheme(theme) {
-    document.documentElement.setAttribute("data-theme", resolve(theme));
+    const resolved = resolve(theme);
+    document.documentElement.setAttribute("data-theme", resolved);
+    updateStatusBar(resolved);
 
     try {
         localStorage.setItem(storageKey, theme);
     } catch {
         // Private mode can block storage; the attribute is still applied.
     }
+}
+
+function updateStatusBar(resolved) {
+    const surface = getComputedStyle(document.documentElement).getPropertyValue("--surface").trim();
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    if (surface && themeColor) {
+        themeColor.setAttribute("content", surface);
+    }
+
+    // iOS only reads this at launch, but keeping it in sync avoids a stale value on reload.
+    const appleStatusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    appleStatusBar?.setAttribute("content", resolved === "dark" ? "black" : "default");
 }
 
 export function getResolvedTheme(theme) {

@@ -4,6 +4,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Raski&trade;</title>
     <base href="/" />
     <script>
@@ -30,6 +32,14 @@
                 ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
                 : stored;
             document.documentElement.setAttribute('data-theme', resolved);
+
+            var surface = getComputedStyle(document.documentElement).getPropertyValue('--surface').trim();
+            if (surface) {
+                document.querySelector('meta[name="theme-color"]').setAttribute('content', surface);
+            }
+            // iOS only reads this at launch, so a theme change applies the next time the app starts.
+            document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')
+                .setAttribute('content', resolved === 'dark' ? 'black' : 'default');
         })();
     </script>
 </head>
