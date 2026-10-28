@@ -12,7 +12,7 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
 {
     private readonly SemaphoreSlim _loadLock = new(1, 1);
     private List<Ingredient>? _ingredients;
-    private List<string>? _units;
+    private List<UnitDefinition>? _units;
     private List<string>? _tags;
 
     public event Action? Changed;
@@ -67,8 +67,54 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
     public async Task<IReadOnlyList<string>> SearchUnitsAsync(string prefix, int limit = 8, CancellationToken ct = default)
     {
         await EnsureLoadedAsync(ct);
-        return IngredientFilter.SearchUnits(_units!, prefix, limit);
+        return IngredientFilter.SearchUnits(_units!.Select(u => u.Name), prefix, limit);
     }
+
+    public async Task<IReadOnlyList<UnitDefinition>> GetUnitsAsync(CancellationToken ct = default)
+    {
+        await EnsureLoadedAsync(ct);
+        return _units!;
+    }
+
+    public async Task UpdateUnitAsync(UnitDefinition unit, CancellationToken ct = default)
+    {
+        var name = unit.Name.Trim();
+
+        if (name.Length == 0)
+        {
+            throw new ArgumentException("Enheten saknar namn.", nameof(unit));
+        }
+
+        await interop.UpdateDocumentAsync($"units/{unit.Id}", new
+        {
+            name,
+            nameLower = name.ToLowerInvariant(),
+            plural = unit.Plural?.Trim() ?? ""
+        }, ct);
+
+        Invalidate();
+    }
+
+    public string FormatUnit(string? unit, decimal amount)
+    {
+        var trimmed = unit?.Trim() ?? "";
+
+        if (trimmed.Length == 0 || _units is null)
+        {
+            return trimmed;
+        }
+
+        return _units.FirstOrDefault(u => u.Matches(trimmed))?.For(amount) ?? trimmed;
+    }
+
+    public string FormatUnit(string? unit, string? quantity) =>
+        decimal.TryParse(
+            (quantity ?? "").Trim().Replace(',', '.'),
+            System.Globalization.NumberStyles.Number,
+            System.Globalization.CultureInfo.InvariantCulture,
+            out var amount)
+            ? FormatUnit(unit, amount)
+            : unit?.Trim() ?? "";
 
     public Task<Ingredient> GetOrCreateAsync(string name, string? unit, CancellationToken ct = default) =>
         GetOrCreateAsync(name, unit, [], ct);
@@ -194,7 +240,8 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
 
         var nameLower = trimmed.ToLowerInvariant();
 
-        if (_units!.Any(u => u.Equals(trimmed, StringComparison.OrdinalIgnoreCase)))
+        // A plural form typed by the user must not become a unit of its own.
+        if (_units!.Any(u => u.Matches(trimmed)))
         {
             return;
         }
@@ -206,7 +253,7 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
             nameLower
         }, ct: ct);
 
-        _units!.Add(trimmed);
+        _units!.Add(new UnitDefinition { Id = nameLower, Name = trimmed });
     }
 
     private async Task EnsureLoadedAsync(CancellationToken ct)
@@ -234,8 +281,13 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
                     "units", new FirestoreQuery { OrderBy = "nameLower" }, ct);
 
                 _units = documents
-                    .Select(d => d.Name ?? d.Id)
-                    .Where(n => !string.IsNullOrWhiteSpace(n))
+                    .Where(d => !string.IsNullOrWhiteSpace(d.Name ?? d.Id))
+                    .Select(d => new UnitDefinition
+                    {
+                        Id = d.Id,
+                        Name = d.Name ?? d.Id,
+                        Plural = string.IsNullOrWhiteSpace(d.Plural) ? null : d.Plural
+                    })
                     .ToList();
             }
 
