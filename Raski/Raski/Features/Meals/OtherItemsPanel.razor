@@ -41,6 +41,11 @@
 					}
 					<button type="button"
 							class="btn btn-icon btn-sm"
+							aria-label="@($"Redigera {item.Name}")"
+							disabled="@isSaving"
+							@onclick="() => StartEdit(item)">✎</button>
+					<button type="button"
+							class="btn btn-icon btn-sm"
 							aria-label="@($"Ta bort {item.Name}")"
 							disabled="@isSaving"
 							@onclick="() => DeleteAsync(item)">✕</button>
@@ -54,6 +59,71 @@
 				   IsSaving="isSaving"
 				   OnAdd="AddAsync" />
 </section>
+
+@if (editing is not null)
+{
+	<div class="backdrop" @onclick="CancelEdit">
+		<div class="dialog card stack"
+			 role="dialog"
+			 aria-modal="true"
+			 aria-labelledby="@EditHeadingId"
+			 @onclick:stopPropagation="true">
+			<h3 id="@EditHeadingId">Redigera @editing.Name</h3>
+
+			@if (editError is not null)
+			{
+				<div class="error-banner">@editError</div>
+			}
+
+			<form class="stack" @onsubmit="SaveEditAsync">
+				<div>
+					<span class="field-label">Vara</span>
+					<AutoComplete TItem="Ingredient"
+								  Value="@editName"
+								  ValueChanged="value => editName = value"
+								  SearchFunc="SearchIngredientsAsync"
+								  DisplaySelector="i => i.Name"
+								  OnItemSelected="OnEditIngredientSelected"
+								  AriaLabel="Vara"
+								  Placeholder="@Placeholder" />
+				</div>
+				<div class="edit-amount">
+					<label class="edit-quantity">
+						<span class="field-label">Mängd</span>
+						<input class="field"
+							   type="number"
+							   step="any"
+							   min="0"
+							   inputmode="decimal"
+							   @bind="editAmount" />
+					</label>
+					<div class="edit-unit">
+						<span class="field-label">Enhet</span>
+						<AutoComplete TItem="string"
+									  Value="@editUnit"
+									  ValueChanged="value => editUnit = value"
+									  SearchFunc="SearchUnitsAsync"
+									  DisplaySelector="u => u"
+									  MinimumLength="1"
+									  AriaLabel="Enhet"
+									  Placeholder="Enhet" />
+					</div>
+				</div>
+				<label>
+					<span class="field-label">Kategori</span>
+					<select class="field" @bind="editCategory">
+						<option value="@ExtraCategories.Snacks">@ExtraCategories.Display(ExtraCategories.Snacks)</option>
+						<option value="@ExtraCategories.Other">@ExtraCategories.Display(ExtraCategories.Other)</option>
+					</select>
+				</label>
+				<div class="row-inline">
+					<button type="submit" class="btn btn-primary" disabled="@isSaving">Spara</button>
+					<button type="button" class="btn btn-secondary" @onclick="CancelEdit">Avbryt</button>
+				</div>
+			</form>
+		</div>
+	</div>
+}
 
 @code {
 	[Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
@@ -142,6 +212,85 @@
 				}
 			},
 			"Kunde inte ta bort varan.");
+
+	private ShoppingListItem? editing;
+	private string editName = "";
+	private decimal? editAmount;
+	private string editUnit = "";
+	private string editCategory = ExtraCategories.Other;
+	private string? editError;
+
+	private string EditHeadingId => $"extra-edit-heading-{Category}";
+
+	private void StartEdit(ShoppingListItem item)
+	{
+		editing = item;
+		editName = item.Name;
+		editCategory = Category;
+		editError = null;
+
+		// A row summed from several units cannot be shown as one amount, so only the unit is prefilled.
+		if (item.Amounts.Count == 1)
+		{
+			editAmount = item.Amounts[0].Amount > 0 ? item.Amounts[0].Amount : null;
+			editUnit = item.Amounts[0].Unit;
+		}
+		else
+		{
+			editAmount = null;
+			editUnit = item.Amounts.Count > 0 ? item.Amounts[0].Unit : "";
+		}
+	}
+
+	private void CancelEdit()
+	{
+		editing = null;
+		editError = null;
+	}
+
+	private async Task SaveEditAsync()
+	{
+		if (editing is not { } item)
+		{
+			return;
+		}
+
+		if (string.IsNullOrWhiteSpace(editName))
+		{
+			editError = "Skriv vad som ska handlas.";
+			return;
+		}
+
+		editError = null;
+		await SaveAsync(
+			() => ShoppingListService.UpdateExtraAsync(Trip.Id, item.ExtraIds, editName, editAmount, editUnit, editCategory),
+			"Kunde inte spara varan.");
+
+		if (errorMessage is null)
+		{
+			editing = null;
+		}
+		else
+		{
+			editError = errorMessage;
+			errorMessage = null;
+		}
+	}
+
+	private async Task<IReadOnlyList<Ingredient>> SearchIngredientsAsync(string term) =>
+		[.. (await IngredientService.SearchAsync(term, 8))];
+
+	private void OnEditIngredientSelected(Ingredient ingredient)
+	{
+		editName = ingredient.Name;
+		if (string.IsNullOrWhiteSpace(editUnit) && !string.IsNullOrWhiteSpace(ingredient.DefaultUnit))
+		{
+			editUnit = ingredient.DefaultUnit;
+		}
+	}
+
+	private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
+		IngredientService.SearchUnitsAsync(term);
 
 	private Task TakeAsync(ShoppingListItem item)
 	{

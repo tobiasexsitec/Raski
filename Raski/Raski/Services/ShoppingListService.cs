@@ -178,6 +178,32 @@ public sealed class ShoppingListService(
         await interop.AddDocumentAsync(ExtrasPath(tripId), data, ct);
     }
 
+    public async Task UpdateExtraAsync(string tripId, IReadOnlyList<string> extraIds, string name, decimal? amount, string unit, string category, CancellationToken ct = default)
+    {
+        if (extraIds.Count == 0)
+        {
+            return;
+        }
+
+        var ingredient = await ingredientService.GetOrCreateAsync(name, unit, ct);
+
+        var data = new Dictionary<string, object?>
+        {
+            ["ingredientId"] = ingredient.Id,
+            ["category"] = ExtraCategories.Normalize(category),
+            ["name"] = ingredient.Name,
+            ["amount"] = amount is > 0 ? amount : null,
+            ["unit"] = unit.Trim()
+        };
+
+        await interop.UpdateDocumentAsync($"{ExtrasPath(tripId)}/{extraIds[0]}", data, ct);
+
+        foreach (var extraId in extraIds.Skip(1))
+        {
+            await DeleteExtraAsync(tripId, extraId, ct);
+        }
+    }
+
     public async Task DeleteExtraAsync(string tripId, string extraId, CancellationToken ct = default)
     {
         await interop.DeleteDocumentAsync($"{ExtrasPath(tripId)}/{extraId}", ct);

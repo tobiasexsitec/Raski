@@ -22,6 +22,12 @@ public interface IShoppingListService
     /// <summary>Adds an item that does not belong to any meal.</summary>
     Task AddExtraAsync(string tripId, string name, decimal? amount, string unit, string category, CancellationToken ct = default);
 
+    /// <summary>
+    /// Updates an extra item. A row may be summed from several extras, so the first one
+    /// keeps the new values and the rest are removed.
+    /// </summary>
+    Task UpdateExtraAsync(string tripId, IReadOnlyList<string> extraIds, string name, decimal? amount, string unit, string category, CancellationToken ct = default);
+
     /// <summary>Removes an extra item together with its checked state.</summary>
     Task DeleteExtraAsync(string tripId, string extraId, CancellationToken ct = default);
 }

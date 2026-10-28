@@ -106,9 +106,9 @@
 
 <TripDrinksPanel Trip="Trip" Meals="meals" ExtrasVersion="extrasVersion" />
 
-<OtherItemsPanel Trip="Trip" Category="@ExtraCategories.Snacks" OnChanged="() => extrasVersion++" />
+<OtherItemsPanel Trip="Trip" Category="@ExtraCategories.Snacks" RefreshKey="extrasVersion" OnChanged="() => extrasVersion++" />
 
-<OtherItemsPanel Trip="Trip" Category="@ExtraCategories.Other" OnChanged="() => extrasVersion++" />
+<OtherItemsPanel Trip="Trip" Category="@ExtraCategories.Other" RefreshKey="extrasVersion" OnChanged="() => extrasVersion++" />
 
 @if (detailMeal is not null)
 {
