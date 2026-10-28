@@ -1,0 +1,64 @@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<div class="ptr-indicator" @ref="indicator" aria-hidden="true">↻</div>
+<span class="visually-hidden" role="status">@statusText</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public EventCallback OnRefresh { get; set; }
+
+    private ElementReference indicator;
+    private IJSObjectReference? module;
+    private IJSObjectReference? handle;
+    private DotNetObjectReference<PullToRefresh>? selfRef;
+    private string statusText = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        selfRef = DotNetObjectReference.Create(this);
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/pull-to-refresh.js");
+        handle = await module.InvokeAsync<IJSObjectReference>("init", indicator, selfRef);
+    }
+
+    [JSInvokable]
+    public async Task RefreshAsync()
+    {
+        statusText = "Uppdaterar…";
+        StateHasChanged();
+
+        await OnRefresh.InvokeAsync();
+        // Gives the recreated page a moment to start loading so the spinner does not just flash.
+        await Task.Delay(400);
+
+        statusText = "Sidan är uppdaterad";
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (handle is not null)
+            {
+                await handle.InvokeVoidAsync("dispose");
+                await handle.DisposeAsync();
+            }
+
+            if (module is not null)
+            {
+                await module.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+
+        selfRef?.Dispose();
+    }
+}
