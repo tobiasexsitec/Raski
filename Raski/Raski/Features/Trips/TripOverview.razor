@@ -112,7 +112,16 @@ else if (trip is not null)
             {
                 <section class="card notes">
                     <h2>Övrig info</h2>
-                    <FormattedText Text="@trip.Notes" />
+                    <div id="notes-content" class="notes-content @(IsNotesLong && !notesExpanded ? "collapsed" : "")">
+                        <FormattedText Text="@trip.Notes" />
+                    </div>
+                    @if (IsNotesLong)
+                    {
+                        <button type="button" class="btn btn-primary btn-sm notes-toggle" aria-expanded="@(notesExpanded ? "true" : "false")" aria-controls="notes-content"
+                                @onclick="() => notesExpanded = !notesExpanded">
+                            @(notesExpanded ? "Visa mindre" : "Visa mer")
+                        </button>
+                    }
                 </section>
             }
 
@@ -148,6 +157,10 @@ else if (trip is not null)
     private bool isLoading = true;
     private string? errorMessage;
     private string? participantSummary;
+    private bool notesExpanded;
+
+    private bool IsNotesLong =>
+        trip?.Notes is { } notes && (notes.Length > 400 || notes.Split('\n').Length > 8);
     private List<TripPolicy> policies = [];
 
     private int UnacceptedPolicyCount => policies.Count(p => !p.IsAcceptedBy(CurrentUser?.Uid));
