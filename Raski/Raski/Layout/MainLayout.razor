@@ -46,12 +46,18 @@
                             <strong>@user.DisplayName</strong>
                             <span class="muted">@user.Email</span>
                         </div>
+                        <a class="menu-item" href="profil" @onclick="CloseMenu">Profil</a>
                         <button type="button" class="menu-item" @onclick="SignOutAsync">Logga ut</button>
                     </div>
                 }
             </div>
         }
     </header>
+
+    @if (menuOpen)
+    {
+        <div class="menu-backdrop" aria-hidden="true" @onclick="CloseMenu"></div>
+    }
 
     <main class="content" id="main" tabindex="-1">
         <AuthGuard AllowAnonymous="IsPublicPage()">
@@ -102,6 +108,8 @@
             .Equals("about", StringComparison.OrdinalIgnoreCase);
 
     private void ToggleMenu() => menuOpen = !menuOpen;
+
+    private void CloseMenu() => menuOpen = false;
 
     private void OnMenuKeyDown(KeyboardEventArgs e)
     {
