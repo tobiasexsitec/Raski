@@ -31,3 +31,4 @@ Som användare av den installerade appen vill jag kunna dra nedåt högst upp p�
 ## Beslut
 - 2026-10-27: Mjuk uppdatering (ingen omladdning av sidan) valdes för att inte förvärra B-049.
 - 2026-10-27: Eget backlog-objekt, utvecklas på samma branch som B-064.
+- 2026-10-27: Undantag från versionsregeln: ger patch-höjning, inte minor.
