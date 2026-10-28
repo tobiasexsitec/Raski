@@ -93,6 +93,8 @@ export function init(indicator, dotNetRef) {
         render();
 
         try {
+            // A found update triggers the existing controllerchange reload in index.html.
+            navigator.serviceWorker?.getRegistration().then(r => r?.update()).catch(() => { });
             await dotNetRef.invokeMethodAsync("RefreshAsync");
         } finally {
             refreshing = false;
