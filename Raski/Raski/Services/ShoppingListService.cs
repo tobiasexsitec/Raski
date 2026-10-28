@@ -21,6 +21,9 @@ public sealed class ShoppingListService(
     // Prefixed so extras share the checked-state collection without colliding with ingredient ids.
     private static string ExtraStateKey(string extraId) => "extra:" + extraId;
 
+    // "burk" and "burkar" are summed together and shown in the right form at display time.
+    private string SingularUnit(string unit) => ingredientService.FormatUnit(unit, 1);
+
     public async Task<IReadOnlyList<ShoppingListItem>> BuildAsync(string tripId, CancellationToken ct = default)
     {
         var meals = (await mealService.GetMealsAsync(tripId, ct)).ToList();
@@ -58,7 +61,7 @@ public sealed class ShoppingListService(
 
         var extras = await GetExtraEntriesAsync(tripId, ct);
 
-        var items = ShoppingListAggregator.Aggregate([.. meals, .. drinkMeals, .. ExtrasAsMeals(extras)], registry, checkedState);
+        var items = ShoppingListAggregator.Aggregate([.. meals, .. drinkMeals, .. ExtrasAsMeals(extras)], registry, checkedState, SingularUnit);
 
         // Rows that only come from extras stay in their own section so they can be removed there;
         // rows shared with a meal are summed into the meal's row.
@@ -144,7 +147,7 @@ public sealed class ShoppingListService(
                 .SelectMany(g =>
                 {
                     var categoryExtras = g.ToList();
-                    var items = ShoppingListAggregator.Aggregate(ExtrasAsMeals(categoryExtras), registry, new Dictionary<string, bool>(StringComparer.Ordinal));
+                    var items = ShoppingListAggregator.Aggregate(ExtrasAsMeals(categoryExtras), registry, new Dictionary<string, bool>(StringComparer.Ordinal), SingularUnit);
                     AttachExtras(items, categoryExtras, registry, onlyExtraRows: false);
                     foreach (var item in items)
                     {

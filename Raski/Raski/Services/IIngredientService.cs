@@ -11,6 +11,20 @@ public interface IIngredientService
     Task<IReadOnlyList<Ingredient>> SearchAsync(string prefix, int limit = 8, CancellationToken ct = default);
     Task<IReadOnlyList<string>> SearchUnitsAsync(string prefix, int limit = 8, CancellationToken ct = default);
 
+    Task<IReadOnlyList<UnitDefinition>> GetUnitsAsync(CancellationToken ct = default);
+
+    /// <summary>Updates the singular and plural form of a unit. Only global admins may do this.</summary>
+    Task UpdateUnitAsync(UnitDefinition unit, CancellationToken ct = default);
+
+    /// <summary>
+    /// Returns the singular or plural form of the unit for the amount. Uses the cached
+    /// register, so call GetUnitsAsync first; unknown units are returned unchanged.
+    /// </summary>
+    string FormatUnit(string? unit, decimal amount);
+
+    /// <summary>Like FormatUnit, for free text quantities such as drinks. Unparseable quantities keep the unit as typed.</summary>
+    string FormatUnit(string? unit, string? quantity);
+
     /// <summary>The known tags: the built-in defaults plus any user created ones.</summary>
     Task<IReadOnlyList<string>> GetTagsAsync(CancellationToken ct = default);
 

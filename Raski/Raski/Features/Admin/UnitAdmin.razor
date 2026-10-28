@@ -1,0 +1,150 @@
+@page "/admin/enheter"
+@inject IIngredientService IngredientService
+@inject IAuthService AuthService
+
+<PageTitle>Enheter – Raski™</PageTitle>
+
+<div class="page-header">
+    <div>
+        <h1>Enheter</h1>
+        <p class="muted">Ange hur varje enhet skrivs i singular och plural, t.ex. burk/burkar.</p>
+    </div>
+</div>
+
+@if (!AuthService.IsGlobalAdmin)
+{
+    <div class="empty-state card">
+        <p><strong>Du saknar behörighet.</strong></p>
+        <p>Bara globala admins kan ändra enheter.</p>
+        <a class="btn btn-secondary" href="">Till mina resor</a>
+    </div>
+}
+else
+{
+    @if (errorMessage is not null)
+    {
+        <div class="error-banner">@errorMessage</div>
+    }
+
+    @if (isLoading)
+    {
+        <p class="muted">Hämtar enheter…</p>
+    }
+    else if (rows.Count == 0)
+    {
+        <div class="empty-state card">
+            <p>Inga enheter ännu.</p>
+        </div>
+    }
+    else
+    {
+        <ul class="unit-list">
+            @foreach (var row in rows)
+            {
+                <li class="card unit-row">
+                    <label class="field">
+                        <span class="field-label">Singular</span>
+                        <input @bind="row.Name" aria-label="@($"Singular för {row.Original}")" />
+                    </label>
+                    <label class="field">
+                        <span class="field-label">Plural</span>
+                        <input @bind="row.Plural" placeholder="@row.Name" aria-label="@($"Plural för {row.Original}")" />
+                    </label>
+                    <button type="button"
+                            class="btn btn-primary btn-sm"
+                            disabled="@(isSaving || !row.IsDirty)"
+                            @onclick="() => SaveAsync(row)">Spara</button>
+                </li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    private sealed class UnitRow
+    {
+        public string Id { get; init; } = "";
+        public string Original { get; init; } = "";
+        public string OriginalPlural { get; init; } = "";
+        public string Name { get; set; } = "";
+        public string Plural { get; set; } = "";
+
+        public bool IsDirty => Name.Trim() != Original || Plural.Trim() != OriginalPlural;
+    }
+
+    private List<UnitRow> rows = [];
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthService.IsGlobalAdmin)
+        {
+            isLoading = false;
+            return;
+        }
+
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            rows =
+            [
+                .. (await IngredientService.GetUnitsAsync())
+                    .OrderBy(u => u.Name, StringComparer.CurrentCultureIgnoreCase)
+                    .Select(u => new UnitRow
+                    {
+                        Id = u.Id,
+                        Original = u.Name,
+                        OriginalPlural = u.Plural ?? "",
+                        Name = u.Name,
+                        Plural = u.Plural ?? ""
+                    })
+            ];
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Kunde inte hämta enheterna. {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SaveAsync(UnitRow row)
+    {
+        if (string.IsNullOrWhiteSpace(row.Name))
+        {
+            errorMessage = "Singular får inte vara tom.";
+            return;
+        }
+
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            await IngredientService.UpdateUnitAsync(new UnitDefinition
+            {
+                Id = row.Id,
+                Name = row.Name.Trim(),
+                Plural = row.Plural.Trim()
+            });
+
+            await LoadAsync();
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte spara enheten.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+}

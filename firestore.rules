@@ -272,8 +272,13 @@ service cloud.firestore {
 	  allow delete: if isGlobalAdmin();
 	}
 
+	// Anyone may register a new unit, but only global admins may set or change
+	// its singular and plural form (B-069).
 	match /units/{unitId} {
-	  allow read, create, update: if isSignedIn();
+	  allow read: if isSignedIn();
+	  allow create: if isSignedIn()
+					&& (request.resource.data.get('plural', '') == '' || isGlobalAdmin());
+	  allow update: if isGlobalAdmin();
 	  allow delete: if false;
 	}
 

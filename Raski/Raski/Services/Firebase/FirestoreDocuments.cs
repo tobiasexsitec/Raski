@@ -402,6 +402,7 @@ internal sealed class UnitDocument
     [JsonPropertyName("id")] public string Id { get; set; } = "";
     [JsonPropertyName("name")] public string? Name { get; set; }
     [JsonPropertyName("nameLower")] public string? NameLower { get; set; }
+    [JsonPropertyName("plural")] public string? Plural { get; set; }
 }
 
 internal sealed class TagDocument

@@ -404,8 +404,8 @@
 
     private static string MealLabelText(DrinkTotal total) => string.Join(", ", total.MealLabels);
 
-    private static string FormatAmount(string quantity, string unit) =>
-        $"{quantity} {unit}".Trim();
+    private string FormatAmount(string quantity, string unit) =>
+        $"{quantity} {IngredientService.FormatUnit(unit, quantity)}".Trim();
 
     private static bool IsHttpUrl(string value) =>
         Uri.TryCreate(value, UriKind.Absolute, out var uri)

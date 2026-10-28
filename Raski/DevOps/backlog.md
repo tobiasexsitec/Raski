@@ -23,6 +23,7 @@
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-069](items/B-069-singular-och-plural-for-enheter.md) | Singular och plural för enheter | Funktion | – | 2026-10-28 |
 | [B-068](items/B-068-ovrigt-under-maltider.md) | Övrigt under Måltider | Funktion | – | 2026-10-28 |
 | [B-067](items/B-067-luft-mellan-kort-och-lagg-till-knapp-pa-oversikten.md) | Luft mellan kort och Lägg till-knapp på översikten | Bugg | – | 2026-10-28 |
 | [B-066](items/B-066-visa-mer-for-ovrig-info-pa-oversikten.md) | Visa mer för Övrig info på översikten | Patch | – | 2026-10-28 |

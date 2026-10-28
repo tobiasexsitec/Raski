@@ -110,7 +110,7 @@
                     <li>
                         <span class="name">@ingredient.Name</span>
                         <span>@FormatTotal(ingredient)</span>
-                        <span class="muted">(@FormatAmount(ingredient.Amount) @ingredient.Unit @ingredient.Scope.ToSwedish())</span>
+                        (@FormatAmount(ingredient.Amount) @IngredientService.FormatUnit(ingredient.Unit, ingredient.Amount) @ingredient.Scope.ToSwedish())
                     </li>
                 }
             </ul>
@@ -151,6 +151,7 @@
         try
         {
             breakfast = await BreakfastService.GetAsync(Trip.Id);
+            await IngredientService.GetUnitsAsync();
         }
         catch (Exception)
         {
@@ -255,8 +256,11 @@
         }
     }
 
-    private string FormatTotal(BreakfastIngredient ingredient) =>
-        $"{FormatAmount(ingredient.TotalAmount(Travelers, Days))} {ingredient.Unit}".Trim();
+    private string FormatTotal(BreakfastIngredient ingredient)
+    {
+        var total = ingredient.TotalAmount(Travelers, Days);
+        return $"{FormatAmount(total)} {IngredientService.FormatUnit(ingredient.Unit, total)}".Trim();
+    }
 
     private static string FormatAmount(decimal amount) =>
         amount.ToString("0.##", Swedish);

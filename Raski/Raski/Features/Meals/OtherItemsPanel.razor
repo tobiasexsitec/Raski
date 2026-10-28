@@ -1,5 +1,6 @@
 @inject IShoppingListService ShoppingListService
 @inject IBringItemService BringItemService
+@inject IIngredientService IngredientService
 
 <section class="card other-items" aria-labelledby="@HeadingId">
 	<h2 id="@HeadingId">@ExtraCategories.Display(Category)</h2>
@@ -197,11 +198,11 @@
 		}
 	}
 
-	private static string FormatAmounts(ShoppingListItem item) =>
+	private string FormatAmounts(ShoppingListItem item) =>
 		string.Join(" + ", item.Amounts.Select(a =>
 			string.IsNullOrWhiteSpace(a.Unit)
 				? Format(a.Amount)
-				: $"{Format(a.Amount)} {a.Unit}"));
+				: $"{Format(a.Amount)} {IngredientService.FormatUnit(a.Unit, a.Amount)}"));
 
 	private static string Format(decimal value) =>
 		value == decimal.Truncate(value) ? ((long)value).ToString() : value.ToString("0.##");
