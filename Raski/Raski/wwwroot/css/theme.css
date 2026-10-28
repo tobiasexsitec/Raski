@@ -72,6 +72,14 @@ body {
     line-height: 1.5;
 }
 
+/* Installed app: block double-tap zoom but keep pinch-zoom for accessibility.
+   Set on every element since touch-action does not carry into nested scroll containers. */
+@media (display-mode: standalone) {
+    * {
+        touch-action: manipulation;
+    }
+}
+
 h1, h2, h3, h4 {
     margin: 0 0 var(--space-3) 0;
     line-height: 1.2;
