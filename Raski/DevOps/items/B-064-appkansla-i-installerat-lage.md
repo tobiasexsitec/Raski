@@ -1,7 +1,7 @@
 # B-064: Appkänsla i installerat läge: ingen dubbeltrycks-zoom och temafärgat statusfält
 
 - **Status:** Klar
-- **Typ:** Funktion
+- **Typ:** Patch
 - **Prioritet:** –
 - **Skapad:** 2026-10-27
 - **Klar:** 2026-10-27

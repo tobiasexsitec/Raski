@@ -23,8 +23,8 @@
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
-| [B-065](items/B-065-dra-for-att-uppdatera.md) | Dra för att uppdatera | Funktion | – | 2026-10-27 |
-| [B-064](items/B-064-appkansla-i-installerat-lage.md) | Appkänsla i installerat läge: ingen dubbeltrycks-zoom och temafärgat statusfält | Funktion | – | 2026-10-27 |
+| [B-065](items/B-065-dra-for-att-uppdatera.md) | Dra för att uppdatera | Patch | – | 2026-10-27 |
+| [B-064](items/B-064-appkansla-i-installerat-lage.md) | Appkänsla i installerat läge: ingen dubbeltrycks-zoom och temafärgat statusfält | Patch | – | 2026-10-27 |
 | [B-056](items/B-056-policyer-for-resan.md) | Policyer för resan | Funktion | – | 2026-10-27 |
 | [B-062](items/B-062-produktionspipelinen-deployar-firestore-regler.md) | Produktionspipelinen deployar Firestore-regler | Utveckling | – | 2026-10-27 |
 | [B-061](items/B-061-alla-kan-skapa-egna-resor.md) | Alla kan skapa egna resor | Funktion | – | 2026-10-27 |
