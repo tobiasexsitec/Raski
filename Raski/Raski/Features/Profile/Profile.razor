@@ -19,6 +19,7 @@
 }
 else
 {
+    <div class="profile-sections">
     @if (errorMessage is not null)
     {
         <div class="error-banner" role="alert">@errorMessage</div>
@@ -117,6 +118,7 @@ else
     </section>
 
     <HouseholdSection />
+    </div>
 }
 
 @code {

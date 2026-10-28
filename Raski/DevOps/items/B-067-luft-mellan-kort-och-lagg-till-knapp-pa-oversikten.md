@@ -15,11 +15,13 @@ Som användare vill jag att korten och knapparna på översikten har luft emella
 ## Acceptanskriterier
 - [x] Det finns avstånd mellan korten "Översikt" och "Övrig info".
 - [x] Knappen "Lägg till" i inbjudningsformuläret har avstånd till fälten ovanför.
+- [x] Det finns avstånd mellan korten på profilsidan.
 
 ## Öppna frågor
 
 ## Tekniska noteringar
 - `TripOverview.razor`: översiktskortet har fått klassen `overview` med `margin-bottom: var(--space-4)`.
-- `MembersPanel.razor.css`: `.invite-form` hade en trasig `display`-deklaration, vilket gjorde att flex-layouten och dess `gap` inte gällde. Rättad till `display: flex;`.
+Rättad till `display: flex;`.
+- `Profile.razor`: korten ligger i en `profile-sections`-wrapper med `gap: var(--space-4)`, så att även `HouseholdSection` får avstånd.
 
 ## Beslut
