@@ -128,7 +128,7 @@ public sealed class ShoppingListService(
         IngredientId = extra.IngredientId ?? "",
         Name = extra.Name?.Trim() ?? "",
         Amount = extra.Amount is > 0 ? extra.Amount.Value : 0,
-        Unit = extra.Unit?.Trim() ?? ""
+        Unit = UnitDefinition.Normalize(extra.Unit)
     };
 
     public async Task<IReadOnlyList<ShoppingListItem>> GetExtrasAsync(string tripId, CancellationToken ct = default)
@@ -170,7 +170,7 @@ public sealed class ShoppingListService(
             ["category"] = ExtraCategories.Normalize(category),
             ["name"] = ingredient.Name,
             ["amount"] = amount is > 0 ? amount : null,
-            ["unit"] = unit.Trim(),
+            ["unit"] = UnitDefinition.Normalize(unit),
             ["createdAt"] = FirestoreFormat.UtcNow(),
             ["createdByUid"] = authService.Current?.Uid ?? ""
         };
@@ -193,7 +193,7 @@ public sealed class ShoppingListService(
             ["category"] = ExtraCategories.Normalize(category),
             ["name"] = ingredient.Name,
             ["amount"] = amount is > 0 ? amount : null,
-            ["unit"] = unit.Trim()
+            ["unit"] = UnitDefinition.Normalize(unit)
         };
 
         await interop.UpdateDocumentAsync($"{ExtrasPath(tripId)}/{extraIds[0]}", data, ct);
@@ -224,7 +224,7 @@ public sealed class ShoppingListService(
                     IngredientId = d.IngredientId,
                     Name = d.Name.Trim(),
                     Amount = ParseQuantity(d.Quantity),
-                    Unit = d.Unit.Trim()
+                    Unit = UnitDefinition.Normalize(d.Unit)
                 })
         ]
     };

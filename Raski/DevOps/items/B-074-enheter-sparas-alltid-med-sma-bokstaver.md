@@ -1,9 +1,10 @@
 # B-074: Enheter sparas alltid med små bokstäver
 
-- **Status:** Idé
+- **Status:** Klar
 - **Typ:** Bugg
 - **Prioritet:** –
 - **Skapad:** 2026-10-28
+- **Klar:** 2026-10-28
 
 ## Beskrivning
 När man sparar en enhet ska den alltid sparas med små bokstäver, så att t.ex. "St", "ST" och "st" inte blir olika enheter och så att enheterna visas enhetligt i appen.
@@ -26,9 +27,12 @@ Som användare vill jag att enheter alltid sparas med små bokstäver så att li
 - Modell: `Models/UnitDefinition.cs`; DTO: `UnitDocument` i `Services/Firebase/FirestoreDocuments.cs`.
 - Sparning sker i `Services/IngredientService.cs` (collection `units`, sorteras på `nameLower`). Normalisera med `ToLowerInvariant()` (eller `ToLower(sv-SE)`) innan skrivning.
 - Relaterat: [B-069](B-069-singular-och-plural-for-enheter.md).
-- Ingen ändring av `firestore.rules` förväntas.
+- Normalisering
+- Migrering: knappen ”Gör om till små bokstäver” på `/admin/enheter` gör om `units` och ingrediensernas `defaultUnit`, och raderar dubbletter.
+- `firestore.rules`: globala admins får radera dokument i `units` (för sammanslagning).
 
 ## Beslut
+- 2026-10-28: Enheter inbäddade i resor (måltider, frukost, drycker, fika och övrigt) kan inte migreras från klienten, eftersom en admin inte får läsa andras resor. De normaliseras i stället vid läsning och sparas med små bokstäver nästa gång de sparas. Enheter refereras med namn, inte id, så sammanslagna dubbletter kräver ingen omskrivning av referenser.
 - 2026-10-28: Typ ändrad från Patch till Bugg.
 - 2026-10-28: Alla befintliga enheter migreras till små bokstäver.
 - 2026-10-28: Regeln gäller alla enheter, inte bara enhetsadministrationen.

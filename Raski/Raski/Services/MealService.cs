@@ -66,7 +66,7 @@ public sealed class MealService(FirebaseInterop interop, IAuthService authServic
                 ingredientId = i.IngredientId,
                 name = i.Name.Trim(),
                 amount = (double)i.Amount,
-                unit = i.Unit.Trim()
+                unit = UnitDefinition.Normalize(i.Unit)
             })
             .ToArray();
 
@@ -77,7 +77,7 @@ public sealed class MealService(FirebaseInterop interop, IAuthService authServic
                 ingredientId = d.IngredientId,
                 name = d.Name.Trim(),
                 quantity = d.Quantity.Trim(),
-                unit = d.Unit.Trim(),
+                unit = UnitDefinition.Normalize(d.Unit),
                 url = d.Url.Trim()
             })
             .ToArray();

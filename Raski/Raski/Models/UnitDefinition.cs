@@ -7,6 +7,9 @@ public sealed class UnitDefinition
     public string Name { get; set; } = "";
     public string? Plural { get; set; }
 
+    /// Units are always stored in lower case so "St" and "st" never become different units.
+    public static string Normalize(string? unit) => (unit ?? "").Trim().ToLowerInvariant();
+
     public bool Matches(string unit) =>
         unit.Equals(Name, StringComparison.OrdinalIgnoreCase)
         || unit.Equals(Id, StringComparison.OrdinalIgnoreCase)

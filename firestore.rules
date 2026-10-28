@@ -279,7 +279,8 @@ service cloud.firestore {
 	  allow create: if isSignedIn()
 					&& (request.resource.data.get('plural', '') == '' || isGlobalAdmin());
 	  allow update: if isGlobalAdmin();
-	  allow delete: if false;
+	  // Global admins remove duplicates when units are merged (B-074).
+	  allow delete: if isGlobalAdmin();
 	}
 
 	// Shared suggestion list for allergies and dietary preferences.
