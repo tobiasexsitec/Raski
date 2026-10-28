@@ -33,3 +33,4 @@ Som användare vill jag nå min profil genom att klicka på min avatar uppe till
 - 2026-10-28: Delad i två objekt: detta (Profil i avatarmenyn) och B-071 (Admin-flik).
 - 2026-10-28: Typ föreslagen som Patch (mindre förbättring av navigeringen).
 - 2026-10-28: Menyn ska stängas när man klickar utanför den.
+- 2026-10-28: Profil-länken i avatarmenyn togs bort igen i B-071. Profil nås i stället via lådan Profil på Admin-sidan, så att Tillbaka-knappen alltid går till `/admin`. Kvar från detta objekt: Profil-fliken är borta ur menyraden och avatarmenyn stängs vid klick utanför.
