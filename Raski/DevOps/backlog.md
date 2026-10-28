@@ -18,13 +18,13 @@
 | [B-059](items/B-059-mallar-for-vem-tar-med.md) | Mallar för "Vem tar med" | Funktion | Idé | – | 2026-10-26 |
 | [B-060](items/B-060-installerbar-app-upplevelse-ren-pwa.md) | Installerbar app-upplevelse (ren PWA) | Funktion | Idé | – | 2026-10-26 |
 | [B-063](items/B-063-ios-splash-och-google-inloggning-i-installerad-app.md) | iOS-splash och Google-inloggning i installerad app | Funktion | Idé | – | 2026-10-27 |
-| [B-064](items/B-064-appkansla-i-installerat-lage.md) | Appkänsla i installerat läge: ingen dubbeltrycks-zoom och temafärgat statusfält | Funktion | Redo | – | 2026-10-27 |
-| [B-065](items/B-065-dra-for-att-uppdatera.md) | Dra för att uppdatera | Funktion | Pågår | – | 2026-10-27 |
 
 ## Klara
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-065](items/B-065-dra-for-att-uppdatera.md) | Dra för att uppdatera | Funktion | – | 2026-10-27 |
+| [B-064](items/B-064-appkansla-i-installerat-lage.md) | Appkänsla i installerat läge: ingen dubbeltrycks-zoom och temafärgat statusfält | Funktion | – | 2026-10-27 |
 | [B-056](items/B-056-policyer-for-resan.md) | Policyer för resan | Funktion | – | 2026-10-27 |
 | [B-062](items/B-062-produktionspipelinen-deployar-firestore-regler.md) | Produktionspipelinen deployar Firestore-regler | Utveckling | – | 2026-10-27 |
 | [B-061](items/B-061-alla-kan-skapa-egna-resor.md) | Alla kan skapa egna resor | Funktion | – | 2026-10-27 |

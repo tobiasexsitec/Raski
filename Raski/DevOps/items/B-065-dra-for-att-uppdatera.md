@@ -1,9 +1,10 @@
 # B-065: Dra för att uppdatera
 
-- **Status:** Pågår
+- **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
 - **Skapad:** 2026-10-27
+- **Klar:** 2026-10-27
 
 ## Beskrivning
 I installerat läge finns ingen inbyggd "dra nedåt för att uppdatera", vilket de flesta appar har. Lägg till en egen gest som gör en mjuk uppdatering: vyns data hämtas om utan att appen startas om (se B-049).
@@ -12,12 +13,13 @@ I installerat läge finns ingen inbyggd "dra nedåt för att uppdatera", vilket 
 Som användare av den installerade appen vill jag kunna dra nedåt högst upp på en sida för att uppdatera den, så att jag känner mig trygg med att jag ser aktuell information.
 
 ## Acceptanskriterier
-- [ ] Dra nedåt när sidan är scrollad högst upp visar en indikator som följer fingret.
-- [ ] Släpper man efter tillräckligt långt drag hämtas sidans data om (sidkomponenten skapas om) utan full omladdning av appen.
-- [ ] Släpper man innan gränsen händer ingenting.
-- [ ] Gesten är bara aktiv i installerat läge; i webbläsaren används webbläsarens egen funktion.
-- [ ] Gesten startar inte när en dialog är öppen eller på redigeringssidor där osparad inmatning skulle försvinna.
-- [ ] Indikatorn har en tillgänglig statustext.
+- [x] Dra nedåt när sidan är scrollad högst upp visar en indikator som följer fingret, och sidans innehåll (allt utom headern) följer med.
+- [x] Släpper man efter tillräckligt långt drag hämtas sidans data om (sidkomponenten skapas om) utan full omladdning av appen.
+- [x] Släpper man innan gränsen händer ingenting.
+- [x] Gesten är bara aktiv i installerat läge; i webbläsaren används webbläsarens egen funktion.
+- [x] Gesten startar inte när en dialog är öppen eller på redigeringssidor där osparad inmatning skulle försvinna.
+- [x] Indikatorn har en tillgänglig statustext.
+- [x] Dragningen söker också efter en ny version av appen; finns en laddas appen om.
 
 ## Öppna frågor
 
