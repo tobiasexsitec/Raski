@@ -18,12 +18,12 @@
 | [B-059](items/B-059-mallar-for-vem-tar-med.md) | Mallar för "Vem tar med" | Funktion | Idé | – | 2026-10-26 |
 | [B-060](items/B-060-installerbar-app-upplevelse-ren-pwa.md) | Installerbar app-upplevelse (ren PWA) | Funktion | Idé | – | 2026-10-26 |
 | [B-063](items/B-063-ios-splash-och-google-inloggning-i-installerad-app.md) | iOS-splash och Google-inloggning i installerad app | Funktion | Idé | – | 2026-10-27 |
-| [B-067](items/B-067-luft-mellan-kort-och-lagg-till-knapp-pa-oversikten.md) | Luft mellan kort och Lägg till-knapp på översikten | Bugg | Testas | – | 2026-10-28 |
 
 ## Klara
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-067](items/B-067-luft-mellan-kort-och-lagg-till-knapp-pa-oversikten.md) | Luft mellan kort och Lägg till-knapp på översikten | Bugg | – | 2026-10-28 |
 | [B-066](items/B-066-visa-mer-for-ovrig-info-pa-oversikten.md) | Visa mer för Övrig info på översikten | Patch | – | 2026-10-28 |
 | [B-065](items/B-065-dra-for-att-uppdatera.md) | Dra för att uppdatera | Patch | – | 2026-10-27 |
 | [B-064](items/B-064-appkansla-i-installerat-lage.md) | Appkänsla i installerat läge: ingen dubbeltrycks-zoom och temafärgat statusfält | Patch | – | 2026-10-27 |

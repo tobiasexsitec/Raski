@@ -1,10 +1,10 @@
 # B-067: Luft mellan kort och Lägg till-knapp på översikten
 
-- **Status:** Testas
+- **Status:** Klar
 - **Typ:** Bugg
 - **Prioritet:** –
 - **Skapad:** 2026-10-28
-- **Klar:**
+- **Klar:** 2026-10-28
 
 ## Beskrivning
 På översikten ligger korten "Översikt" och "Övrig info" direkt intill varandra. I formuläret för att bjuda in användare saknas också avstånd mellan inmatningsfälten och knappen "Lägg till".
