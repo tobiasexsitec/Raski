@@ -28,10 +28,19 @@ export function init(indicator, dotNetRef) {
     let distance = 0;
     let refreshing = false;
 
+    // Content and footer follow the finger; the header and bottom navigation stay put.
+    const movables = () => document.querySelectorAll(".shell > main, .shell > footer");
+
     const render = () => {
         indicator.style.transform = `translate(-50%, ${distance - 48}px) rotate(${distance * 3}deg)`;
         indicator.style.opacity = String(Math.min(distance / threshold, 1));
         indicator.classList.toggle("ready", distance >= threshold);
+
+        const pulling = indicator.classList.contains("pulling");
+        for (const el of movables()) {
+            el.style.transition = pulling ? "none" : "transform 0.2s ease";
+            el.style.transform = distance > 0 ? `translateY(${distance}px)` : "";
+        }
     };
 
     const reset = () => {
