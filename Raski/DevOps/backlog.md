@@ -23,6 +23,7 @@
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-066](items/B-066-visa-mer-for-ovrig-info-pa-oversikten.md) | Visa mer för Övrig info på översikten | Patch | – | 2026-10-28 |
 | [B-065](items/B-065-dra-for-att-uppdatera.md) | Dra för att uppdatera | Patch | – | 2026-10-27 |
 | [B-064](items/B-064-appkansla-i-installerat-lage.md) | Appkänsla i installerat läge: ingen dubbeltrycks-zoom och temafärgat statusfält | Patch | – | 2026-10-27 |
 | [B-056](items/B-056-policyer-for-resan.md) | Policyer för resan | Funktion | – | 2026-10-27 |
