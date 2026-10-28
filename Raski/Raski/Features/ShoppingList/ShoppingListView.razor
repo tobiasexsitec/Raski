@@ -35,36 +35,6 @@ else
         <div class="error-banner">@errorMessage</div>
     }
 
-    <h2>Lägg till på inköpslistan</h2>
-    <p class="muted">Hör varan till en måltid? Registrera då ingrediensen under fliken "Måltider" på resan.</p>
-
-    <form class="extra-form" @onsubmit="AddExtraAsync">
-        <input class="field extra-name"
-               placeholder="Vad behövs? T.ex. toapapper"
-               aria-label="Vara"
-               maxlength="100"
-               @bind="newExtraName" />
-        <input class="field extra-quantity"
-               type="number"
-               step="any"
-               min="0"
-               inputmode="decimal"
-               placeholder="Mängd"
-               aria-label="Mängd"
-               @bind="newExtraAmount" />
-        <div class="extra-unit">
-            <AutoComplete TItem="string"
-                          Value="@newExtraUnit"
-                          ValueChanged="value => newExtraUnit = value"
-                          SearchFunc="SearchUnitsAsync"
-                          DisplaySelector="u => u"
-                          MinimumLength="1"
-                          AriaLabel="Enhet"
-                          Placeholder="Enhet" />
-        </div>
-        <button type="submit" class="btn btn-primary" disabled="@isSaving">Lägg till</button>
-    </form>
-
     @if (TotalCount > 0)
     {
         <p class="progress-text">@CheckedCount av @TotalCount ihandlade</p>
@@ -75,7 +45,7 @@ else
         <p class="muted">Inga ingredienser från måltider än.</p>
     }
 
-    @foreach (var group in groups)
+    @foreach (var group in groups.Where(g => g.Tag != IngredientTags.Uncategorized))
     {
         <section class="group">
             <h2>@group.DisplayTag</h2>
@@ -104,13 +74,37 @@ else
         </section>
     }
 
-    <section class="group">
-        <h2>Övrigt att handla</h2>
+    @foreach (var category in new[] { ExtraCategories.Snacks, ExtraCategories.Other })
+    {
+        var meals = category == ExtraCategories.Other ? uncategorized : [];
+        var categoryExtras = extras.Where(e => e.ExtraCategory == category).ToList();
 
-        @if (extras.Count > 0)
+    <section class="group">
+        <h2>@ExtraCategories.Display(category)</h2>
+
+        @if (meals.Count > 0 || categoryExtras.Count > 0)
         {
             <ul class="items">
-                @foreach (var item in extras)
+                @foreach (var item in meals)
+                {
+                    <li class="item @(item.Checked ? "is-checked" : "")">
+                        <label>
+                            <input type="checkbox"
+                                   checked="@item.Checked"
+                                   @onchange="e => ToggleAsync(item, e)" />
+
+                            <span class="item-body">
+                                <span class="item-name">@item.Name</span>
+                                <span class="item-amount">@FormatAmounts(item)</span>
+                                @if (item.UsedInMeals.Count > 0)
+                                {
+                                    <span class="item-meals">@string.Join(", ", item.UsedInMeals)</span>
+                                }
+                            </span>
+                        </label>
+                    </li>
+                }
+                @foreach (var item in categoryExtras)
                 {
                     <li class="item extra-item @(item.Checked ? "is-checked" : "")">
                         <label>
@@ -138,9 +132,15 @@ else
         }
         else
         {
-            <p class="muted">Inget övrigt tillagt än.</p>
+            <p class="muted">Inget tillagt än.</p>
         }
+
+        <ExtraItemForm Placeholder="@(category == ExtraCategories.Snacks ? "T.ex. kanelbullar eller chips" : "T.ex. diskmaskinstabletter")"
+                       AriaLabel="@($"Vara till {ExtraCategories.Display(category)}")"
+                       IsSaving="isSaving"
+                       OnAdd="(name, amount, unit) => AddExtraAsync(category, name, amount, unit)" />
     </section>
+    }
 }
 
 @code {
@@ -150,9 +150,7 @@ else
     private IReadOnlyList<ShoppingListItem> items = [];
     private IReadOnlyList<ShoppingListGroup> groups = [];
     private IReadOnlyList<ShoppingListItem> extras = [];
-    private string newExtraName = "";
-    private decimal? newExtraAmount;
-    private string newExtraUnit = "";
+    private IReadOnlyList<ShoppingListItem> uncategorized = [];
     private bool isSaving;
     private CancellationTokenSource? listenerCts;
     private bool isLoading = true;
@@ -241,37 +239,34 @@ else
     {
         groups = ShoppingListAggregator.GroupByTag(items.Where(i => !i.IsExtra));
         extras = [.. items.Where(i => i.IsExtra)];
+        uncategorized = [.. groups.Where(g => g.Tag == IngredientTags.Uncategorized).SelectMany(g => g.Items)];
     }
 
-    private async Task AddExtraAsync()
+    private async Task<bool> AddExtraAsync(string category, string name, decimal? amount, string unit)
     {
-        if (string.IsNullOrWhiteSpace(newExtraName))
+        if (string.IsNullOrWhiteSpace(name))
         {
             errorMessage = "Skriv vad som ska handlas.";
-            return;
+            return false;
         }
 
         await SaveExtrasAsync(
-            () => ShoppingListService.AddExtraAsync(TripId, newExtraName, newExtraAmount, newExtraUnit),
+            () => ShoppingListService.AddExtraAsync(TripId, name, amount, unit, category),
             "Kunde inte lägga till varan.");
 
-        if (errorMessage is null)
-        {
-            newExtraName = "";
-            newExtraAmount = null;
-            newExtraUnit = "";
-        }
+        return errorMessage is null;
     }
 
-    private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
-        IngredientService.SearchUnitsAsync(term);
-
     private Task DeleteExtraAsync(ShoppingListItem item) =>
-        item.ExtraId is null
-            ? Task.CompletedTask
-            : SaveExtrasAsync(
-                () => ShoppingListService.DeleteExtraAsync(TripId, item.ExtraId),
-                "Kunde inte ta bort varan.");
+        SaveExtrasAsync(
+            async () =>
+            {
+                foreach (var extraId in item.ExtraIds)
+                {
+                    await ShoppingListService.DeleteExtraAsync(TripId, extraId);
+                }
+            },
+            "Kunde inte ta bort varan.");
 
     private async Task SaveExtrasAsync(Func<Task> save, string failureMessage)
     {
@@ -292,6 +287,7 @@ else
         finally
         {
             isSaving = false;
+            StateHasChanged();
         }
     }
 

@@ -103,7 +103,11 @@
     }
 </section>
 
-<TripDrinksPanel Trip="Trip" Meals="meals" />
+<TripDrinksPanel Trip="Trip" Meals="meals" ExtrasVersion="extrasVersion" />
+
+<OtherItemsPanel Trip="Trip" Category="@ExtraCategories.Snacks" OnChanged="() => extrasVersion++" />
+
+<OtherItemsPanel Trip="Trip" Category="@ExtraCategories.Other" OnChanged="() => extrasVersion++" />
 
 @if (detailMeal is not null)
 {
@@ -116,6 +120,7 @@
     [Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
 
     private List<Meal> meals = [];
+    private int extrasVersion;
     private IReadOnlyList<TripMember> members = [];
     private CancellationTokenSource? listenerCts;
     private string? observedTripId;

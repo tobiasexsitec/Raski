@@ -60,6 +60,18 @@
     </div>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
     <script>
+        // Enter in an open autocomplete picks the suggestion; it must not submit the surrounding form.
+        // Blazor cannot conditionally preventDefault, so this is done here before the default action runs.
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && e.target instanceof HTMLInputElement
+                && e.target.getAttribute('role') === 'combobox'
+                && e.target.hasAttribute('aria-expanded')
+                && e.target.getAttribute('aria-expanded').toLowerCase() !== 'false') {
+                e.preventDefault();
+            }
+        }, true);
+    </script>
+    <script>
         (function () {
             if (!('serviceWorker' in navigator)) return;
 

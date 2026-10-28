@@ -123,6 +123,13 @@
 
     [Parameter] public RenderFragment? HeaderContent { get; set; }
 
+    [Parameter] public EventCallback OnMovedToShoppingList { get; set; }
+
+    /// <summary>Bumped by the parent when items were added elsewhere so the list reloads.</summary>
+    [Parameter] public int RefreshKey { get; set; }
+
+    private int loadedRefreshKey;
+
     private string IdSuffix => string.IsNullOrEmpty(SectionId) ? "default" : SectionId;
 
     private string HeadingId => $"bring-heading-{IdSuffix}";
@@ -150,11 +157,12 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (loadedTripId == Trip.Id)
+        if (loadedTripId == Trip.Id && loadedRefreshKey == RefreshKey)
         {
             return;
         }
 
+        loadedRefreshKey = RefreshKey;
         loadedTripId = Trip.Id;
         isLoading = true;
         errorMessage = null;
@@ -359,9 +367,10 @@
 
         try
         {
-            await ShoppingListService.AddExtraAsync(Trip.Id, item.Name.Trim(), item.Quantity, "st");
+            await ShoppingListService.AddExtraAsync(Trip.Id, item.Name.Trim(), item.Quantity, "st", ExtraCategories.Other);
             await BringItemService.DeleteAsync(Trip.Id, item.Id);
             items.Remove(item);
+            await OnMovedToShoppingList.InvokeAsync();
         }
         catch (Exception)
         {

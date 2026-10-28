@@ -10,6 +10,10 @@
     margin: 0;
 }
 
+.shopping-heading {
+    margin-top: var(--space-6);
+}
+
 .section-actions,
 .section-rename {
     flex-wrap: wrap;

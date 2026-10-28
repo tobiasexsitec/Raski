@@ -94,7 +94,7 @@ public static class ShoppingListAggregator
     /// Follows the merge chain so merged ingredients land on the same row.
     /// Falls back to the embedded name when the meal predates the registry.
     /// </summary>
-    private static string ResolveKey(
+    public static string ResolveKey(
         MealIngredient ingredient,
         IReadOnlyDictionary<string, Ingredient> ingredients)
     {

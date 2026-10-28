@@ -1,6 +1,7 @@
 ﻿@inject ITripDrinkService TripDrinkService
 @inject IIngredientService IngredientService
 @inject ITripService TripService
+@inject IShoppingListService ShoppingListService
 
 <section class="card breakfast" aria-labelledby="trip-drinks-heading">
     <div class="breakfast-header">
@@ -16,7 +17,7 @@
             <button type="button" class="btn btn-secondary btn-sm" @onclick="StartEditing">Redigera</button>
         }
     </div>
-    <p class="muted">Dryck för hela resan. Totalen inkluderar även drycker på måltiderna.</p>
+    <p class="muted">Dryck för hela resan. Totalen inkluderar även drycker på måltiderna, under Fika/Snacks och under Övrigt.</p>
 
     @if (isLoading)
     {
@@ -136,7 +137,7 @@
                         <span>@total.Amount</span>
                         @if (total.MealLabels.Count > 0)
                         {
-                            <span class="muted">&ndash; till @MealLabelText(total)</span>
+                            <span class="muted">&ndash; från @MealLabelText(total)</span>
                         }
                     </li>
                 }
@@ -148,6 +149,12 @@
 @code {
     [Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
     [Parameter, EditorRequired] public IReadOnlyList<Meal> Meals { get; set; } = [];
+
+    /// <summary>Bumped by the parent when snacks or other items change so totals can be refreshed.</summary>
+    [Parameter] public int ExtrasVersion { get; set; }
+
+    private IReadOnlyList<ShoppingListItem> extras = [];
+    private int loadedExtrasVersion = -1;
 
     private sealed record DrinkTotal(MealDrink Drink, string Amount, IReadOnlyList<string> MealLabels);
 
@@ -165,6 +172,8 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        await LoadExtrasAsync();
+
         if (loadedTripId == Trip.Id)
         {
             return;
@@ -196,6 +205,26 @@
         {
             // The summary is optional; the drinks list still works without it.
             members = [];
+        }
+    }
+
+    private async Task LoadExtrasAsync()
+    {
+        if (loadedExtrasVersion == ExtrasVersion && loadedTripId == Trip.Id)
+        {
+            return;
+        }
+
+        loadedExtrasVersion = ExtrasVersion;
+
+        try
+        {
+            extras = await ShoppingListService.GetExtrasAsync(Trip.Id);
+        }
+        catch (Exception)
+        {
+            // Totals still work from drinks and meals alone.
+            extras = [];
         }
     }
 
@@ -309,10 +338,24 @@
     /// </summary>
     private List<DrinkTotal> Totals()
     {
-        var all = drinks.Select(d => (Drink: d, Meal: (string?)null))
+        var all = drinks.Select(d => (Drink: d, Meal: (string?)"Dryck för resan"))
             .Concat(Meals.SelectMany(m => m.Drinks.Select(d => (Drink: d, Meal: (string?)MealLabel(m)))))
             .Where(x => !string.IsNullOrWhiteSpace(x.Drink.Name))
             .ToList();
+
+        // Only extras that are drinks count: either tagged as such or named like a planned drink.
+        var drinkNames = all.Select(x => x.Drink.Name.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        all.AddRange(extras
+            .Where(e => drinkNames.Contains(e.Name) || e.Tags.Contains("drycker", StringComparer.OrdinalIgnoreCase))
+            .SelectMany(e => (e.Amounts.Count > 0 ? e.Amounts : [new AmountPerUnit("", 0)])
+                .Select(a => (
+                    Drink: new MealDrink
+                    {
+                        Name = e.Name,
+                        Quantity = a.Amount > 0 ? a.Amount.ToString("0.##", Swedish) : "",
+                        Unit = a.Unit
+                    },
+                    Meal: (string?)ExtraCategories.Display(e.ExtraCategory)))));
 
         var result = new List<DrinkTotal>();
 
