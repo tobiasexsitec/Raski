@@ -6,7 +6,6 @@
 | --- | --- | --- | --- | --- | --- |
 | [B-003](items/B-003-mark-ingredienser-med-allergener.md) | Märk ingredienser med allergener | Funktion | Redo | – | 2026-09-29 |
 | [B-004](items/B-004-varna-for-allergener-i-maltider.md) | Varna för allergener i måltider | Funktion | Redo | – | 2026-09-29 |
-| [B-021](items/B-021-sok-och-filtrera-i-inkopslistan.md) | Sök och filtrera i inköpslistan | Funktion | Idé | – | 2026-10-01 |
 | [B-041](items/B-041-tema-pa-resan.md) | Tema på resan | Funktion | Idé | – | 2026-10-14 |
 | [B-043](items/B-043-markera-saker-som-saknar-ansvarig.md) | Markera saker som saknar ansvarig | Funktion | Idé | – | 2026-10-14 |
 | [B-044](items/B-044-dashboard-med-nedrakning-till-resan.md) | Dashboard med nedräkning till resan | Funktion | Idé | – | 2026-10-14 |
@@ -24,6 +23,7 @@
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-021](items/B-021-sok-och-filtrera-i-inkopslistan.md) | Sök och filtrera i inköpslistan | Funktion | – | 2026-10-29 |
 | [B-074](items/B-074-enheter-sparas-alltid-med-sma-bokstaver.md) | Enheter sparas alltid med små bokstäver | Bugg | – | 2026-10-28 |
 | [B-073](items/B-073-redigera-fika-och-ovrigt.md) | Redigera fika och övrigt | Patch | – | 2026-10-28 |
 | [B-071](items/B-071-admin-flik-for-global-administration.md) | Admin-flik med administrationslådor | Patch | – | 2026-10-28 |
