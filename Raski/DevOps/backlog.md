@@ -11,7 +11,7 @@
 | [B-044](items/B-044-dashboard-med-nedrakning-till-resan.md) | Dashboard med nedräkning till resan | Funktion | Idé | – | 2026-10-14 |
 | [B-046](items/B-046-koppla-anonym-deltagare-till-befintlig-anvandare.md) | Koppla anonym deltagare till befintlig användare | Funktion | Idé | – | 2026-10-14 |
 | [B-049](items/B-049-bugg-appen-laddar-om-ofta-pa-mobilen.md) | Bugg: Appen laddar om ofta på mobilen | Bugg | Idé | Hög | 2026-10-14 |
-| [B-051](items/B-051-flytta-appen-till-domanen-krispinsson-se.md) | Flytta appen till domänen krispinsson.se | Utveckling | Idé | – | 2026-10-22 |
+| [B-051](items/B-051-flytta-appen-till-domanen-krispinsson-se.md) | Flytta appen till domänen krispinsson.se | Utveckling | Pågår | – | 2026-10-22 |
 | [B-054](items/B-054-onboarding-vid-inbjudan-till-ny-resa.md) | Onboarding vid inbjudan till ny resa | Funktion | Idé | – | 2026-10-22 |
 | [B-057](items/B-057-dela-kostnader-pa-resan.md) | Dela kostnader på resan | Funktion | Idé | – | 2026-10-26 |
 | [B-059](items/B-059-mallar-for-vem-tar-med.md) | Mallar för "Vem tar med" | Funktion | Idé | – | 2026-10-26 |

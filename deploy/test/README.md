@@ -38,6 +38,6 @@ Under bygget ersätts `Raski/Raski/wwwroot/appsettings.json` med `deploy/test/ap
 
 ## Egen domän (senare)
 
-Hosting → Lägg till anpassad domän → `test.raski.krispinsson.se`. Lägg in DNS-posterna som visas,
+Hosting → Lägg till anpassad domän → `test-raski.krispinsson.se`. Lägg in DNS-posterna som visas,
 och lägg till domänen under Authentication → Settings → Authorized domains samt som
 JavaScript origin för Google-klienten.
