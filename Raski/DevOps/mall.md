@@ -7,7 +7,7 @@ Kopiera till `items/B-XXX-titel-som-slug.md` och lägg till en rad i
 # B-XXX: Titel
 
 - **Status:** Idé
-- **Typ:** Funktion | Bugg | Utveckling
+- **Typ:** Funktion | Patch | Bugg | Utveckling
 - **Prioritet:** –
 - **Skapad:** ÅÅÅÅ-MM-DD
 - **Klar:** ÅÅÅÅ-MM-DD (läggs till när objektet blir Klar)

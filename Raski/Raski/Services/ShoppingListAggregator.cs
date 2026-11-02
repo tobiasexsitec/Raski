@@ -15,7 +15,8 @@ public static class ShoppingListAggregator
     public static IReadOnlyList<ShoppingListItem> Aggregate(
         IEnumerable<Meal> meals,
         IReadOnlyDictionary<string, Ingredient> ingredients,
-        IReadOnlyDictionary<string, bool> checkedState)
+        IReadOnlyDictionary<string, bool> checkedState,
+        Func<string, string>? canonicalUnit = null)
     {
         var items = new Dictionary<string, ShoppingListItem>(StringComparer.Ordinal);
         var amounts = new Dictionary<string, Dictionary<string, decimal>>(StringComparer.Ordinal);
@@ -52,6 +53,7 @@ public static class ShoppingListAggregator
                 if (ingredient.Amount > 0)
                 {
                     var unit = ingredient.Unit?.Trim() ?? "";
+                    unit = canonicalUnit?.Invoke(unit) ?? unit;
                     amounts[key][unit] = amounts[key].GetValueOrDefault(unit) + ingredient.Amount;
                 }
 
@@ -94,7 +96,7 @@ public static class ShoppingListAggregator
     /// Follows the merge chain so merged ingredients land on the same row.
     /// Falls back to the embedded name when the meal predates the registry.
     /// </summary>
-    private static string ResolveKey(
+    public static string ResolveKey(
         MealIngredient ingredient,
         IReadOnlyDictionary<string, Ingredient> ingredients)
     {

@@ -16,8 +16,17 @@ public interface IShoppingListService
     /// <summary>Persists the checked state so it is shared by every participant.</summary>
     Task SetCheckedAsync(string tripId, string ingredientId, bool isChecked, CancellationToken ct = default);
 
+    /// <summary>Gets the items that do not belong to any meal, e.g. snacks and household goods.</summary>
+    Task<IReadOnlyList<ShoppingListItem>> GetExtrasAsync(string tripId, CancellationToken ct = default);
+
     /// <summary>Adds an item that does not belong to any meal.</summary>
-    Task AddExtraAsync(string tripId, string name, decimal? amount, string unit, CancellationToken ct = default);
+    Task AddExtraAsync(string tripId, string name, decimal? amount, string unit, string category, CancellationToken ct = default);
+
+    /// <summary>
+    /// Updates an extra item. A row may be summed from several extras, so the first one
+    /// keeps the new values and the rest are removed.
+    /// </summary>
+    Task UpdateExtraAsync(string tripId, IReadOnlyList<string> extraIds, string name, decimal? amount, string unit, string category, CancellationToken ct = default);
 
     /// <summary>Removes an extra item together with its checked state.</summary>
     Task DeleteExtraAsync(string tripId, string extraId, CancellationToken ct = default);

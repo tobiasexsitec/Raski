@@ -3,6 +3,22 @@
     margin: 0 0 var(--space-4) 0;
 }
 
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.filter-search {
+    flex: 1 1 12rem;
+}
+
+.filter-tag {
+    flex: 0 1 10rem;
+}
+
 .group {
     margin-bottom: var(--space-5);
 }

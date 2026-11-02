@@ -6,25 +6,40 @@
 | --- | --- | --- | --- | --- | --- |
 | [B-003](items/B-003-mark-ingredienser-med-allergener.md) | Märk ingredienser med allergener | Funktion | Redo | – | 2026-09-29 |
 | [B-004](items/B-004-varna-for-allergener-i-maltider.md) | Varna för allergener i måltider | Funktion | Redo | – | 2026-09-29 |
-| [B-021](items/B-021-sok-och-filtrera-i-inkopslistan.md) | Sök och filtrera i inköpslistan | Funktion | Idé | – | 2026-10-01 |
-| [B-041](items/B-041-tema-pa-resan.md) | Tema på resan | Funktion | Idé | – | 2026-10-14 |
 | [B-043](items/B-043-markera-saker-som-saknar-ansvarig.md) | Markera saker som saknar ansvarig | Funktion | Idé | – | 2026-10-14 |
 | [B-044](items/B-044-dashboard-med-nedrakning-till-resan.md) | Dashboard med nedräkning till resan | Funktion | Idé | – | 2026-10-14 |
 | [B-046](items/B-046-koppla-anonym-deltagare-till-befintlig-anvandare.md) | Koppla anonym deltagare till befintlig användare | Funktion | Idé | – | 2026-10-14 |
 | [B-049](items/B-049-bugg-appen-laddar-om-ofta-pa-mobilen.md) | Bugg: Appen laddar om ofta på mobilen | Bugg | Idé | Hög | 2026-10-14 |
-| [B-051](items/B-051-flytta-appen-till-domanen-krispinsson-se.md) | Flytta appen till domänen krispinsson.se | Utveckling | Idé | – | 2026-10-22 |
+| [B-051](items/B-051-flytta-appen-till-domanen-krispinsson-se.md) | Flytta appen till domänen krispinsson.se | Utveckling | Pågår | – | 2026-10-22 |
 | [B-054](items/B-054-onboarding-vid-inbjudan-till-ny-resa.md) | Onboarding vid inbjudan till ny resa | Funktion | Idé | – | 2026-10-22 |
-| [B-056](items/B-056-policyer-for-resan.md) | Policyer för resan | Funktion | Idé | – | 2026-10-26 |
 | [B-057](items/B-057-dela-kostnader-pa-resan.md) | Dela kostnader på resan | Funktion | Idé | – | 2026-10-26 |
 | [B-059](items/B-059-mallar-for-vem-tar-med.md) | Mallar för "Vem tar med" | Funktion | Idé | – | 2026-10-26 |
 | [B-060](items/B-060-installerbar-app-upplevelse-ren-pwa.md) | Installerbar app-upplevelse (ren PWA) | Funktion | Idé | – | 2026-10-26 |
-| [B-061](items/B-061-alla-kan-skapa-egna-resor.md) | Alla kan skapa egna resor | Funktion | Pågår | – | 2026-10-27 |
-| [B-062](items/B-062-produktionspipelinen-deployar-firestore-regler.md) | Produktionspipelinen deployar Firestore-regler | Utveckling | Pågår | – | 2026-10-27 |
+| [B-063](items/B-063-ios-splash-och-google-inloggning-i-installerad-app.md) | iOS-splash och Google-inloggning i installerad app | Funktion | Idé | – | 2026-10-27 |
+| [B-072](items/B-072-snygg-ikon-nar-appen-installeras.md) | Snygg ikon när appen installeras | Bugg | Idé | – | 2026-10-28 |
 
 ## Klara
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-078](items/B-078-hojdpunkter-i-nyhetspopupen.md) | Höjdpunkter i nyhetspopupen | Patch | – | 2026-11-02 |
+| [B-075](items/B-075-spara-maltid-nar-ingrediens-laggs-till.md) | Spara måltid när ingrediens läggs till | Patch | – | 2026-11-02 |
+| [B-077](items/B-077-enhet-byter-till-plural-vid-inmatning.md) | Enhet byter till plural vid inmatning | Patch | – | 2026-11-02 |
+| [B-076](items/B-076-visa-mer-for-fika-och-snacks-under-maltider.md) | Visa mer för fika och snacks under Måltider | Patch | – | 2026-11-02 |
+| [B-021](items/B-021-sok-och-filtrera-i-inkopslistan.md) | Sök och filtrera i inköpslistan | Funktion | – | 2026-10-29 |
+| [B-074](items/B-074-enheter-sparas-alltid-med-sma-bokstaver.md) | Enheter sparas alltid med små bokstäver | Bugg | – | 2026-10-28 |
+| [B-073](items/B-073-redigera-fika-och-ovrigt.md) | Redigera fika och övrigt | Patch | – | 2026-10-28 |
+| [B-071](items/B-071-admin-flik-for-global-administration.md) | Admin-flik med administrationslådor | Patch | – | 2026-10-28 |
+| [B-070](items/B-070-profil-i-avatarmenyn.md) | Profil i avatarmenyn | Patch | – | 2026-10-28 |
+| [B-069](items/B-069-singular-och-plural-for-enheter.md) | Singular och plural för enheter | Funktion | – | 2026-10-28 |
+| [B-068](items/B-068-ovrigt-under-maltider.md) | Övrigt under Måltider | Funktion | – | 2026-10-28 |
+| [B-067](items/B-067-luft-mellan-kort-och-lagg-till-knapp-pa-oversikten.md) | Luft mellan kort och Lägg till-knapp på översikten | Bugg | – | 2026-10-28 |
+| [B-066](items/B-066-visa-mer-for-ovrig-info-pa-oversikten.md) | Visa mer för Övrig info på översikten | Patch | – | 2026-10-28 |
+| [B-065](items/B-065-dra-for-att-uppdatera.md) | Dra för att uppdatera | Patch | – | 2026-10-27 |
+| [B-064](items/B-064-appkansla-i-installerat-lage.md) | Appkänsla i installerat läge: ingen dubbeltrycks-zoom och temafärgat statusfält | Patch | – | 2026-10-27 |
+| [B-056](items/B-056-policyer-for-resan.md) | Policyer för resan | Funktion | – | 2026-10-27 |
+| [B-062](items/B-062-produktionspipelinen-deployar-firestore-regler.md) | Produktionspipelinen deployar Firestore-regler | Utveckling | – | 2026-10-27 |
+| [B-061](items/B-061-alla-kan-skapa-egna-resor.md) | Alla kan skapa egna resor | Funktion | – | 2026-10-27 |
 | [B-058](items/B-058-testmiljo-fore-produktion.md) | Testmiljö före produktion | Utveckling | – | 2026-10-27 |
 | [B-042](items/B-042-antal-personer-pa-oversikten.md) | Antal personer på översikten | Funktion | – | 2026-10-22 |
 | [B-055](items/B-055-onboarding-for-partner-och-barn-till-befintliga-anvandare.md) | Onboarding för partner och barn till befintliga användare | Funktion | Hög | 2026-10-22 |
@@ -72,6 +87,12 @@
 | [B-002](items/B-002-visa-resenarers-allergier-pa-en-resa.md) | Visa resenärers allergier på en resa | Funktion | – | 2026-09-29 |
 | [B-001](items/B-001-profilsida-med-allergier-och-kostpreferenser.md) | Profilsida med allergier och kostpreferenser | Funktion | – | 2026-09-29 |
 
+## Borttagna
+
+| ID | Titel | Typ | Borttagen |
+| --- | --- | --- | --- |
+| [B-041](items/B-041-tema-pa-resan.md) | Tema på resan | Funktion | 2026-11-02 |
+
 ## Struktur
 
 - Den här filen är bara ett **index**. Varje backlog-objekt ligger i en egen fil i
@@ -81,6 +102,8 @@
   båda tabellerna + 1).
 - Öppna objekt listas under **Öppna** med skapat-datum. När ett objekt blir Klar flyttas
   raden till **Klara** med klar-datum, och **Klar:** sätts i objektfilen.
+- Objekt som inte ska göras får status Borttagen och flyttas till **Borttagna** med
+  borttaget-datum, och **Borttagen:** sätts i objektfilen.
 - Beslut som gäller flera objekt ligger i [`beslut/`](beslut/), t.ex.
   [Allergier och kostpreferenser](beslut/allergier-och-kostpreferenser.md).
 
@@ -95,11 +118,13 @@
 >      nummerordning,
 >    - **Klara** har exakt fem kolumner (ID, Titel, Typ, Prioritet, Klar) och är sorterad med
 >      senast klar överst (vid samma datum: högst ID överst),
+>    - **Borttagna** har exakt fyra kolumner (ID, Titel, Typ, Borttagen) och är sorterad med
+>      senast borttagen överst,
 >    - varje fil i `items/` finns i exakt en av tabellerna, och objekt med status Klar
->      ligger i **Klara**, övriga i **Öppna**,
+>      ligger i **Klara**, Borttagen i **Borttagna**, övriga i **Öppna**,
 >    - typ, status och datum stämmer med respektive objektfil,
 >    - länken pekar på en befintlig fil.
 > 4. Om något avviker: rätta tabellerna innan arbetet rapporteras som klart.
 
-**Status:** `Idé` / `Redo` / `Pågår` / `Klar`
+**Status:** `Idé` / `Redo` / `Pågår` / `Klar` / `Borttagen`
 **Prioritet:** `Hög` / `Medel` / `Låg`

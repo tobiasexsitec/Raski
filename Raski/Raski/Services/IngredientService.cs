@@ -12,7 +12,7 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
 {
     private readonly SemaphoreSlim _loadLock = new(1, 1);
     private List<Ingredient>? _ingredients;
-    private List<string>? _units;
+    private List<UnitDefinition>? _units;
     private List<string>? _tags;
 
     public event Action? Changed;
@@ -67,8 +67,111 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
     public async Task<IReadOnlyList<string>> SearchUnitsAsync(string prefix, int limit = 8, CancellationToken ct = default)
     {
         await EnsureLoadedAsync(ct);
-        return IngredientFilter.SearchUnits(_units!, prefix, limit);
+        return IngredientFilter.SearchUnits(_units!.Select(u => u.Name), prefix, limit);
     }
+
+    public async Task<IReadOnlyList<UnitDefinition>> GetUnitsAsync(CancellationToken ct = default)
+    {
+        await EnsureLoadedAsync(ct);
+        return _units!;
+    }
+
+    public async Task UpdateUnitAsync(UnitDefinition unit, CancellationToken ct = default)
+    {
+        var name = UnitDefinition.Normalize(unit.Name);
+
+        if (name.Length == 0)
+        {
+            throw new ArgumentException("Enheten saknar namn.", nameof(unit));
+        }
+
+        await interop.UpdateDocumentAsync($"units/{unit.Id}", new
+        {
+            name,
+            nameLower = name,
+            plural = UnitDefinition.Normalize(unit.Plural)
+        }, ct);
+
+        Invalidate();
+    }
+
+    public async Task<int> NormalizeUnitsAsync(CancellationToken ct = default)
+    {
+        await EnsureLoadedAsync(ct);
+
+        var changes = 0;
+
+        foreach (var group in _units!.GroupBy(u => UnitDefinition.Normalize(u.Name)))
+        {
+            var units = group.ToList();
+            var keeper = units.FirstOrDefault(u => u.Id == group.Key) ?? units[0];
+            var plural = units
+                .Select(u => UnitDefinition.Normalize(u.Plural))
+                .FirstOrDefault(p => p.Length > 0) ?? "";
+
+            if (keeper.Name != group.Key || (keeper.Plural ?? "") != plural)
+            {
+                await interop.UpdateDocumentAsync($"units/{keeper.Id}", new
+                {
+                    name = group.Key,
+                    nameLower = group.Key,
+                    plural
+                }, ct);
+                changes++;
+            }
+
+            // Units are referenced by name, not id, so duplicates can simply be removed.
+            foreach (var duplicate in units.Where(u => u != keeper))
+            {
+                await interop.DeleteDocumentAsync($"units/{duplicate.Id}", ct);
+                changes++;
+            }
+        }
+
+        // The cached models are already normalized on read, so compare against the raw documents.
+        var ingredients = await interop.QueryAsync<IngredientDocument>("ingredients", new FirestoreQuery(), ct);
+
+        foreach (var ingredient in ingredients)
+        {
+            var raw = ingredient.DefaultUnit ?? "";
+            var normalized = UnitDefinition.Normalize(raw);
+
+            if (raw == normalized)
+            {
+                continue;
+            }
+
+            await interop.UpdateDocumentAsync($"ingredients/{ingredient.Id}", new
+            {
+                defaultUnit = normalized
+            }, ct);
+            changes++;
+        }
+
+        Invalidate();
+        return changes;
+    }
+
+    public string FormatUnit(string? unit, decimal amount)
+    {
+        var trimmed = unit?.Trim() ?? "";
+
+        if (trimmed.Length == 0 || _units is null)
+        {
+            return trimmed;
+        }
+
+        return _units.FirstOrDefault(u => u.Matches(trimmed))?.For(amount) ?? trimmed;
+    }
+
+    public string FormatUnit(string? unit, string? quantity) =>
+        decimal.TryParse(
+            (quantity ?? "").Trim().Replace(',', '.'),
+            System.Globalization.NumberStyles.Number,
+            System.Globalization.CultureInfo.InvariantCulture,
+            out var amount)
+            ? FormatUnit(unit, amount)
+            : unit?.Trim() ?? "";
 
     public Task<Ingredient> GetOrCreateAsync(string name, string? unit, CancellationToken ct = default) =>
         GetOrCreateAsync(name, unit, [], ct);
@@ -77,6 +180,7 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
     {
         await EnsureLoadedAsync(ct);
 
+        var normalizedUnit = UnitDefinition.Normalize(unit);
         var trimmed = Capitalize(name.Trim());
         var nameLower = IngredientFilter.Normalize(trimmed);
 
@@ -98,7 +202,7 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
             name = trimmed,
             nameLower,
             tags = defaultTags.ToArray(),
-            defaultUnit = unit ?? "",
+            defaultUnit = normalizedUnit,
             createdAt = FirestoreFormat.UtcNow()
         }, ct);
 
@@ -108,11 +212,11 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
             Name = trimmed,
             NameLower = nameLower,
             Tags = [.. defaultTags],
-            DefaultUnit = unit
+            DefaultUnit = normalizedUnit.Length > 0 ? normalizedUnit : null
         };
 
         _ingredients!.Add(created);
-        await EnsureUnitAsync(unit, ct);
+        await EnsureUnitAsync(normalizedUnit, ct);
         Changed?.Invoke();
 
         return created;
@@ -121,16 +225,17 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
     public async Task UpdateAsync(Ingredient ingredient, CancellationToken ct = default)
     {
         var trimmed = Capitalize(ingredient.Name.Trim());
+        var defaultUnit = UnitDefinition.Normalize(ingredient.DefaultUnit);
 
         await interop.UpdateDocumentAsync($"ingredients/{ingredient.Id}", new
         {
             name = trimmed,
             nameLower = IngredientFilter.Normalize(trimmed),
             tags = ingredient.Tags.ToArray(),
-            defaultUnit = ingredient.DefaultUnit ?? ""
+            defaultUnit
         }, ct);
 
-        await EnsureUnitAsync(ingredient.DefaultUnit, ct);
+        await EnsureUnitAsync(defaultUnit, ct);
         Invalidate();
     }
 
@@ -185,16 +290,15 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
 
     private async Task EnsureUnitAsync(string? unit, CancellationToken ct)
     {
-        var trimmed = (unit ?? "").Trim();
+        var nameLower = UnitDefinition.Normalize(unit);
 
-        if (trimmed.Length == 0)
+        if (nameLower.Length == 0)
         {
             return;
         }
 
-        var nameLower = trimmed.ToLowerInvariant();
-
-        if (_units!.Any(u => u.Equals(trimmed, StringComparison.OrdinalIgnoreCase)))
+        // A plural form typed by the user must not become a unit of its own.
+        if (_units!.Any(u => u.Matches(nameLower)))
         {
             return;
         }
@@ -202,11 +306,11 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
         // The document id is the normalized name, which makes the write idempotent.
         await interop.SetDocumentAsync($"units/{nameLower}", new
         {
-            name = trimmed,
+            name = nameLower,
             nameLower
         }, ct: ct);
 
-        _units!.Add(trimmed);
+        _units!.Add(new UnitDefinition { Id = nameLower, Name = nameLower });
     }
 
     private async Task EnsureLoadedAsync(CancellationToken ct)
@@ -234,8 +338,13 @@ public sealed class IngredientService(FirebaseInterop interop) : IIngredientServ
                     "units", new FirestoreQuery { OrderBy = "nameLower" }, ct);
 
                 _units = documents
-                    .Select(d => d.Name ?? d.Id)
-                    .Where(n => !string.IsNullOrWhiteSpace(n))
+                    .Where(d => !string.IsNullOrWhiteSpace(d.Name ?? d.Id))
+                    .Select(d => new UnitDefinition
+                    {
+                        Id = d.Id,
+                        Name = d.Name ?? d.Id,
+                        Plural = string.IsNullOrWhiteSpace(d.Plural) ? null : d.Plural
+                    })
                     .ToList();
             }
 

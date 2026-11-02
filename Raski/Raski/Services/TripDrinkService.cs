@@ -23,7 +23,7 @@ public sealed class TripDrinkService(FirebaseInterop interop, IAuthService authS
                 ingredientId = d.IngredientId,
                 name = d.Name.Trim(),
                 quantity = d.Quantity.Trim(),
-                unit = d.Unit.Trim(),
+                unit = UnitDefinition.Normalize(d.Unit),
                 url = d.Url.Trim()
             })
             .ToArray();

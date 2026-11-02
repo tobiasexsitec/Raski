@@ -23,7 +23,7 @@ public sealed class BreakfastService(FirebaseInterop interop, IAuthService authS
                 ingredientId = i.IngredientId,
                 name = i.Name.Trim(),
                 amount = (double)i.Amount,
-                unit = i.Unit.Trim(),
+                unit = UnitDefinition.Normalize(i.Unit),
                 scope = i.Scope.ToFirestore()
             })
             .ToArray();

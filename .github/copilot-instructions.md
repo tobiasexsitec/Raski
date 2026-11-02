@@ -42,6 +42,7 @@ Raski/                        # repo-rot
 | `/resor/{TripId}` | `Features/Trips/TripOverview.razor` |
 | `/resor/{TripId}/inkopslista` | `Features/ShoppingList/ShoppingListView.razor` |
 | `/ingredienser` | `Features/Admin/IngredientAdmin.razor` |
+| `/admin` | `Features/Admin/AdminHome.razor` |
 | `/not-found` | `Pages/NotFound.razor` |
 
 Routes är på svenska. Följ det mönstret vid nya sidor.
@@ -96,19 +97,21 @@ Mönstret finns i `MealService.ObserveMeals` / `ShoppingListService`: en bounded
 - Hemligheter: `wwwroot/appsettings.json` innehåller Firebase-konfiguration – lägg aldrig till andra hemligheter i repot.
 - Backloggen ligger i `Raski/DevOps/`: `backlog.md` är ett **index** (tabellerna Öppna och Klara), varje objekt är en egen fil `items/B-XXX-titel-som-slug.md` skapad från `mall.md`, och beslut som gäller flera objekt ligger i `beslut/`. Skriv på svenska.
 - När en funktion diskuteras eller en ändring begärs, skapa alltid ett backlog-objekt (ny fil i `items/` + rad i tabellen **Öppna** i `backlog.md`) innan eller samtidigt som du implementerar den. Strukturen följer mallen: ID B-XXX, status, typ, prioritet, skapad-datum, beskrivning, user story, acceptanskriterier, öppna frågor, tekniska noteringar, beslut.
-- Varje backlog-objekt har en **Typ**: `Funktion` (märks för användaren som något nytt), `Bugg` (rättar fel som användaren märker) eller `Utveckling` (refaktorering, verktyg, dokumentation, backlog, process – inget användaren märker). När ett nytt backlog-objekt skapas: föreslå en typ med kort motivering och låt användaren bekräfta innan typen sätts.
-- Commit-meddelanden följer Conventional Commits: `<typ>(<valfritt scope>): <beskrivning>`, beskrivningen på svenska. Typer: `feat`, `fix`, `chore`, `docs`, `refactor`, `style`, `test`, `build`, `ci`, `perf`, `revert`. Mappning från backlog-typ: Funktion → `feat`, Bugg → `fix`, Utveckling → `chore`/`refactor`/`docs` m.fl. Formatet valideras lokalt av commitlint (`.githooks/commit-msg`, config i `tools/commitlint/`). Kringgå aldrig hooken med `--no-verify`.
-- Markera backlog-objekt som "Klar" (sätt **Status: Klar** och **Klar:**-datum i objektfilen och flytta raden från **Öppna** till **Klara** i `backlog.md`) först efter att användaren uttryckligen säger att det är klart. När det är klart, commita och pusha. Versionen höjs **inte** då, utan först när ändringen går till `main` (se Release och Hotfix nedan). Versionen i `<Version>` i `Raski/Raski/Raski.csproj` höjs beroende på typen på de objekt som ingår i releasen, om inget annat anges:
+- Varje backlog-objekt har en **Typ**: `Funktion` (märks för användaren som något nytt), `Patch` (mindre förbättring som användaren märker): commit-typ feat, ger patch-höjning och tas med i release notes. `Bugg` (rättar fel som användaren märker) eller `Utveckling` (refaktorering, verktyg, dokumentation, backlog, process – inget användaren märker). Mappning från backlog-typ: Funktion → `feat`, Patch → `feat`, Bugg → `fix`.
+- Markera backlog-objekt som "Klar" (sätt **Status: Klar** och **Klar:**-datum i objektfilen och flytta raden från **Öppna** till **Klara** i `backlog.md`) först efter att användaren uttryckligen säger att det är klart. När det är klart, commita och pusha. Versionen höjs **inte** då, utan först när ändringen går till `main` (se Release och Hotfix nedan). Versionen i `<Version>` i `Raski/Raksi/Raski.csproj` höjs beroende på typen på de objekt som ingår i releasen, om inget annat anges:
   - `Funktion` (`feat`): höj **minor** och nollställ patch (t.ex. `0.4.2` → `0.5.0`).
+  - `Patch` (`feat`): höj **patch** (t.ex. `0.4.2` → `0.4.3`). Tas med i release notes.
   - `Bugg` (`fix`): höj **patch** (t.ex. `0.4.2` → `0.4.3`).
   - `Utveckling` (övriga typer): **ingen** versionshöjning och ingen release notes-post.
-  - Innehåller en release både `feat` och `fix` höjs minor. Major höjs endast när användaren uttryckligen säger till; `BREAKING CHANGE`/`!` styr inte versionen.
-  - Vid versionshöjning (i samband med release till `main`): ange den nya versionen under **Beslut** i objektfilerna som ingår (t.ex. `- Släppt i version 0.5.0.`). Release notes och nyhets-popupen ska bara innehålla `feat`/`fix`. Appen är inte släppt ännu, så versionen ligger på 0.x.y tills 1.0.0 släpps.
-- Branchflöde (förenklad Git Flow):
-  - **Feature:** nya funktioner och ändringar utvecklas i en feature-branch (t.ex. `feature/B-058-testmiljo`) som skapas från `develop` och mergas tillbaka till `develop` först när arbetet är klart. `develop` ska alltid gå att släppa; stora funktioner delas upp eller döljs bakom en konfigurationsflagga.
-  - **Test:** push till `develop` publicerar testmiljön (`.github/workflows/deploy-test.yml`, se `deploy/test/README.md`).
+  - Innehåller en release minst ett `Funktion`-objekt höjs minor, annars patch om den innehåller `Patch` eller `Bugg`.
+  Appen släpptes i version 1.0.0; reglerna ovan för minor och patch gäller fortsatt (major höjs bara när användaren uttryckligen ber om det).
+  - Release notes skrivs i `wwwroot/release-notes.json`. `notes` innehåller alla `feat`/`fix`-rader och visas på Om Raski™. Har releasen fler än cirka 4 rader, lägg även till `highlights`: högst cirka 4 punkter grupperade efter vad användaren märker (kort rubrik + en mening om nyttan, viktigast först). Innehåller releasen flera `Patch`- eller `Bugg`-objekt som inte ryms i de övriga punkterna ska `highlights` alltid avslutas med punkten "Buggfixar och små förbättringar". Popupen visar `highlights` om det finns, annars `notes`.
+  
+## Branchflöde
+- **Feature:** skapa alltid en ny feature-branch (feature/B-XXX-slug) från develop innan du börjar arbeta på en ny funktion/backlog-objekt, snarare än att arbeta på den för närvarande checkade branchen. Nya funktioner och ändringar utvecklas i en feature-branch som skapas från `develop` och mergas tillbaka till `develop` först när arbetet är klart. `develop` ska alltid gå att släppa; stora funktioner delas upp eller döljs bakom en konfigurationsflagga.
+- **Test:** push till `develop` publicerar testmiljön (`.github/workflows/deploy-test.yml`, se `deploy/test/README.md`).
   Öppna en PR `release/vX.Y.Z` → `main` och merga den med **merge commit** (inte rebase, så att `main` och `develop` delar historik). Tagga merge-committen på `main` med `vX.Y.Z` (t.ex. `v0.28.0`). Push till `main` publicerar produktion (en enda körning). Öppna därefter en PR `main` → `develop` och merga den med merge commit så att versionen finns där. Feature-PR:er in i `develop` mergas med rebase.
-  Höj patch i en commit på hotfix-branchen, öppna en PR mot `main` och merga med merge commit, tagga, och merga sedan `main` tillbaka till `develop` via PR med merge commit
+- Höj patch i en commit på hotfix-branchen, öppna en PR mot `main` och merga med merge commit, tagga, och merga sedan `main` tillbaka till `develop` via PR med merge commit.
 - När du redigerar tabellerna i `Raski/DevOps/backlog.md`, följ reglerna i filen: ersätt alltid hela raden och läs igenom tabellerna efteråt. **Öppna** har kolumnerna ID, Titel, Typ, Status, Prioritet, Skapad i nummerordning; **Klara** har ID, Titel, Typ, Prioritet, Klar med senast klar överst. Varje fil i `items/` ska finnas i exakt en tabell, och typ, status och datum ska matcha objektfilerna.
 
 ## ⚠️ KRITISKT: Redigering av backlog-tabellerna

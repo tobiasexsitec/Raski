@@ -45,15 +45,17 @@
                                aria-label="@($"Mängd {rowNumber}")"
                                placeholder="Mängd"
                                @bind="row.Amount"
-                               @bind:event="oninput" />
+                               @bind:event="oninput"
+                               @bind:after="() => InflectUnit(row)" />
                     </div>
 
                     <div class="field unit">
                         <AutoComplete TItem="string"
                                       Value="@row.Unit"
-                                      ValueChanged="value => row.Unit = value"
-                                      SearchFunc="SearchUnitsAsync"
+                                      ValueChanged="value => OnUnitTyped(row, value)"
+                                      SearchFunc="term => UnitInflection.SuggestAsync(IngredientService, term, row.Amount)"
                                       DisplaySelector="u => u"
+                                      OnItemSelected="_ => OnUnitSelected(row)"
                                       MinimumLength="1"
                                       AriaLabel="@($"Enhet {rowNumber}")"
                                       Placeholder="Enhet" />
@@ -110,7 +112,7 @@
                     <li>
                         <span class="name">@ingredient.Name</span>
                         <span>@FormatTotal(ingredient)</span>
-                        <span class="muted">(@FormatAmount(ingredient.Amount) @ingredient.Unit @ingredient.Scope.ToSwedish())</span>
+                        (@FormatAmount(ingredient.Amount) @IngredientService.FormatUnit(ingredient.Unit, ingredient.Amount) @ingredient.Scope.ToSwedish())
                     </li>
                 }
             </ul>
@@ -128,6 +130,7 @@
         public decimal? Amount { get; set; }
         public string Unit { get; set; } = "";
         public BreakfastAmountScope Scope { get; set; }
+        public UnitInflection UnitInflection { get; } = new();
     }
 
     private static readonly System.Globalization.CultureInfo Swedish =
@@ -151,6 +154,7 @@
         try
         {
             breakfast = await BreakfastService.GetAsync(Trip.Id);
+            await IngredientService.GetUnitsAsync();
         }
         catch (Exception)
         {
@@ -201,9 +205,6 @@
             .Where(i => !i.Tags.Contains("drycker", StringComparer.OrdinalIgnoreCase))
             .Take(8)];
 
-    private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
-        IngredientService.SearchUnitsAsync(term);
-
     private void OnIngredientSelected(IngredientRow row, Ingredient ingredient)
     {
         row.IngredientId = ingredient.Id;
@@ -212,7 +213,23 @@
         if (string.IsNullOrWhiteSpace(row.Unit) && !string.IsNullOrWhiteSpace(ingredient.DefaultUnit))
         {
             row.Unit = ingredient.DefaultUnit!;
+            InflectUnit(row);
         }
+    }
+
+    private void InflectUnit(IngredientRow row) =>
+        row.Unit = row.UnitInflection.ForAmount(IngredientService, row.Unit, row.Amount);
+
+    private static void OnUnitTyped(IngredientRow row, string value)
+    {
+        row.Unit = value;
+        row.UnitInflection.OnUnitTyped(value);
+    }
+
+    private void OnUnitSelected(IngredientRow row)
+    {
+        row.UnitInflection.OnUnitSelected();
+        InflectUnit(row);
     }
 
     private async Task SaveAsync()
@@ -255,8 +272,11 @@
         }
     }
 
-    private string FormatTotal(BreakfastIngredient ingredient) =>
-        $"{FormatAmount(ingredient.TotalAmount(Travelers, Days))} {ingredient.Unit}".Trim();
+    private string FormatTotal(BreakfastIngredient ingredient)
+    {
+        var total = ingredient.TotalAmount(Travelers, Days);
+        return $"{FormatAmount(total)} {IngredientService.FormatUnit(ingredient.Unit, total)}".Trim();
+    }
 
     private static string FormatAmount(decimal amount) =>
         amount.ToString("0.##", Swedish);

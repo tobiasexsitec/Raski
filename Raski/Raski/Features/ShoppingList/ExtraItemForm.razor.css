@@ -1,0 +1,18 @@
+.extra-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+}
+
+.extra-name {
+    flex: 1 1 12rem;
+}
+
+.extra-quantity {
+    flex: 0 1 6rem;
+}
+
+.extra-unit {
+    flex: 0 1 8rem;
+}

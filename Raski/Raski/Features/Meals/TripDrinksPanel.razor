@@ -1,6 +1,7 @@
 ﻿@inject ITripDrinkService TripDrinkService
 @inject IIngredientService IngredientService
 @inject ITripService TripService
+@inject IShoppingListService ShoppingListService
 
 <section class="card breakfast" aria-labelledby="trip-drinks-heading">
     <div class="breakfast-header">
@@ -16,7 +17,7 @@
             <button type="button" class="btn btn-secondary btn-sm" @onclick="StartEditing">Redigera</button>
         }
     </div>
-    <p class="muted">Dryck för hela resan. Totalen inkluderar även drycker på måltiderna.</p>
+    <p class="muted">Dryck för hela resan. Totalen inkluderar även drycker på måltiderna, under Fika/Snacks och under Övrigt.</p>
 
     @if (isLoading)
     {
@@ -49,15 +50,17 @@
                                aria-label="@($"Mängd för dryck {drinkNumber}")"
                                placeholder="Mängd"
                                @bind="drink.Quantity"
-                               @bind:event="oninput" />
+                               @bind:event="oninput"
+                               @bind:after="() => InflectUnit(drink)" />
                     </div>
 
                     <div class="field unit">
                         <AutoComplete TItem="string"
                                       Value="@drink.Unit"
-                                      ValueChanged="value => drink.Unit = value"
-                                      SearchFunc="SearchUnitsAsync"
+                                      ValueChanged="value => OnUnitTyped(drink, value)"
+                                      SearchFunc="term => UnitInflection.SuggestAsync(IngredientService, term, drink.Quantity)"
                                       DisplaySelector="u => u"
+                                      OnItemSelected="_ => OnUnitSelected(drink)"
                                       MinimumLength="1"
                                       AriaLabel="@($"Enhet för dryck {drinkNumber}")"
                                       Placeholder="Enhet" />
@@ -136,7 +139,7 @@
                         <span>@total.Amount</span>
                         @if (total.MealLabels.Count > 0)
                         {
-                            <span class="muted">&ndash; till @MealLabelText(total)</span>
+                            <span class="muted">&ndash; från @MealLabelText(total)</span>
                         }
                     </li>
                 }
@@ -148,6 +151,12 @@
 @code {
     [Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
     [Parameter, EditorRequired] public IReadOnlyList<Meal> Meals { get; set; } = [];
+
+    /// <summary>Bumped by the parent when snacks or other items change so totals can be refreshed.</summary>
+    [Parameter] public int ExtrasVersion { get; set; }
+
+    private IReadOnlyList<ShoppingListItem> extras = [];
+    private int loadedExtrasVersion = -1;
 
     private sealed record DrinkTotal(MealDrink Drink, string Amount, IReadOnlyList<string> MealLabels);
 
@@ -165,6 +174,8 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        await LoadExtrasAsync();
+
         if (loadedTripId == Trip.Id)
         {
             return;
@@ -196,6 +207,26 @@
         {
             // The summary is optional; the drinks list still works without it.
             members = [];
+        }
+    }
+
+    private async Task LoadExtrasAsync()
+    {
+        if (loadedExtrasVersion == ExtrasVersion && loadedTripId == Trip.Id)
+        {
+            return;
+        }
+
+        loadedExtrasVersion = ExtrasVersion;
+
+        try
+        {
+            extras = await ShoppingListService.GetExtrasAsync(Trip.Id);
+        }
+        catch (Exception)
+        {
+            // Totals still work from drinks and meals alone.
+            extras = [];
         }
     }
 
@@ -236,15 +267,43 @@
         isEditing = false;
     }
 
-    private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
-        IngredientService.SearchUnitsAsync(term);
+    private readonly Dictionary<MealDrink, UnitInflection> unitInflections = new(ReferenceEqualityComparer.Instance);
+
+    protected override async Task OnInitializedAsync() =>
+        await IngredientService.GetUnitsAsync();
+
+    private UnitInflection InflectionFor(MealDrink drink)
+    {
+        if (!unitInflections.TryGetValue(drink, out var inflection))
+        {
+            inflection = new UnitInflection();
+            unitInflections[drink] = inflection;
+        }
+
+        return inflection;
+    }
+
+    private void InflectUnit(MealDrink drink) =>
+        drink.Unit = InflectionFor(drink).ForQuantity(IngredientService, drink.Unit, drink.Quantity);
+
+    private void OnUnitTyped(MealDrink drink, string value)
+    {
+        drink.Unit = value;
+        InflectionFor(drink).OnUnitTyped(value);
+    }
+
+    private void OnUnitSelected(MealDrink drink)
+    {
+        InflectionFor(drink).OnUnitSelected();
+        InflectUnit(drink);
+    }
 
     private async Task<IReadOnlyList<Ingredient>> SearchIngredientsAsync(string term) =>
         [.. (await IngredientService.SearchAsync(term, 50))
             .Where(i => i.Tags.Contains("drycker", StringComparer.OrdinalIgnoreCase))
             .Take(8)];
 
-    private static void OnDrinkSelected(MealDrink drink, Ingredient ingredient)
+    private void OnDrinkSelected(MealDrink drink, Ingredient ingredient)
     {
         drink.IngredientId = ingredient.Id;
         drink.Name = ingredient.Name;
@@ -252,6 +311,7 @@
         if (string.IsNullOrWhiteSpace(drink.Unit) && !string.IsNullOrWhiteSpace(ingredient.DefaultUnit))
         {
             drink.Unit = ingredient.DefaultUnit!;
+            InflectUnit(drink);
         }
     }
 
@@ -309,10 +369,24 @@
     /// </summary>
     private List<DrinkTotal> Totals()
     {
-        var all = drinks.Select(d => (Drink: d, Meal: (string?)null))
+        var all = drinks.Select(d => (Drink: d, Meal: (string?)"Dryck för resan"))
             .Concat(Meals.SelectMany(m => m.Drinks.Select(d => (Drink: d, Meal: (string?)MealLabel(m)))))
             .Where(x => !string.IsNullOrWhiteSpace(x.Drink.Name))
             .ToList();
+
+        // Only extras that are drinks count: either tagged as such or named like a planned drink.
+        var drinkNames = all.Select(x => x.Drink.Name.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        all.AddRange(extras
+            .Where(e => drinkNames.Contains(e.Name) || e.Tags.Contains("drycker", StringComparer.OrdinalIgnoreCase))
+            .SelectMany(e => (e.Amounts.Count > 0 ? e.Amounts : [new AmountPerUnit("", 0)])
+                .Select(a => (
+                    Drink: new MealDrink
+                    {
+                        Name = e.Name,
+                        Quantity = a.Amount > 0 ? a.Amount.ToString("0.##", Swedish) : "",
+                        Unit = a.Unit
+                    },
+                    Meal: (string?)ExtraCategories.Display(e.ExtraCategory)))));
 
         var result = new List<DrinkTotal>();
 
@@ -361,8 +435,8 @@
 
     private static string MealLabelText(DrinkTotal total) => string.Join(", ", total.MealLabels);
 
-    private static string FormatAmount(string quantity, string unit) =>
-        $"{quantity} {unit}".Trim();
+    private string FormatAmount(string quantity, string unit) =>
+        $"{quantity} {IngredientService.FormatUnit(unit, quantity)}".Trim();
 
     private static bool IsHttpUrl(string value) =>
         Uri.TryCreate(value, UriKind.Absolute, out var uri)

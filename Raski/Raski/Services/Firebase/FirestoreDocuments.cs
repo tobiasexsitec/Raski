@@ -162,6 +162,7 @@ internal sealed class TripMemberDocument
     [JsonPropertyName("photoUrl")] public string? PhotoUrl { get; set; }
     [JsonPropertyName("role")] public string? Role { get; set; }
     [JsonPropertyName("alcohol")] public string? Alcohol { get; set; }
+    [JsonPropertyName("canManagePolicies")] public bool? CanManagePolicies { get; set; }
 
     public TripMember ToModel() => new()
     {
@@ -170,7 +171,8 @@ internal sealed class TripMemberDocument
         Email = Email ?? "",
         PhotoUrl = PhotoUrl ?? "",
         Role = Role == MemberRoles.Admin ? MemberRoles.Admin : MemberRoles.Member,
-        Alcohol = AlcoholPreferenceExtensions.ParseAlcoholPreference(Alcohol)
+        Alcohol = AlcoholPreferenceExtensions.ParseAlcoholPreference(Alcohol),
+        CanManagePolicies = CanManagePolicies == true
     };
 }
 
@@ -215,7 +217,7 @@ internal sealed class MealIngredientDocument
         IngredientId = IngredientId ?? "",
         Name = Name ?? "",
         Amount = (decimal)Amount,
-        Unit = Unit ?? ""
+        Unit = UnitDefinition.Normalize(Unit)
     };
 }
 
@@ -250,7 +252,7 @@ internal sealed class BreakfastIngredientDocument
         IngredientId = IngredientId ?? "",
         Name = Name ?? "",
         Amount = (decimal)Amount,
-        Unit = Unit ?? "",
+        Unit = UnitDefinition.Normalize(Unit),
         Scope = BreakfastAmountScopeExtensions.ParseBreakfastAmountScope(Scope)
     };
 }
@@ -322,6 +324,27 @@ internal sealed class PollDocument
     };
 }
 
+internal sealed class TripPolicyDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("title")] public string? Title { get; set; }
+    [JsonPropertyName("text")] public string? Text { get; set; }
+    [JsonPropertyName("createdAt")] public string? CreatedAt { get; set; }
+    [JsonPropertyName("updatedAt")] public string? UpdatedAt { get; set; }
+    [JsonPropertyName("acceptedBy")] public Dictionary<string, string>? AcceptedBy { get; set; }
+
+    public TripPolicy ToModel(string tripId) => new()
+    {
+        Id = Id,
+        TripId = tripId,
+        Title = Title ?? "",
+        Text = Text ?? "",
+        CreatedAt = CreatedAt ?? "",
+        UpdatedAt = UpdatedAt ?? "",
+        AcceptedBy = AcceptedBy ?? []
+    };
+}
+
 internal sealed class PollOptionDocument
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";
@@ -369,7 +392,7 @@ internal sealed class IngredientDocument
         Name = Name ?? "",
         NameLower = NameLower ?? (Name ?? "").ToLowerInvariant(),
         Tags = Tags ?? [],
-        DefaultUnit = DefaultUnit,
+        DefaultUnit = string.IsNullOrWhiteSpace(DefaultUnit) ? DefaultUnit : UnitDefinition.Normalize(DefaultUnit),
         MergedIntoId = MergedIntoId
     };
 }
@@ -379,6 +402,7 @@ internal sealed class UnitDocument
     [JsonPropertyName("id")] public string Id { get; set; } = "";
     [JsonPropertyName("name")] public string? Name { get; set; }
     [JsonPropertyName("nameLower")] public string? NameLower { get; set; }
+    [JsonPropertyName("plural")] public string? Plural { get; set; }
 }
 
 internal sealed class TagDocument
@@ -407,6 +431,8 @@ internal sealed class ShoppingExtraDocument
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";
     [JsonPropertyName("name")] public string? Name { get; set; }
+    [JsonPropertyName("ingredientId")] public string? IngredientId { get; set; }
+    [JsonPropertyName("category")] public string? Category { get; set; }
     [JsonPropertyName("amount")] public decimal? Amount { get; set; }
     [JsonPropertyName("unit")] public string? Unit { get; set; }
 }

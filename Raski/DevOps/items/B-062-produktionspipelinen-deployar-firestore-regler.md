@@ -1,9 +1,10 @@
 # B-062: Produktionspipelinen deployar Firestore-regler
 
-- **Status:** Pågår
+- **Status:** Klar
 - **Typ:** Utveckling
 - **Prioritet:** –
 - **Skapad:** 2026-10-27
+- **Klar:** 2026-10-27
 
 ## Beskrivning
 Testpipelinen (`.github/workflows/deploy-test.yml`) deployar redan `firestore.rules` och `firestore.indexes.json` till `raski-test`, men produktionspipelinen (`.github/workflows/deploy-github-pages.yml`) publicerar bara appen. Regeländringar i produktion måste därför deployas manuellt, och det finns risk att appen och reglerna inte stämmer överens (t.ex. B-061, där appen visar "Ny resa" för alla men gamla regler nekar skapandet).
@@ -12,11 +13,11 @@ Testpipelinen (`.github/workflows/deploy-test.yml`) deployar redan `firestore.ru
 Som utvecklare vill jag att push till `main` även deployar Firestore-regler och index till produktion så att appen och reglerna alltid är i synk.
 
 ## Acceptanskriterier
-- [ ] Push till `main` deployar `firestore.rules` och `firestore.indexes.json` till produktionsprojektet.
-- [ ] Deployen av regler sker i samma körning som appen publiceras.
-- [ ] Misslyckas regeldeployen så misslyckas arbetsflödet synligt.
-- [ ] Tjänstekontot för produktion ligger som GitHub-hemlighet, inte i repot.
-- [ ] Dokumentationen beskriver hur produktionsdeployen av regler fungerar.
+- [x] Push till `main` deployar `firestore.rules` och `firestore.indexes.json` till produktionsprojektet.
+- [x] Deployen av regler sker i samma körning som appen publiceras.
+- [x] Misslyckas regeldeployen så misslyckas arbetsflödet synligt.
+- [x] Tjänstekontot för produktion ligger som GitHub-hemlighet, inte i repot.
+- [x] Dokumentationen beskriver hur produktionsdeployen av regler fungerar.
 
 ## Öppna frågor
 - Inga just nu.

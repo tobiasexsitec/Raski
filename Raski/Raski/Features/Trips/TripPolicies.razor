@@ -1,0 +1,346 @@
+@page "/resor/{TripId}/policyer"
+@inject ITripService TripService
+@inject ITripPolicyService PolicyService
+
+<PageTitle>Policyer – @(trip?.Name ?? "Resa") – Raski™</PageTitle>
+
+@if (isLoading)
+{
+    <p class="muted">Hämtar policyer…</p>
+}
+else if (trip is null)
+{
+    <div class="error-banner">@(errorMessage ?? "Resan hittades inte.")</div>
+}
+else
+{
+    <div class="page-header">
+        <div>
+            <h1>Policyer</h1>
+            <p class="muted">@trip.Name</p>
+        </div>
+        <div class="row-inline">
+            <a class="btn btn-secondary" href="@($"resor/{TripId}/oversikt")">Tillbaka</a>
+        </div>
+    </div>
+
+    @if (errorMessage is not null)
+    {
+        <div class="error-banner" role="alert">@errorMessage</div>
+    }
+
+    @if (CanManage)
+    {
+        @if (editingId == NewId)
+        {
+            <section class="card" aria-labelledby="policy-new-heading">
+                <h2 id="policy-new-heading">Ny policy</h2>
+                @PolicyForm("policy-new", "Skapa")
+            </section>
+        }
+        else if (editingId is null)
+        {
+            <button type="button" class="btn btn-secondary btn-sm" @onclick="StartCreate">+ Lägg till policy</button>
+        }
+    }
+
+    @if (policies.Count == 0 && editingId != NewId)
+    {
+        <p class="muted">Inga policyer än.</p>
+    }
+
+    @foreach (var policy in policies)
+    {
+        <section class="card policy" @key="policy.Id" aria-labelledby="@($"policy-{policy.Id}-title")">
+            @if (editingId == policy.Id)
+            {
+                <h2 id="@($"policy-{policy.Id}-title")">Redigera policy</h2>
+                <p class="muted">Om du ändrar policyn behöver alla deltagare bekräfta den igen.</p>
+                @PolicyForm($"policy-{policy.Id}", "Spara")
+            }
+            else
+            {
+                <h2 id="@($"policy-{policy.Id}-title")">@policy.Title</h2>
+                <FormattedText Text="@policy.Text" />
+
+                <div class="row-inline">
+                    @if (policy.IsAcceptedBy(CurrentUser?.Uid))
+                    {
+                        <span class="muted">✅ Du har bekräftat policyn</span>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-primary btn-sm" disabled="@isSaving" @onclick="() => AcceptAsync(policy)">
+                            Jag har läst och godkänner
+                        </button>
+                    }
+
+                    @if (CanManage && editingId is null)
+                    {
+                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => StartEdit(policy)">Redigera</button>
+                        <button type="button"
+                                class="btn btn-danger btn-sm"
+                                aria-label="@($"Ta bort policyn {policy.Title}")"
+                                disabled="@isSaving"
+                                @onclick="() => confirmingDelete = policy">
+                            Ta bort
+                        </button>
+                    }
+                </div>
+
+                @if (CanManage)
+                {
+                    var accepted = members.Where(m => policy.IsAcceptedBy(m.Uid)).ToList();
+                    var notAccepted = members.Where(m => !policy.IsAcceptedBy(m.Uid)).ToList();
+
+                    <details>
+                        <summary>Bekräftad av @accepted.Count av @members.Count</summary>
+                        @if (accepted.Count > 0)
+                        {
+                            <p>✅ @string.Join(", ", accepted.Select(m => m.DisplayName))</p>
+                        }
+                        @if (notAccepted.Count > 0)
+                        {
+                            <p>⏳ Inte bekräftat: @string.Join(", ", notAccepted.Select(m => m.DisplayName))</p>
+                        }
+                    </details>
+                }
+            }
+        </section>
+    }
+
+    @if (CanGrant && GrantableMembers.Any())
+    {
+        <details class="card">
+            <summary>Vilka får hantera policyer?</summary>
+            <p class="muted">Utöver resans ägare kan valda deltagare skapa, redigera och ta bort policyer.</p>
+            <div class="stack">
+                @foreach (var member in GrantableMembers)
+                {
+                    <label class="row-inline" @key="member.Uid">
+                        <input type="checkbox"
+                               checked="@member.CanManagePolicies"
+                               disabled="@isSaving"
+                               @onchange="e => ToggleCanManageAsync(member, e.Value is true)" />
+                        @member.DisplayName
+                    </label>
+                }
+            </div>
+        </details>
+    }
+
+    @if (confirmingDelete is not null)
+    {
+        <div class="backdrop" @onclick="() => confirmingDelete = null">
+            <div class="dialog card"
+                 role="alertdialog"
+                 aria-modal="true"
+                 aria-labelledby="delete-policy-title"
+                 @onclick:stopPropagation="true"
+                 @onkeydown="OnDeleteDialogKeyDown">
+                <h2 id="delete-policy-title">Ta bort "@confirmingDelete.Title"?</h2>
+                <p class="muted">Policyn och alla bekräftelser tas bort. Detta går inte att ångra.</p>
+                <div class="row-inline">
+                    <button type="button" class="btn btn-danger" disabled="@isSaving" @onclick="DeleteAsync">Ta bort</button>
+                    <button type="button" class="btn btn-secondary" @onclick="() => confirmingDelete = null">Avbryt</button>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    private const string NewId = "__new";
+
+    [Parameter] public string TripId { get; set; } = "";
+
+    [CascadingParameter(Name = "CurrentUser")]
+    private UserProfile? CurrentUser { get; set; }
+
+    private Trip? trip;
+    private List<TripPolicy> policies = [];
+    private List<TripMember> members = [];
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+    private string? editingId;
+    private string draftTitle = "";
+    private string draftText = "";
+    private TripPolicy? confirmingDelete;
+
+    private bool CanGrant => trip?.IsOwner(CurrentUser?.Uid) == true || CurrentUser?.IsGlobalAdmin == true;
+
+    private bool CanManage => CanGrant || members.Any(m => m.Uid == CurrentUser?.Uid && m.CanManagePolicies);
+
+    private IEnumerable<TripMember> GrantableMembers => members.Where(m => !trip!.IsOwner(m.Uid));
+
+    private RenderFragment PolicyForm(string idPrefix, string submitText) => __builder =>
+    {
+        <form @onsubmit="SaveAsync" @onsubmit:preventDefault="true">
+            <div class="field">
+                <label for="@($"{idPrefix}-title")">Titel</label>
+                <input id="@($"{idPrefix}-title")"
+                       @bind="draftTitle"
+                       @bind:event="oninput"
+                       maxlength="@TripPolicy.MaxTitleLength"
+                       placeholder="T.ex. Avbokning"
+                       required />
+            </div>
+            <div class="field">
+                <label for="@($"{idPrefix}-text")">Text</label>
+                <textarea id="@($"{idPrefix}-text")"
+                          rows="8"
+                          @bind="draftText"
+                          @bind:event="oninput"
+                          maxlength="@TripPolicy.MaxTextLength"
+                          placeholder="Vad gäller? Rubriker (#), **fet stil** och länkar stöds."></textarea>
+            </div>
+            <div class="row-inline">
+                <button type="submit" class="btn btn-primary" disabled="@(isSaving || string.IsNullOrWhiteSpace(draftTitle))">@submitText</button>
+                <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Avbryt</button>
+            </div>
+        </form>
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            trip = await TripService.GetAsync(TripId);
+            if (trip is not null)
+            {
+                var policiesTask = PolicyService.GetAsync(TripId);
+                var membersTask = TripService.GetMembersAsync(TripId);
+                policies = [.. await policiesTask];
+                members = [.. (await membersTask).Where(m => !m.IsPending).OrderBy(m => m.DisplayName)];
+            }
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte hämta policyerna.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void StartCreate()
+    {
+        errorMessage = null;
+        draftTitle = "";
+        draftText = "";
+        editingId = NewId;
+    }
+
+    private void StartEdit(TripPolicy policy)
+    {
+        errorMessage = null;
+        draftTitle = policy.Title;
+        draftText = policy.Text;
+        editingId = policy.Id;
+    }
+
+    private void CancelEdit() => editingId = null;
+
+    private async Task SaveAsync()
+    {
+        if (string.IsNullOrWhiteSpace(draftTitle))
+        {
+            return;
+        }
+
+        if (editingId == NewId)
+        {
+            var policy = new TripPolicy { TripId = TripId, Title = draftTitle.Trim(), Text = draftText.Trim() };
+            if (await RunAsync(() => PolicyService.CreateAsync(policy), "Kunde inte skapa policyn."))
+            {
+                policies.Add(policy);
+                editingId = null;
+            }
+        }
+        else if (policies.FirstOrDefault(p => p.Id == editingId) is { } existing)
+        {
+            var oldTitle = existing.Title;
+            var oldText = existing.Text;
+            existing.Title = draftTitle.Trim();
+            existing.Text = draftText.Trim();
+
+            if (existing.Title == oldTitle && existing.Text == oldText)
+            {
+                editingId = null;
+                return;
+            }
+
+            if (await RunAsync(() => PolicyService.UpdateAsync(existing), "Kunde inte spara policyn."))
+            {
+                editingId = null;
+            }
+            else
+            {
+                existing.Title = oldTitle;
+                existing.Text = oldText;
+            }
+        }
+    }
+
+    private Task AcceptAsync(TripPolicy policy) =>
+        RunAsync(() => PolicyService.AcceptAsync(policy), "Kunde inte bekräfta policyn.");
+
+    private async Task DeleteAsync()
+    {
+        if (confirmingDelete is not { } policy)
+        {
+            return;
+        }
+
+        if (await RunAsync(() => PolicyService.DeleteAsync(policy), "Kunde inte ta bort policyn."))
+        {
+            policies.Remove(policy);
+        }
+
+        confirmingDelete = null;
+    }
+
+    private async Task ToggleCanManageAsync(TripMember member, bool canManage)
+    {
+        if (!await RunAsync(() => TripService.SetCanManagePoliciesAsync(TripId, member.Uid, canManage), "Kunde inte ändra behörigheten."))
+        {
+            return;
+        }
+
+        member.CanManagePolicies = canManage;
+    }
+
+    private void OnDeleteDialogKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            confirmingDelete = null;
+        }
+    }
+
+    private async Task<bool> RunAsync(Func<Task> action, string failureMessage)
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            await action();
+            return true;
+        }
+        catch (Exception)
+        {
+            errorMessage = failureMessage;
+            return false;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+}

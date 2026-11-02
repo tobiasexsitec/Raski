@@ -1,6 +1,7 @@
 @implements IAsyncDisposable
 @inject IMealService MealService
 @inject ITripService TripService
+@inject IIngredientService IngredientService
 
 <Confetti @ref="confetti" />
 
@@ -103,7 +104,11 @@
     }
 </section>
 
-<TripDrinksPanel Trip="Trip" Meals="meals" />
+<TripDrinksPanel Trip="Trip" Meals="meals" ExtrasVersion="extrasVersion" />
+
+<OtherItemsPanel Trip="Trip" Category="@ExtraCategories.Snacks" RefreshKey="extrasVersion" OnChanged="() => extrasVersion++" />
+
+<OtherItemsPanel Trip="Trip" Category="@ExtraCategories.Other" RefreshKey="extrasVersion" OnChanged="() => extrasVersion++" />
 
 @if (detailMeal is not null)
 {
@@ -116,6 +121,7 @@
     [Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
 
     private List<Meal> meals = [];
+    private int extrasVersion;
     private IReadOnlyList<TripMember> members = [];
     private CancellationTokenSource? listenerCts;
     private string? observedTripId;
@@ -134,6 +140,7 @@
 
         observedTripId = Trip.Id;
         members = await TripService.GetMembersAsync(Trip.Id);
+        await IngredientService.GetUnitsAsync();
         await StartListeningAsync();
     }
 
@@ -220,15 +227,15 @@
         }
     }
 
-    private static string FormatDrink(MealDrink drink)
+    private string FormatDrink(MealDrink drink)
     {
-        var amount = $"{drink.Quantity} {drink.Unit}".Trim();
+        var amount = $"{drink.Quantity} {IngredientService.FormatUnit(drink.Unit, drink.Quantity)}".Trim();
         return amount.Length > 0 ? $"{drink.Name} ({amount})" : drink.Name;
     }
 
-    private static string FormatIngredient(MealIngredient ingredient) =>
+    private string FormatIngredient(MealIngredient ingredient) =>
         ingredient.Amount > 0
-            ? $"{ingredient.Name} {Format(ingredient.Amount)} {ingredient.Unit}".TrimEnd()
+            ? $"{ingredient.Name} {Format(ingredient.Amount)} {IngredientService.FormatUnit(ingredient.Unit, ingredient.Amount)}".TrimEnd()
             : ingredient.Name;
 
     private static string Format(decimal value) =>

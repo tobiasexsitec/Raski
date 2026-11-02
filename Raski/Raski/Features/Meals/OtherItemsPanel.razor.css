@@ -1,0 +1,86 @@
+﻿.other-items {
+    margin-bottom: var(--space-4);
+}
+
+.other-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.other-list li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.other-list .name {
+    font-weight: 600;
+}
+
+.other-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+
+.show-more {
+    margin-top: var(--space-2);
+}
+
+/* Shows the first rows in full and half of the next one, faded out like Övrig info on the overview. */
+.other-list.collapsed {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent);
+    mask-image: linear-gradient(to bottom, #000 60%, transparent);
+}
+
+.other-list.collapsed li:nth-child(5) {
+    max-height: 1.25rem;
+    overflow: hidden;
+    align-items: flex-start;
+}
+
+.other-list.collapsed li:nth-child(n + 6) {
+    display: none;
+}
+
+
+.actions {
+    margin-top: var(--space-4);
+}
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3);
+    background: rgb(0 0 0 / 55%);
+    overflow-y: auto;
+}
+
+.dialog {
+    width: min(32rem, 100%);
+    max-height: 90vh;
+    overflow-y: visible;
+}
+
+.edit-amount {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.edit-quantity {
+    flex: 0 1 6rem;
+}
+
+.edit-unit {
+    flex: 1 1 8rem;
+}

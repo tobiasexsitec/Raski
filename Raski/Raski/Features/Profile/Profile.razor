@@ -10,7 +10,10 @@
         <h1>Profil</h1>
         <p class="muted">Allergier och kostpreferenser syns för dem som planerar måltider.</p>
     </div>
-    <a class="btn btn-secondary btn-sm" href="on-boarding">✨ Kör introduktionen igen</a>
+    <div class="row-inline">
+        <a class="btn btn-secondary btn-sm" href="admin">Tillbaka</a>
+        <a class="btn btn-secondary btn-sm" href="on-boarding">✨ Kör introduktionen igen</a>
+    </div>
 </div>
 
 @if (AuthService.Current is null)
@@ -19,6 +22,7 @@
 }
 else
 {
+    <div class="profile-sections">
     @if (errorMessage is not null)
     {
         <div class="error-banner" role="alert">@errorMessage</div>
@@ -117,6 +121,7 @@ else
     </section>
 
     <HouseholdSection />
+    </div>
 }
 
 @code {

@@ -53,11 +53,20 @@
         }
     </header>
 
+    @if (menuOpen)
+    {
+        <div class="menu-backdrop" aria-hidden="true" @onclick="CloseMenu"></div>
+    }
+
     <main class="content" id="main" tabindex="-1">
         <AuthGuard AllowAnonymous="IsPublicPage()">
-            @Body
+            <div @key="refreshKey">
+                @Body
+            </div>
         </AuthGuard>
     </main>
+
+    <PullToRefresh OnRefresh="Refresh" />
 
     <footer class="app-footer">
         <a class="about-link" href="about"><span class="info-icon" aria-hidden="true">i</span> Om Raski™</a>
@@ -77,6 +86,14 @@
     private static readonly string AppVersion = AppInfo.InformationalVersion;
 
     private bool menuOpen;
+    private int refreshKey;
+
+    // A new key recreates the page component so it reloads its data without restarting the app.
+    private void Refresh()
+    {
+        menuOpen = false;
+        refreshKey++;
+    }
 
     protected override void OnInitialized()
     {
@@ -90,6 +107,8 @@
             .Equals("about", StringComparison.OrdinalIgnoreCase);
 
     private void ToggleMenu() => menuOpen = !menuOpen;
+
+    private void CloseMenu() => menuOpen = false;
 
     private void OnMenuKeyDown(KeyboardEventArgs e)
     {

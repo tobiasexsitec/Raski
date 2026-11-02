@@ -49,7 +49,7 @@ public sealed class MealDrinkPayload
         IngredientId = IngredientId ?? "",
         Name = Name ?? "",
         Quantity = Quantity ?? "",
-        Unit = Unit ?? "",
+        Unit = UnitDefinition.Normalize(Unit),
         Url = Url ?? ""
     };
 }
@@ -66,6 +66,6 @@ public sealed class MealIngredientPayload
         IngredientId = IngredientId ?? "",
         Name = Name ?? "",
         Amount = (decimal)Amount,
-        Unit = Unit ?? ""
+        Unit = UnitDefinition.Normalize(Unit)
     };
 }

@@ -80,15 +80,17 @@
                            aria-label="@($"Mängd {rowNumber}")"
                            placeholder="Mängd"
                            @bind="row.Amount"
-                           @bind:event="oninput" />
+                           @bind:event="oninput"
+                           @bind:after="() => InflectUnit(row)" />
                 </div>
 
                 <div class="field unit">
                     <AutoComplete TItem="string"
                                   Value="@row.Unit"
-                                  ValueChanged="value => row.Unit = value"
-                                  SearchFunc="SearchUnitsAsync"
+                                  ValueChanged="value => OnUnitTyped(row, value)"
+                                  SearchFunc="term => UnitInflection.SuggestAsync(IngredientService, term, row.Amount)"
                                   DisplaySelector="u => u"
+                                  OnItemSelected="_ => OnUnitSelected(row)"
                                   MinimumLength="1"
                                   AriaLabel="@($"Enhet {rowNumber}")"
                                   Placeholder="Enhet" />
@@ -103,7 +105,18 @@
             </div>
         }
 
-        <button type="button" class="btn btn-secondary btn-sm" @onclick="AddRow">+ Lägg till ingrediens</button>
+        <button type="button"
+                class="btn btn-secondary btn-sm"
+                disabled="@(!CanAddRow)"
+                title="@(CanAddRow ? null : "Fyll i ingrediens, mängd och enhet först")"
+                aria-describedby="@(CanAddRow ? null : "add-ingredient-hint")"
+                @onclick="AddRowAndSaveAsync">
+            + Lägg till ingrediens
+        </button>
+        @if (!CanAddRow)
+        {
+            <span id="add-ingredient-hint" class="muted visually-hidden">Fyll i ingrediens, mängd och enhet för den senaste ingrediensen först.</span>
+        }
     </fieldset>
 
     <fieldset class="ingredients">
@@ -131,15 +144,17 @@
                            aria-label="@($"Mängd för dryck {drinkNumber}")"
                            placeholder="Mängd"
                            @bind="drink.Quantity"
-                           @bind:event="oninput" />
+                           @bind:event="oninput"
+                           @bind:after="() => InflectUnit(drink)" />
                 </div>
 
                 <div class="field unit">
                     <AutoComplete TItem="string"
                                   Value="@drink.Unit"
-                                  ValueChanged="value => drink.Unit = value"
-                                  SearchFunc="SearchUnitsAsync"
+                                  ValueChanged="value => OnUnitTyped(drink, value)"
+                                  SearchFunc="term => UnitInflection.SuggestAsync(IngredientService, term, drink.Quantity)"
                                   DisplaySelector="u => u"
+                                  OnItemSelected="_ => OnUnitSelected(drink)"
                                   MinimumLength="1"
                                   AriaLabel="@($"Enhet för dryck {drinkNumber}")"
                                   Placeholder="Enhet" />
@@ -193,7 +208,10 @@
         public string Name { get; set; } = "";
         public decimal? Amount { get; set; }
         public string Unit { get; set; } = "";
+        public UnitInflection UnitInflection { get; } = new();
     }
+
+    private readonly Dictionary<MealDrink, UnitInflection> drinkInflections = new(ReferenceEqualityComparer.Instance);
 
     private readonly List<IngredientRow> rows = [];
     private readonly List<MealDrink> drinkRows = [];
@@ -206,12 +224,22 @@
     private bool isSaving;
     private string? errorMessage;
 
+    private string savedMealId = "";
+
     private bool IsNew => Meal is null || string.IsNullOrEmpty(Meal.Id);
+
+    private bool CanAddRow => !isSaving && (rows.Count == 0 || IsComplete(rows[^1]));
+
+    private static bool IsComplete(IngredientRow row) =>
+        !string.IsNullOrWhiteSpace(row.Name)
+        && row.Amount is > 0
+        && !string.IsNullOrWhiteSpace(row.Unit);
 
     protected override void OnInitialized()
     {
         if (Meal is not null)
         {
+            savedMealId = Meal.Id;
             selectedDate = Meal.Date.ToString("yyyy-MM-dd");
             mealType = Meal.Type;
             title = Meal.Title;
@@ -250,6 +278,62 @@
 
     private void AddRow() => rows.Add(new IngredientRow());
 
+    private async Task AddRowAndSaveAsync()
+    {
+        if (!CanAddRow)
+        {
+            return;
+        }
+
+        // Silent save: an incomplete meal is not created, the row is just added.
+        await PersistAsync(silent: true);
+        AddRow();
+    }
+
+    protected override async Task OnInitializedAsync() =>
+        await IngredientService.GetUnitsAsync();
+
+    private void InflectUnit(IngredientRow row) =>
+        row.Unit = row.UnitInflection.ForAmount(IngredientService, row.Unit, row.Amount);
+
+    private static void OnUnitTyped(IngredientRow row, string value)
+    {
+        row.Unit = value;
+        row.UnitInflection.OnUnitTyped(value);
+    }
+
+    private void OnUnitSelected(IngredientRow row)
+    {
+        row.UnitInflection.OnUnitSelected();
+        InflectUnit(row);
+    }
+
+    private UnitInflection InflectionFor(MealDrink drink)
+    {
+        if (!drinkInflections.TryGetValue(drink, out var inflection))
+        {
+            inflection = new UnitInflection();
+            drinkInflections[drink] = inflection;
+        }
+
+        return inflection;
+    }
+
+    private void InflectUnit(MealDrink drink) =>
+        drink.Unit = InflectionFor(drink).ForQuantity(IngredientService, drink.Unit, drink.Quantity);
+
+    private void OnUnitTyped(MealDrink drink, string value)
+    {
+        drink.Unit = value;
+        InflectionFor(drink).OnUnitTyped(value);
+    }
+
+    private void OnUnitSelected(MealDrink drink)
+    {
+        InflectionFor(drink).OnUnitSelected();
+        InflectUnit(drink);
+    }
+
     private async Task<IReadOnlyList<Ingredient>> SearchIngredientsAsync(string term) =>
         [.. (await IngredientService.SearchAsync(term, 50)).Where(i => !IsDrink(i)).Take(8)];
 
@@ -259,10 +343,7 @@
     private static bool IsDrink(Ingredient ingredient) =>
         ingredient.Tags.Contains("drycker", StringComparer.OrdinalIgnoreCase);
 
-    private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
-        IngredientService.SearchUnitsAsync(term);
-
-    private static void OnDrinkSelected(MealDrink drink, Ingredient ingredient)
+    private void OnDrinkSelected(MealDrink drink, Ingredient ingredient)
     {
         drink.IngredientId = ingredient.Id;
         drink.Name = ingredient.Name;
@@ -270,6 +351,7 @@
         if (string.IsNullOrWhiteSpace(drink.Unit) && !string.IsNullOrWhiteSpace(ingredient.DefaultUnit))
         {
             drink.Unit = ingredient.DefaultUnit!;
+            InflectUnit(drink);
         }
     }
 
@@ -282,16 +364,26 @@
         if (string.IsNullOrWhiteSpace(row.Unit) && !string.IsNullOrWhiteSpace(ingredient.DefaultUnit))
         {
             row.Unit = ingredient.DefaultUnit!;
+            InflectUnit(row);
         }
     }
 
-    private async Task SaveAsync()
+    private Task SaveAsync() => PersistAsync(silent: false);
+
+    private async Task PersistAsync(bool silent)
     {
-        errorMessage = null;
+        if (!silent)
+        {
+            errorMessage = null;
+        }
 
         if (string.IsNullOrWhiteSpace(title))
         {
-            errorMessage = "Ange vad ni ska äta.";
+            if (!silent)
+            {
+                errorMessage = "Ange vad ni ska äta.";
+            }
+
             return;
         }
 
@@ -299,7 +391,11 @@
 
         if (trimmedRecipeUrl.Length > 0 && !IsHttpUrl(trimmedRecipeUrl))
         {
-            errorMessage = "Receptlänken måste börja med http:// eller https://.";
+            if (!silent)
+            {
+                errorMessage = "Receptlänken måste börja med http:// eller https://.";
+            }
+
             return;
         }
 
@@ -318,7 +414,11 @@
 
         if (invalidDrink is not null)
         {
-            errorMessage = $"Länken för {invalidDrink.Name} måste börja med http:// eller https://.";
+            if (!silent)
+            {
+                errorMessage = $"Länken för {invalidDrink.Name} måste börja med http:// eller https://.";
+            }
+
             return;
         }
 
@@ -352,9 +452,9 @@
                 drink.Name = ingredient.Name;
             }
 
-            await MealService.SaveAsync(new Meal
+            savedMealId = await MealService.SaveAsync(new Meal
             {
-                Id = Meal?.Id ?? "",
+                Id = savedMealId,
                 TripId = Trip.Id,
                 Date = DateOnly.Parse(selectedDate),
                 Type = mealType,
@@ -367,7 +467,10 @@
                 Drinks = drinks
             });
 
-            await OnSaved.InvokeAsync();
+            if (!silent)
+            {
+                await OnSaved.InvokeAsync();
+            }
         }
         catch (Exception)
         {

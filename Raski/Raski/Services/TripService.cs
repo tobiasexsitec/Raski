@@ -139,6 +139,12 @@ public sealed class TripService(FirebaseInterop interop, IAuthService authServic
             alcohol = preference.ToFirestore()
         }, ct);
 
+    public Task SetCanManagePoliciesAsync(string tripId, string uid, bool canManage, CancellationToken ct = default) =>
+        interop.UpdateDocumentAsync($"trips/{tripId}/members/{uid}", new
+        {
+            canManagePolicies = canManage
+        }, ct);
+
     public async Task RemoveMemberAsync(string tripId, string uid, CancellationToken ct = default)
     {
         if (TripMember.IsPendingId(uid))

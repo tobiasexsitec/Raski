@@ -40,6 +40,9 @@ public sealed class TripMember
 
     public bool IsAdmin => Role == MemberRoles.Admin;
 
+    /// <summary>Granted by the trip owner or a global admin; allows creating, editing and deleting policies.</summary>
+    public bool CanManagePolicies { get; set; }
+
     /// <summary>True for a participant added by email who has not signed in yet.</summary>
     public bool IsPending => IsPendingId(Uid);
 

@@ -22,4 +22,6 @@ public interface ITripService
     Task SetMyAlcoholAsync(string tripId, AlcoholPreference preference, CancellationToken ct = default);
 
     Task RemoveMemberAsync(string tripId, string uid, CancellationToken ct = default);
+
+    Task SetCanManagePoliciesAsync(string tripId, string uid, bool canManage, CancellationToken ct = default);
 }

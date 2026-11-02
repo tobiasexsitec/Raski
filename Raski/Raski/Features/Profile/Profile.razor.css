@@ -41,6 +41,12 @@ h2 {
     cursor: not-allowed;
 }
 
+.profile-sections {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
 .add-form .row-inline {
     flex-wrap: nowrap;
 }

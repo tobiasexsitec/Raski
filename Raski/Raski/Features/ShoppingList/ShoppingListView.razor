@@ -35,39 +35,34 @@ else
         <div class="error-banner">@errorMessage</div>
     }
 
-    <h2>Lägg till på inköpslistan</h2>
-    <p class="muted">Hör varan till en måltid? Registrera då ingrediensen under fliken "Måltider" på resan.</p>
-
-    <form class="extra-form" @onsubmit="AddExtraAsync">
-        <input class="field extra-name"
-               placeholder="Vad behövs? T.ex. toapapper"
-               aria-label="Vara"
-               maxlength="100"
-               @bind="newExtraName" />
-        <input class="field extra-quantity"
-               type="number"
-               step="any"
-               min="0"
-               inputmode="decimal"
-               placeholder="Mängd"
-               aria-label="Mängd"
-               @bind="newExtraAmount" />
-        <div class="extra-unit">
-            <AutoComplete TItem="string"
-                          Value="@newExtraUnit"
-                          ValueChanged="value => newExtraUnit = value"
-                          SearchFunc="SearchUnitsAsync"
-                          DisplaySelector="u => u"
-                          MinimumLength="1"
-                          AriaLabel="Enhet"
-                          Placeholder="Enhet" />
-        </div>
-        <button type="submit" class="btn btn-primary" disabled="@isSaving">Lägg till</button>
-    </form>
-
     @if (TotalCount > 0)
     {
         <p class="progress-text">@CheckedCount av @TotalCount ihandlade</p>
+    }
+
+    @if (TotalCount > 0)
+    {
+        <div class="filters" role="search">
+            <input type="search"
+                   class="field filter-search"
+                   placeholder="Sök vara"
+                   aria-label="Sök i inköpslistan"
+                   @bind="searchText"
+                   @bind:event="oninput" />
+
+            <select class="field filter-tag" aria-label="Filtrera på tagg" @bind="selectedTag">
+                <option value="">Alla taggar</option>
+                @foreach (var tag in AvailableTags)
+                {
+                    <option value="@tag">@IngredientTags.Display(tag)</option>
+                }
+            </select>
+
+            @if (IsFiltering)
+            {
+                <button type="button" class="btn btn-secondary btn-sm" @onclick="ClearFilters">Rensa</button>
+            }
+        </div>
     }
 
     @if (groups.Count == 0)
@@ -75,13 +70,24 @@ else
         <p class="muted">Inga ingredienser från måltider än.</p>
     }
 
-    @foreach (var group in groups)
+    @if (IsFiltering && !items.Any(Matches))
     {
+        <p class="muted">Inga varor matchar filtret.</p>
+    }
+
+    @foreach (var group in groups.Where(g => g.Tag != IngredientTags.Uncategorized))
+    {
+        var groupItems = group.Items.Where(Matches).ToList();
+        if (groupItems.Count == 0)
+        {
+            continue;
+        }
+
         <section class="group">
             <h2>@group.DisplayTag</h2>
 
             <ul class="items">
-                @foreach (var item in group.Items)
+                @foreach (var item in groupItems)
                 {
                     <li class="item @(item.Checked ? "is-checked" : "")">
                         <label>
@@ -104,13 +110,42 @@ else
         </section>
     }
 
-    <section class="group">
-        <h2>Övrigt att handla</h2>
+    @foreach (var category in new[] { ExtraCategories.Snacks, ExtraCategories.Other })
+    {
+        var meals = (category == ExtraCategories.Other ? uncategorized : []).Where(Matches).ToList();
+        var categoryExtras = extras.Where(e => e.ExtraCategory == category).Where(Matches).ToList();
 
-        @if (extras.Count > 0)
+        if (IsFiltering && meals.Count == 0 && categoryExtras.Count == 0)
+        {
+            continue;
+        }
+
+    <section class="group">
+        <h2>@ExtraCategories.Display(category)</h2>
+
+        @if (meals.Count > 0 || categoryExtras.Count > 0)
         {
             <ul class="items">
-                @foreach (var item in extras)
+                @foreach (var item in meals)
+                {
+                    <li class="item @(item.Checked ? "is-checked" : "")">
+                        <label>
+                            <input type="checkbox"
+                                   checked="@item.Checked"
+                                   @onchange="e => ToggleAsync(item, e)" />
+
+                            <span class="item-body">
+                                <span class="item-name">@item.Name</span>
+                                <span class="item-amount">@FormatAmounts(item)</span>
+                                @if (item.UsedInMeals.Count > 0)
+                                {
+                                    <span class="item-meals">@string.Join(", ", item.UsedInMeals)</span>
+                                }
+                            </span>
+                        </label>
+                    </li>
+                }
+                @foreach (var item in categoryExtras)
                 {
                     <li class="item extra-item @(item.Checked ? "is-checked" : "")">
                         <label>
@@ -138,9 +173,18 @@ else
         }
         else
         {
-            <p class="muted">Inget övrigt tillagt än.</p>
+            <p class="muted">Inget tillagt än.</p>
+        }
+
+        @if (!IsFiltering)
+        {
+            <ExtraItemForm Placeholder="@(category == ExtraCategories.Snacks ? "T.ex. kanelbullar eller chips" : "T.ex. diskmaskinstabletter")"
+                           AriaLabel="@($"Vara till {ExtraCategories.Display(category)}")"
+                           IsSaving="isSaving"
+                           OnAdd="(name, amount, unit) => AddExtraAsync(category, name, amount, unit)" />
         }
     </section>
+    }
 }
 
 @code {
@@ -150,9 +194,7 @@ else
     private IReadOnlyList<ShoppingListItem> items = [];
     private IReadOnlyList<ShoppingListGroup> groups = [];
     private IReadOnlyList<ShoppingListItem> extras = [];
-    private string newExtraName = "";
-    private decimal? newExtraAmount;
-    private string newExtraUnit = "";
+    private IReadOnlyList<ShoppingListItem> uncategorized = [];
     private bool isSaving;
     private CancellationTokenSource? listenerCts;
     private bool isLoading = true;
@@ -160,8 +202,39 @@ else
     private Confetti? confetti;
     private bool hasCelebrated;
 
+    private string searchText = "";
+    private string selectedTag = "";
+
     private int TotalCount => items.Count;
     private int CheckedCount => items.Count(i => i.Checked);
+
+    private bool IsFiltering => !string.IsNullOrWhiteSpace(searchText) || selectedTag.Length > 0;
+
+    private IEnumerable<string> AvailableTags =>
+        items.Select(i => i.PrimaryTag)
+            .Concat(items.SelectMany(i => i.Tags))
+            .Where(t => !string.IsNullOrWhiteSpace(t))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(t => t, StringComparer.CurrentCultureIgnoreCase);
+
+    private bool Matches(ShoppingListItem item)
+    {
+        var query = searchText.Trim();
+        if (query.Length > 0 && !item.Name.Contains(query, StringComparison.CurrentCultureIgnoreCase))
+        {
+            return false;
+        }
+
+        return selectedTag.Length == 0
+            || string.Equals(item.PrimaryTag, selectedTag, StringComparison.OrdinalIgnoreCase)
+            || item.Tags.Contains(selectedTag, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private void ClearFilters()
+    {
+        searchText = "";
+        selectedTag = "";
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -241,37 +314,34 @@ else
     {
         groups = ShoppingListAggregator.GroupByTag(items.Where(i => !i.IsExtra));
         extras = [.. items.Where(i => i.IsExtra)];
+        uncategorized = [.. groups.Where(g => g.Tag == IngredientTags.Uncategorized).SelectMany(g => g.Items)];
     }
 
-    private async Task AddExtraAsync()
+    private async Task<bool> AddExtraAsync(string category, string name, decimal? amount, string unit)
     {
-        if (string.IsNullOrWhiteSpace(newExtraName))
+        if (string.IsNullOrWhiteSpace(name))
         {
             errorMessage = "Skriv vad som ska handlas.";
-            return;
+            return false;
         }
 
         await SaveExtrasAsync(
-            () => ShoppingListService.AddExtraAsync(TripId, newExtraName, newExtraAmount, newExtraUnit),
+            () => ShoppingListService.AddExtraAsync(TripId, name, amount, unit, category),
             "Kunde inte lägga till varan.");
 
-        if (errorMessage is null)
-        {
-            newExtraName = "";
-            newExtraAmount = null;
-            newExtraUnit = "";
-        }
+        return errorMessage is null;
     }
 
-    private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
-        IngredientService.SearchUnitsAsync(term);
-
     private Task DeleteExtraAsync(ShoppingListItem item) =>
-        item.ExtraId is null
-            ? Task.CompletedTask
-            : SaveExtrasAsync(
-                () => ShoppingListService.DeleteExtraAsync(TripId, item.ExtraId),
-                "Kunde inte ta bort varan.");
+        SaveExtrasAsync(
+            async () =>
+            {
+                foreach (var extraId in item.ExtraIds)
+                {
+                    await ShoppingListService.DeleteExtraAsync(TripId, extraId);
+                }
+            },
+            "Kunde inte ta bort varan.");
 
     private async Task SaveExtrasAsync(Func<Task> save, string failureMessage)
     {
@@ -292,6 +362,7 @@ else
         finally
         {
             isSaving = false;
+            StateHasChanged();
         }
     }
 
@@ -315,11 +386,11 @@ else
         await confetti.CelebrateAsync();
     }
 
-    private static string FormatAmounts(ShoppingListItem item) =>
+    private string FormatAmounts(ShoppingListItem item) =>
         string.Join(" + ", item.Amounts.Select(a =>
             string.IsNullOrWhiteSpace(a.Unit)
                 ? Format(a.Amount)
-                : $"{Format(a.Amount)} {a.Unit}"));
+                : $"{Format(a.Amount)} {IngredientService.FormatUnit(a.Unit, a.Amount)}"));
 
     private static string Format(decimal value) =>
         value == decimal.Truncate(value) ? ((long)value).ToString() : value.ToString("0.##");
