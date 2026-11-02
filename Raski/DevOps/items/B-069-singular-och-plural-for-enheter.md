@@ -30,3 +30,4 @@ Som global admin vill jag ange singular och plural för varje enhet så att män
 
 ## Beslut
 - 2026-10-28: Pluralformen är valfri; saknas den visas singular.
+- 2026-11-02: Släppt i version 1.0.0.

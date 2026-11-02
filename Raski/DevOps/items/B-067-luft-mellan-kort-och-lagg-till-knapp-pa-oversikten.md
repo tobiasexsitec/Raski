@@ -25,3 +25,4 @@ Rättad till `display: flex;`.
 - `Profile.razor`: korten ligger i en `profile-sections`-wrapper med `gap: var(--space-4)`, så att även `HouseholdSection` får avstånd.
 
 ## Beslut
+- 2026-11-02: Släppt i version 1.0.0.

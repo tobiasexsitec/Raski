@@ -37,3 +37,4 @@ Som användare vill jag att enheter alltid sparas med små bokstäver så att li
 - 2026-10-28: Alla befintliga enheter migreras till små bokstäver.
 - 2026-10-28: Regeln gäller alla enheter, inte bara enhetsadministrationen.
 - 2026-10-28: Dubbletter som uppstår vid migreringen slås ihop till en enhet.
+- 2026-11-02: Släppt i version 1.0.0.

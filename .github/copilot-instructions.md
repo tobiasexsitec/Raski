@@ -104,7 +104,7 @@ Mönstret finns i `MealService.ObserveMeals` / `ShoppingListService`: en bounded
   - `Bugg` (`fix`): höj **patch** (t.ex. `0.4.2` → `0.4.3`).
   - `Utveckling` (övriga typer): **ingen** versionshöjning och ingen release notes-post.
   - Innehåller en release minst ett `Funktion`-objekt höjs minor, annars patch om den innehåller `Patch` eller `Bugg`.
-  Appen är inte släppt ännu, så versionen ligger på 0.x.y tills 1.0.0 släpps.
+  Appen släpptes i version 1.0.0; reglerna ovan för minor och patch gäller fortsatt (major höjs bara när användaren uttryckligen ber om det).
   - Release notes skrivs i `wwwroot/release-notes.json`. `notes` innehåller alla `feat`/`fix`-rader och visas på Om Raski™. Har releasen fler än cirka 4 rader, lägg även till `highlights`: högst cirka 4 punkter grupperade efter vad användaren märker (kort rubrik + en mening om nyttan, viktigast först). Innehåller releasen flera `Patch`- eller `Bugg`-objekt som inte ryms i de övriga punkterna ska `highlights` alltid avslutas med punkten "Buggfixar och små förbättringar". Popupen visar `highlights` om det finns, annars `notes`.
   
 ## Branchflöde

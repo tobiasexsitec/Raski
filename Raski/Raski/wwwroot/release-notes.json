@@ -1,4 +1,29 @@
 [
+  { "version": "1.0.0", "date": "2026-11-02",
+    "highlights": [
+      "Raski™ 1.0 är här! 🎉",
+      "Regler för resan: arrangören kan sätta regler som deltagarna bekräftar och låta andra hjälpa till att administrera.",
+      "Fika, snacks och övrigt: har nu egna platser under Måltider och Vem tar med, och går att redigera.",
+      "Smidigare inköpslista: sök och filtrera, och enheter visas rätt i singular och plural.",
+      "Mer som en app: dra nedåt för att uppdatera, temafärgat statusfält och ingen zoom vid dubbeltryck.",
+      "Buggfixar och små förbättringar."
+    ],
+    "notes": [
+      "Resan kan ha regler som deltagarna bekräftar, och administratören kan låta andra hjälpa till.",
+      "Fika/Snacks och Övrigt finns under Måltider och Vem tar med.",
+      "Fika och övrigt går att redigera, med Visa mer och redigeringsläge.",
+      "Sök och filtrera i inköpslistan.",
+      "Enheter har singular och plural och byter form när du skriver in mängden.",
+      "Dra nedåt för att uppdatera i installerat läge. Appen söker då också efter en ny version.",
+      "I installerat läge får statusfältet temats färg och dubbeltryck zoomar inte längre.",
+      "Visa mer för Övrig info på översikten.",
+      "Profil finns i avatarmenyn.",
+      "Ny Admin-flik för administratörer.",
+      "Måltiden sparas när du lägger till en ingrediens.",
+      "Popupen med nyheter visar en kort sammanfattning, och alla ändringar finns i release notes.",
+      "Enheter sparas alltid med små bokstäver.",
+      "Mer luft mellan korten och Lägg till-knappen på översikten och profilsidan."
+    ] },
   { "version": "0.28.0", "date": "2026-10-27", "notes": [ "Alla med konto kan nu skapa egna resor och blir administratör för dem." ] },
   { "version": "0.27.1", "date": "2026-10-22", "notes": [ "Popupen med nyheter och release notes på Om Raski™ visas igen." ] },
   { "version": "0.27.0", "date": "2026-10-22", "notes": [ "Lägg till partner och barn i din profil. De visas tillsammans med dig som deltagare i resor.", "Har du redan ett konto guidas du nu genom att lägga till partner och barn. Du kan också ta bort dem direkt där.", "Resöversikten visar hur många personer som är med." ] },

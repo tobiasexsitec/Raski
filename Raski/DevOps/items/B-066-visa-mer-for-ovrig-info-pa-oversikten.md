@@ -36,3 +36,4 @@ resten av innehållet, men kan fälla ut texten när jag vill läsa allt.
 - 2026-10-28: Typ bekräftad som Patch.
 - 2026-10-28: Heuristik på tecken-/radantal valdes i stället för JS-mätning av höjd.
 - 2026-10-28: Knappen använder designsystemets `btn btn-primary btn-sm` (utan pil) så att den ser ut som en knapp i Raskis färger.
+- 2026-11-02: Släppt i version 1.0.0.

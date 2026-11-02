@@ -49,3 +49,4 @@ slipper skriva om "burk" till "burkar".
 ## Beslut
 - 2026-11-02: Typ satt till Patch enligt användaren.
 - 2026-11-02: En enhet som användaren manuellt skriver om efter autobytet ska respekteras.
+- 2026-11-02: Släppt i version 1.0.0.

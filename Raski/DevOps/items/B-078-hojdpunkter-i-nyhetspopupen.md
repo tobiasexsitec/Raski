@@ -30,3 +30,4 @@ jag snabbt förstår vad som är nytt, och kunna läsa alla detaljer om jag vill
 
 ## Beslut
 - 2026-11-02: Höjdpunkter skrivs för hand per release; äldre versioner utan `highlights` visas som förut.
+- 2026-11-02: Släppt i version 1.0.0.

@@ -41,3 +41,4 @@ hamnar på inköpslistan tillsammans med resten.
 ## Beslut
 - 2026-10-28: Samma lagring som "Övrigt att handla" på inköpslistan används i stället för en ny collection.
 - 2026-10-28: Två kategorier (`category` = `fika`/`ovrigt`) som separata kort; äldre dokument utan kategori räknas som Övrigt.
+- 2026-11-02: Släppt i version 1.0.0.

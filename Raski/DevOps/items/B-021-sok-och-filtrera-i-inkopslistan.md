@@ -18,3 +18,4 @@ hittar det jag letar efter.
 ## Tekniska noteringar
 - Filtreringen sker helt i klienten i `ShoppingListView.razor`; sektioner utan träffar döljs.
 - Formulären för att lägga till varor döljs medan ett filter är aktivt.
+- 2026-11-02: Släppt i version 1.0.0.
