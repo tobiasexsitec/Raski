@@ -1,9 +1,10 @@
 # B-076: Visa mer för fika och snacks under Måltider
 
-- **Status:** Pågående
+- **Status:** Klar
 - **Typ:** Patch
 - **Prioritet:** –
 - **Skapad:** 2026-11-02
+- **Klar:** 2026-11-02
 
 ## Beskrivning
 På fliken Måltider kan listorna under "Fika/snacks" och "Övrigt" bli långa, vilket gör att
