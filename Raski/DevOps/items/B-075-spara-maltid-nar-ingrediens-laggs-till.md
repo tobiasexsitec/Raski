@@ -1,9 +1,10 @@
 # B-075: Spara måltid när ingrediens läggs till
 
-- **Status:** Idé
+- **Status:** Klar
 - **Typ:** Patch
 - **Prioritet:** –
 - **Skapad:** 2026-10-29
+- **Klar:** 2026-11-02
 
 ## Beskrivning
 När man klickar på "Lägg till ingrediens" på en måltid ska måltiden och dess befintliga ingredienser sparas direkt, så att man inte behöver klicka på "Spara måltid" för att inget ska gå förlorat. Knappen "Lägg till ingrediens" ska dessutom vara inaktiverad tills den föregående ingrediensen är helt ifylld, för att motverka tomma ingredienser.

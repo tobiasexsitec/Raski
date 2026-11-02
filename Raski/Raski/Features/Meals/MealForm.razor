@@ -105,7 +105,18 @@
             </div>
         }
 
-        <button type="button" class="btn btn-secondary btn-sm" @onclick="AddRow">+ Lägg till ingrediens</button>
+        <button type="button"
+                class="btn btn-secondary btn-sm"
+                disabled="@(!CanAddRow)"
+                title="@(CanAddRow ? null : "Fyll i ingrediens, mängd och enhet först")"
+                aria-describedby="@(CanAddRow ? null : "add-ingredient-hint")"
+                @onclick="AddRowAndSaveAsync">
+            + Lägg till ingrediens
+        </button>
+        @if (!CanAddRow)
+        {
+            <span id="add-ingredient-hint" class="muted visually-hidden">Fyll i ingrediens, mängd och enhet för den senaste ingrediensen först.</span>
+        }
     </fieldset>
 
     <fieldset class="ingredients">
@@ -213,12 +224,22 @@
     private bool isSaving;
     private string? errorMessage;
 
+    private string savedMealId = "";
+
     private bool IsNew => Meal is null || string.IsNullOrEmpty(Meal.Id);
+
+    private bool CanAddRow => !isSaving && (rows.Count == 0 || IsComplete(rows[^1]));
+
+    private static bool IsComplete(IngredientRow row) =>
+        !string.IsNullOrWhiteSpace(row.Name)
+        && row.Amount is > 0
+        && !string.IsNullOrWhiteSpace(row.Unit);
 
     protected override void OnInitialized()
     {
         if (Meal is not null)
         {
+            savedMealId = Meal.Id;
             selectedDate = Meal.Date.ToString("yyyy-MM-dd");
             mealType = Meal.Type;
             title = Meal.Title;
@@ -256,6 +277,18 @@
     }
 
     private void AddRow() => rows.Add(new IngredientRow());
+
+    private async Task AddRowAndSaveAsync()
+    {
+        if (!CanAddRow)
+        {
+            return;
+        }
+
+        // Silent save: an incomplete meal is not created, the row is just added.
+        await PersistAsync(silent: true);
+        AddRow();
+    }
 
     protected override async Task OnInitializedAsync() =>
         await IngredientService.GetUnitsAsync();
@@ -335,13 +368,22 @@
         }
     }
 
-    private async Task SaveAsync()
+    private Task SaveAsync() => PersistAsync(silent: false);
+
+    private async Task PersistAsync(bool silent)
     {
-        errorMessage = null;
+        if (!silent)
+        {
+            errorMessage = null;
+        }
 
         if (string.IsNullOrWhiteSpace(title))
         {
-            errorMessage = "Ange vad ni ska äta.";
+            if (!silent)
+            {
+                errorMessage = "Ange vad ni ska äta.";
+            }
+
             return;
         }
 
@@ -349,7 +391,11 @@
 
         if (trimmedRecipeUrl.Length > 0 && !IsHttpUrl(trimmedRecipeUrl))
         {
-            errorMessage = "Receptlänken måste börja med http:// eller https://.";
+            if (!silent)
+            {
+                errorMessage = "Receptlänken måste börja med http:// eller https://.";
+            }
+
             return;
         }
 
@@ -368,7 +414,11 @@
 
         if (invalidDrink is not null)
         {
-            errorMessage = $"Länken för {invalidDrink.Name} måste börja med http:// eller https://.";
+            if (!silent)
+            {
+                errorMessage = $"Länken för {invalidDrink.Name} måste börja med http:// eller https://.";
+            }
+
             return;
         }
 
@@ -402,9 +452,9 @@
                 drink.Name = ingredient.Name;
             }
 
-            await MealService.SaveAsync(new Meal
+            savedMealId = await MealService.SaveAsync(new Meal
             {
-                Id = Meal?.Id ?? "",
+                Id = savedMealId,
                 TripId = Trip.Id,
                 Date = DateOnly.Parse(selectedDate),
                 Type = mealType,
@@ -417,7 +467,10 @@
                 Drinks = drinks
             });
 
-            await OnSaved.InvokeAsync();
+            if (!silent)
+            {
+                await OnSaved.InvokeAsync();
+            }
         }
         catch (Exception)
         {
