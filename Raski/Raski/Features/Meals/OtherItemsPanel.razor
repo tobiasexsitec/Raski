@@ -122,15 +122,17 @@
 							   step="any"
 							   min="0"
 							   inputmode="decimal"
-							   @bind="editAmount" />
+							   @bind="editAmount"
+							   @bind:after="InflectEditUnit" />
 					</label>
 					<div class="edit-unit">
 						<span class="field-label">Enhet</span>
 						<AutoComplete TItem="string"
 									  Value="@editUnit"
-									  ValueChanged="value => editUnit = value"
+									  ValueChanged="OnEditUnitTyped"
 									  SearchFunc="SearchUnitsAsync"
 									  DisplaySelector="u => u"
+									  OnItemSelected="OnEditUnitSelected"
 									  MinimumLength="1"
 									  AriaLabel="Enhet"
 									  Placeholder="Enhet" />
@@ -288,10 +290,29 @@ private ShoppingListItem? editing;
 private string editName = "";
 private decimal? editAmount;
 private string editUnit = "";
+private readonly UnitInflection editUnitInflection = new();
 private string editCategory = ExtraCategories.Other;
 private string? editError;
 
 private string EditHeadingId => $"extra-edit-heading-{Category}";
+
+protected override async Task OnInitializedAsync() =>
+	await IngredientService.GetUnitsAsync();
+
+private void InflectEditUnit() =>
+	editUnit = editUnitInflection.ForAmount(IngredientService, editUnit, editAmount);
+
+private void OnEditUnitTyped(string value)
+{
+	editUnit = value;
+	editUnitInflection.OnUnitTyped(value);
+}
+
+private void OnEditUnitSelected(string _)
+{
+	editUnitInflection.OnUnitSelected();
+	InflectEditUnit();
+}
 
 private void StartEdit(ShoppingListItem item)
 {
@@ -299,6 +320,7 @@ private void StartEdit(ShoppingListItem item)
 	editName = item.Name;
 	editCategory = Category;
 	editError = null;
+	editUnitInflection.Reset();
 
 	// A row summed from several units cannot be shown as one amount, so only the unit is prefilled.
 	if (item.Amounts.Count == 1)
@@ -357,11 +379,12 @@ private void OnEditIngredientSelected(Ingredient ingredient)
 	if (string.IsNullOrWhiteSpace(editUnit) && !string.IsNullOrWhiteSpace(ingredient.DefaultUnit))
 	{
 		editUnit = ingredient.DefaultUnit;
+		InflectEditUnit();
 	}
 }
 
 	private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
-		IngredientService.SearchUnitsAsync(term);
+		UnitInflection.SuggestAsync(IngredientService, term, editAmount);
 
 	private Task TakeAsync(ShoppingListItem item)
 	{

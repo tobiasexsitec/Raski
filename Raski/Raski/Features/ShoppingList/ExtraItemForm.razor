@@ -18,13 +18,15 @@
            inputmode="decimal"
            placeholder="Mängd"
            aria-label="Mängd"
-           @bind="amount" />
+           @bind="amount"
+           @bind:after="InflectUnit" />
     <div class="extra-unit">
         <AutoComplete TItem="string"
                       Value="@unit"
-                      ValueChanged="value => unit = value"
+                      ValueChanged="OnUnitTyped"
                       SearchFunc="SearchUnitsAsync"
                       DisplaySelector="u => u"
+                      OnItemSelected="OnUnitSelected"
                       MinimumLength="1"
                       AriaLabel="Enhet"
                       Placeholder="Enhet" />
@@ -43,6 +45,10 @@
     private string name = "";
     private decimal? amount;
     private string unit = "";
+    private readonly UnitInflection unitInflection = new();
+
+    protected override async Task OnInitializedAsync() =>
+        await IngredientService.GetUnitsAsync();
 
     private async Task SubmitAsync()
     {
@@ -51,7 +57,23 @@
             name = "";
             amount = null;
             unit = "";
+            unitInflection.Reset();
         }
+    }
+
+    private void InflectUnit() =>
+        unit = unitInflection.ForAmount(IngredientService, unit, amount);
+
+    private void OnUnitTyped(string value)
+    {
+        unit = value;
+        unitInflection.OnUnitTyped(value);
+    }
+
+    private void OnUnitSelected(string _)
+    {
+        unitInflection.OnUnitSelected();
+        InflectUnit();
     }
 
     private async Task<IReadOnlyList<Ingredient>> SearchIngredientsAsync(string term) =>
@@ -63,9 +85,10 @@
         if (string.IsNullOrWhiteSpace(unit) && !string.IsNullOrWhiteSpace(ingredient.DefaultUnit))
         {
             unit = ingredient.DefaultUnit;
+            InflectUnit();
         }
     }
 
     private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
-        IngredientService.SearchUnitsAsync(term);
+        UnitInflection.SuggestAsync(IngredientService, term, amount);
 }

@@ -1,9 +1,10 @@
 # B-077: Enhet byter till plural vid inmatning
 
-- **Status:** Idé
+- **Status:** Klar
 - **Typ:** Patch
 - **Prioritet:** –
 - **Skapad:** 2026-11-02
+- **Klar:** 2026-11-02
 
 ## Beskrivning
 När man anger en mängd större än 1 i ett formulär står enheten fortfarande i singular (t.ex.
@@ -22,6 +23,7 @@ slipper skriva om "burk" till "burkar".
 - [ ] När mängden ändras till 1 eller lägre byts en känd pluralform tillbaka till singular.
 - [ ] Bytet syns direkt i formuläret, innan man sparar.
 - [ ] Ordningen spelar ingen roll: väljs enheten efter att mängden angetts får den också rätt form.
+- [ ] Förslagen i enhetslistan visas i den form som passar mängden (t.ex. "burkar" när mängden är 2).
 - [ ] Enheter som saknar pluralform eller är okända lämnas orörda.
 - [ ] Har användaren själv skrivit om enheten efter ett automatiskt byte respekteras det, och
       enheten byts inte längre automatiskt i det fältet.
@@ -39,6 +41,10 @@ slipper skriva om "burk" till "burkar".
 - Berörda formulär: t.ex. `Features/Meals/ExtraItemForm.razor`, redigeringsdialogen i
   `OtherItemsPanel.razor`, `TripDrinksPanel.razor` och ingrediensraderna i måltidsredigeringen.
 - Relaterat: B-074 (enheter sparas alltid med små bokstäver).
+- Implementerat med `Shared/UnitInflection.cs` som håller reda på senaste automatiska byte per
+  fält. Skriver användaren något annat än det automatiska värdet stängs bytet av; väljer man en
+  enhet i listan slås det på igen. Under fri inmatning i enhetsfältet byts inget, så att texten
+  inte ändras mitt i skrivandet.
 
 ## Beslut
 - 2026-11-02: Typ satt till Patch enligt användaren.

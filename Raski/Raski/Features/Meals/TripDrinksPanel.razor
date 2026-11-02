@@ -50,15 +50,17 @@
                                aria-label="@($"Mängd för dryck {drinkNumber}")"
                                placeholder="Mängd"
                                @bind="drink.Quantity"
-                               @bind:event="oninput" />
+                               @bind:event="oninput"
+                               @bind:after="() => InflectUnit(drink)" />
                     </div>
 
                     <div class="field unit">
                         <AutoComplete TItem="string"
                                       Value="@drink.Unit"
-                                      ValueChanged="value => drink.Unit = value"
-                                      SearchFunc="SearchUnitsAsync"
+                                      ValueChanged="value => OnUnitTyped(drink, value)"
+                                      SearchFunc="term => UnitInflection.SuggestAsync(IngredientService, term, drink.Quantity)"
                                       DisplaySelector="u => u"
+                                      OnItemSelected="_ => OnUnitSelected(drink)"
                                       MinimumLength="1"
                                       AriaLabel="@($"Enhet för dryck {drinkNumber}")"
                                       Placeholder="Enhet" />
@@ -265,15 +267,43 @@
         isEditing = false;
     }
 
-    private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
-        IngredientService.SearchUnitsAsync(term);
+    private readonly Dictionary<MealDrink, UnitInflection> unitInflections = new(ReferenceEqualityComparer.Instance);
+
+    protected override async Task OnInitializedAsync() =>
+        await IngredientService.GetUnitsAsync();
+
+    private UnitInflection InflectionFor(MealDrink drink)
+    {
+        if (!unitInflections.TryGetValue(drink, out var inflection))
+        {
+            inflection = new UnitInflection();
+            unitInflections[drink] = inflection;
+        }
+
+        return inflection;
+    }
+
+    private void InflectUnit(MealDrink drink) =>
+        drink.Unit = InflectionFor(drink).ForQuantity(IngredientService, drink.Unit, drink.Quantity);
+
+    private void OnUnitTyped(MealDrink drink, string value)
+    {
+        drink.Unit = value;
+        InflectionFor(drink).OnUnitTyped(value);
+    }
+
+    private void OnUnitSelected(MealDrink drink)
+    {
+        InflectionFor(drink).OnUnitSelected();
+        InflectUnit(drink);
+    }
 
     private async Task<IReadOnlyList<Ingredient>> SearchIngredientsAsync(string term) =>
         [.. (await IngredientService.SearchAsync(term, 50))
             .Where(i => i.Tags.Contains("drycker", StringComparer.OrdinalIgnoreCase))
             .Take(8)];
 
-    private static void OnDrinkSelected(MealDrink drink, Ingredient ingredient)
+    private void OnDrinkSelected(MealDrink drink, Ingredient ingredient)
     {
         drink.IngredientId = ingredient.Id;
         drink.Name = ingredient.Name;
@@ -281,6 +311,7 @@
         if (string.IsNullOrWhiteSpace(drink.Unit) && !string.IsNullOrWhiteSpace(ingredient.DefaultUnit))
         {
             drink.Unit = ingredient.DefaultUnit!;
+            InflectUnit(drink);
         }
     }
 
