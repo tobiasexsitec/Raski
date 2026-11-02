@@ -50,3 +50,4 @@ avbokning på grund av sjukdom, så att alla deltagare vet vad som gäller innan
 - Deltagare ska bekräfta/godkänna policyer.
 - Policyerna nås via en länk på Översikt-kortet på Översikt-fliken.
 - Lagring som subcollection `trips/{tripId}/policies/{policyId}`.
+- 2026-11-02: Släppt i version 1.0.0.

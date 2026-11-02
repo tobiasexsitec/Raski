@@ -36,3 +36,4 @@ Som deltagare på en resa vill jag kunna redigera det jag lagt till under Fika/S
 - 2026-10-28: Alla fält ska gå att ändra.
 - Kategori (Fika/Snacks eller Övrigt) går också att ändra i dialogen.
 - En rad som summerats från flera poster slås ihop till en post vid redigering (första posten uppdateras, övriga tas bort).
+- 2026-11-02: Släppt i version 1.0.0.

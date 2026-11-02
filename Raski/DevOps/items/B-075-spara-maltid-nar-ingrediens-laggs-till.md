@@ -34,3 +34,4 @@ Som deltagare som planerar måltider vill jag att ingredienserna sparas när jag
 - 2026-10-29: Ingrediens, mängd och enhet är obligatoriska.
 - 2026-10-29: En ny måltid som saknar obligatoriska fält skapas inte vid första klicket.
 - 2026-10-29: Ingen bekräftelse per ingrediens; "Spara måltid" bekräftar som idag.
+- 2026-11-02: Släppt i version 1.0.0.

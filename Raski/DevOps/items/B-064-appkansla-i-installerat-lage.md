@@ -36,3 +36,4 @@ och att statusfältet matchar appens tema, så att appen känns som en riktig ap
 - 2026-10-27: Utbrutet från B-060. Typ bekräftad som Funktion.
 - 2026-10-27: Undantag från versionsregeln: ger patch-höjning, inte minor.
 - 2026-10-27: Endast dubbeltrycks-zoom spärras; nyp-zoom tillåts av tillgänglighetsskäl.
+- 2026-11-02: Släppt i version 1.0.0.

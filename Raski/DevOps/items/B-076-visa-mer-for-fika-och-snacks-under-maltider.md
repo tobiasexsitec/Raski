@@ -56,3 +56,4 @@ inte behöver scrolla så mycket på fliken Måltider.
 - 2026-11-02: Radredigering à la dryck blev grötig på mobil. Istället behålls penna/kryss per
   rad med modaler, men de visas bara i redigeringsläge. "Visa mer" får samma utseende som
   Övrig info på översikten.
+- 2026-11-02: Släppt i version 1.0.0.

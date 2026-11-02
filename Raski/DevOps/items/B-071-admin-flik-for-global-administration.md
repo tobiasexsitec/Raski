@@ -36,3 +36,4 @@ Som användare vill jag ha en Admin-flik där allt jag kan administrera finns sa
 - 2026-10-28: Delad i två objekt: B-070 (Profil i avatarmenyn) och detta (Admin-flik).
 - 2026-10-28: Typ föreslagen som Patch (mindre förbättring av navigeringen).
 - 2026-10-28: Admin-fliken visas för alla användare; sidan består av lådor (Profil för alla, Användare och Enheter bara för globala admins). Branchen bygger på B-070.
+- 2026-11-02: Släppt i version 1.0.0.
