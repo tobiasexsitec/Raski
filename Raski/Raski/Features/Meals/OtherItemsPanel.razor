@@ -1,9 +1,15 @@
-@inject IShoppingListService ShoppingListService
+﻿@inject IShoppingListService ShoppingListService
 @inject IBringItemService BringItemService
 @inject IIngredientService IngredientService
 
 <section class="card other-items" aria-labelledby="@HeadingId">
-	<h2 id="@HeadingId">@ExtraCategories.Display(Category)</h2>
+	<div class="other-header">
+		<h2 id="@HeadingId">@ExtraCategories.Display(Category)</h2>
+		@if (!isEditing && !isLoading)
+		{
+			<button type="button" class="btn btn-secondary btn-sm" disabled="@isSaving" @onclick="StartEditing">Redigera</button>
+		}
+	</div>
 	<p class="muted">@Description</p>
 
 	@if (errorMessage is not null)
@@ -15,13 +21,13 @@
 	{
 		<p class="muted">Hämtar…</p>
 	}
-	else if (items.Count == 0)
+	else if (items.Count == 0 && !isEditing)
 	{
 		<p class="muted">Inget tillagt än.</p>
 	}
 	else
 	{
-		<ul class="other-list">
+		<ul class="other-list @(IsCollapsed ? "collapsed" : "")" id="@ListId">
 			@foreach (var item in items)
 			{
 				<li>
@@ -31,7 +37,20 @@
 						<span class="muted">@FormatAmounts(item)</span>
 					}
 					<span class="spacer"></span>
-					@if (ShowTakeButton && CurrentUser is not null)
+					@if (isEditing)
+					{
+						<button type="button"
+								class="btn btn-icon btn-sm"
+								aria-label="@($"Redigera {item.Name}")"
+								disabled="@isSaving"
+								@onclick="() => StartEdit(item)">✎</button>
+						<button type="button"
+								class="btn btn-icon btn-sm"
+								aria-label="@($"Ta bort {item.Name}")"
+								disabled="@isSaving"
+								@onclick="() => deleting = item">✕</button>
+					}
+					else if (ShowTakeButton && CurrentUser is not null)
 					{
 						<button type="button"
 								class="btn btn-secondary btn-sm"
@@ -39,25 +58,33 @@
 								disabled="@isSaving"
 								@onclick="() => TakeAsync(item)">Jag tar med</button>
 					}
-					<button type="button"
-							class="btn btn-icon btn-sm"
-							aria-label="@($"Redigera {item.Name}")"
-							disabled="@isSaving"
-							@onclick="() => StartEdit(item)">✎</button>
-					<button type="button"
-							class="btn btn-icon btn-sm"
-							aria-label="@($"Ta bort {item.Name}")"
-							disabled="@isSaving"
-							@onclick="() => DeleteAsync(item)">✕</button>
 				</li>
 			}
 		</ul>
+
+		@if (!isEditing && items.Count > CollapsedCount)
+		{
+			<button type="button"
+					class="btn btn-primary btn-sm show-more"
+					aria-expanded="@(isExpanded ? "true" : "false")"
+					aria-controls="@ListId"
+					@onclick="() => isExpanded = !isExpanded">
+				@(isExpanded ? "Visa mindre" : $"Visa mer ({items.Count - CollapsedCount})")
+			</button>
+		}
 	}
 
-	<ExtraItemForm Placeholder="@Placeholder"
-				   AriaLabel="@($"Vara till {ExtraCategories.Display(Category)}")"
-				   IsSaving="isSaving"
-				   OnAdd="AddAsync" />
+	@if (isEditing && !isLoading)
+	{
+		<ExtraItemForm Placeholder="@Placeholder"
+					   AriaLabel="@($"Vara till {ExtraCategories.Display(Category)}")"
+					   IsSaving="isSaving"
+					   OnAdd="AddAsync" />
+
+		<div class="row-inline actions">
+			<button type="button" class="btn btn-primary" disabled="@isSaving" @onclick="() => isEditing = false">Klar</button>
+		</div>
+	}
 </section>
 
 @if (editing is not null)
@@ -125,6 +152,24 @@
 	</div>
 }
 
+@if (deleting is not null)
+{
+	<div class="backdrop" @onclick="() => deleting = null">
+		<div class="dialog card stack"
+			 role="dialog"
+			 aria-modal="true"
+			 aria-labelledby="@DeleteHeadingId"
+			 @onclick:stopPropagation="true">
+			<h3 id="@DeleteHeadingId">Ta bort @deleting.Name?</h3>
+			<p class="muted">Varan tas bort från listan och inköpslistan.</p>
+			<div class="row-inline">
+				<button type="button" class="btn btn-danger" disabled="@isSaving" @onclick="ConfirmDeleteAsync">Ta bort</button>
+				<button type="button" class="btn btn-secondary" @onclick="() => deleting = null">Avbryt</button>
+			</div>
+		</div>
+	</div>
+}
+
 @code {
 	[Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
 	[Parameter, EditorRequired] public string Category { get; set; } = ExtraCategories.Other;
@@ -141,13 +186,20 @@
 	[CascadingParameter(Name = "CurrentUser")]
 	private UserProfile? CurrentUser { get; set; }
 
+	private const int CollapsedCount = 4;
+
 	private IReadOnlyList<ShoppingListItem> items = [];
 	private string? loadedTripId;
 	private bool isLoading = true;
+	private bool isEditing;
+	private bool isExpanded;
 	private bool isSaving;
 	private string? errorMessage;
 
 	private string HeadingId => $"extra-heading-{Category}";
+	private string ListId => $"extra-list-{Category}";
+
+	private bool IsCollapsed => !isEditing && !isExpanded && items.Count > CollapsedCount;
 
 	private string Description => Category == ExtraCategories.Snacks
 		? "Fika och snacks som inte hör till en måltid. Allt här kommer med på inköpslistan."
@@ -187,107 +239,126 @@
 	private async Task LoadAsync() =>
 		items = [.. (await ShoppingListService.GetExtrasAsync(Trip.Id)).Where(i => i.ExtraCategory == Category)];
 
-	private async Task<bool> AddAsync(string name, decimal? amount, string unit)
+private void StartEditing()
+{
+	errorMessage = null;
+	isEditing = true;
+}
+
+private async Task<bool> AddAsync(string name, decimal? amount, string unit)
+{
+	if (string.IsNullOrWhiteSpace(name))
 	{
-		if (string.IsNullOrWhiteSpace(name))
-		{
-			errorMessage = "Skriv vad som ska handlas.";
-			return false;
-		}
-
-		await SaveAsync(
-			() => ShoppingListService.AddExtraAsync(Trip.Id, name, amount, unit, Category),
-			"Kunde inte lägga till varan.");
-
-		return errorMessage is null;
+		errorMessage = "Skriv vad som ska handlas.";
+		return false;
 	}
 
-	private Task DeleteAsync(ShoppingListItem item) =>
-		SaveAsync(
-			async () =>
+	await SaveAsync(
+		() => ShoppingListService.AddExtraAsync(Trip.Id, name, amount, unit, Category),
+		"Kunde inte lägga till varan.");
+
+	return errorMessage is null;
+}
+
+private ShoppingListItem? deleting;
+
+private string DeleteHeadingId => $"extra-delete-heading-{Category}";
+
+private async Task ConfirmDeleteAsync()
+{
+	if (deleting is not { } item)
+	{
+		return;
+	}
+
+	await SaveAsync(
+		async () =>
+		{
+			foreach (var extraId in item.ExtraIds)
 			{
-				foreach (var extraId in item.ExtraIds)
-				{
-					await ShoppingListService.DeleteExtraAsync(Trip.Id, extraId);
-				}
-			},
-			"Kunde inte ta bort varan.");
+				await ShoppingListService.DeleteExtraAsync(Trip.Id, extraId);
+			}
+		},
+		"Kunde inte ta bort varan.");
 
-	private ShoppingListItem? editing;
-	private string editName = "";
-	private decimal? editAmount;
-	private string editUnit = "";
-	private string editCategory = ExtraCategories.Other;
-	private string? editError;
+	deleting = null;
+}
 
-	private string EditHeadingId => $"extra-edit-heading-{Category}";
+private ShoppingListItem? editing;
+private string editName = "";
+private decimal? editAmount;
+private string editUnit = "";
+private string editCategory = ExtraCategories.Other;
+private string? editError;
 
-	private void StartEdit(ShoppingListItem item)
+private string EditHeadingId => $"extra-edit-heading-{Category}";
+
+private void StartEdit(ShoppingListItem item)
+{
+	editing = item;
+	editName = item.Name;
+	editCategory = Category;
+	editError = null;
+
+	// A row summed from several units cannot be shown as one amount, so only the unit is prefilled.
+	if (item.Amounts.Count == 1)
 	{
-		editing = item;
-		editName = item.Name;
-		editCategory = Category;
-		editError = null;
+		editAmount = item.Amounts[0].Amount > 0 ? item.Amounts[0].Amount : null;
+		editUnit = item.Amounts[0].Unit;
+	}
+	else
+	{
+		editAmount = null;
+		editUnit = item.Amounts.Count > 0 ? item.Amounts[0].Unit : "";
+	}
+}
 
-		// A row summed from several units cannot be shown as one amount, so only the unit is prefilled.
-		if (item.Amounts.Count == 1)
-		{
-			editAmount = item.Amounts[0].Amount > 0 ? item.Amounts[0].Amount : null;
-			editUnit = item.Amounts[0].Unit;
-		}
-		else
-		{
-			editAmount = null;
-			editUnit = item.Amounts.Count > 0 ? item.Amounts[0].Unit : "";
-		}
+private void CancelEdit()
+{
+	editing = null;
+	editError = null;
+}
+
+private async Task SaveEditAsync()
+{
+	if (editing is not { } item)
+	{
+		return;
 	}
 
-	private void CancelEdit()
+	if (string.IsNullOrWhiteSpace(editName))
+	{
+		editError = "Skriv vad som ska handlas.";
+		return;
+	}
+
+	editError = null;
+	await SaveAsync(
+		() => ShoppingListService.UpdateExtraAsync(Trip.Id, item.ExtraIds, editName, editAmount, editUnit, editCategory),
+		"Kunde inte spara varan.");
+
+	if (errorMessage is null)
 	{
 		editing = null;
-		editError = null;
 	}
-
-	private async Task SaveEditAsync()
+	else
 	{
-		if (editing is not { } item)
-		{
-			return;
-		}
-
-		if (string.IsNullOrWhiteSpace(editName))
-		{
-			editError = "Skriv vad som ska handlas.";
-			return;
-		}
-
-		editError = null;
-		await SaveAsync(
-			() => ShoppingListService.UpdateExtraAsync(Trip.Id, item.ExtraIds, editName, editAmount, editUnit, editCategory),
-			"Kunde inte spara varan.");
-
-		if (errorMessage is null)
-		{
-			editing = null;
-		}
-		else
-		{
-			editError = errorMessage;
-			errorMessage = null;
-		}
+		editError = errorMessage;
+		errorMessage = null;
 	}
+}
 
-	private async Task<IReadOnlyList<Ingredient>> SearchIngredientsAsync(string term) =>
-		[.. (await IngredientService.SearchAsync(term, 8))];
+private async Task<IReadOnlyList<Ingredient>> SearchIngredientsAsync(string term) =>
+	[.. (await IngredientService.SearchAsync(term, 8))];
 
-	private void OnEditIngredientSelected(Ingredient ingredient)
+private void OnEditIngredientSelected(Ingredient ingredient)
+{
+	editName = ingredient.Name;
+	if (string.IsNullOrWhiteSpace(editUnit) && !string.IsNullOrWhiteSpace(ingredient.DefaultUnit))
 	{
-		editName = ingredient.Name;
-		if (string.IsNullOrWhiteSpace(editUnit) && !string.IsNullOrWhiteSpace(ingredient.DefaultUnit))
-		{
-			editUnit = ingredient.DefaultUnit;
-		}
+		editUnit = ingredient.DefaultUnit;
 	}
+}
 
 	private Task<IReadOnlyList<string>> SearchUnitsAsync(string term) =>
 		IngredientService.SearchUnitsAsync(term);

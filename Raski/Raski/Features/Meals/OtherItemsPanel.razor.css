@@ -1,4 +1,4 @@
-.other-items {
+﻿.other-items {
     margin-bottom: var(--space-4);
 }
 
@@ -18,6 +18,39 @@
 
 .other-list .name {
     font-weight: 600;
+}
+
+.other-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+
+.show-more {
+    margin-top: var(--space-2);
+}
+
+/* Shows the first rows in full and half of the next one, faded out like Övrig info on the overview. */
+.other-list.collapsed {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent);
+    mask-image: linear-gradient(to bottom, #000 60%, transparent);
+}
+
+.other-list.collapsed li:nth-child(5) {
+    max-height: 1.25rem;
+    overflow: hidden;
+    align-items: flex-start;
+}
+
+.other-list.collapsed li:nth-child(n + 6) {
+    display: none;
+}
+
+
+.actions {
+    margin-top: var(--space-4);
 }
 
 .backdrop {

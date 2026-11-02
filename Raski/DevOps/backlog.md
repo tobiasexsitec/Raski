@@ -19,6 +19,7 @@
 | [B-063](items/B-063-ios-splash-och-google-inloggning-i-installerad-app.md) | iOS-splash och Google-inloggning i installerad app | Funktion | Idé | – | 2026-10-27 |
 | [B-072](items/B-072-snygg-ikon-nar-appen-installeras.md) | Snygg ikon när appen installeras | Bugg | Idé | – | 2026-10-28 |
 | [B-075](items/B-075-spara-maltid-nar-ingrediens-laggs-till.md) | Spara måltid när ingrediens läggs till | Patch | Idé | – | 2026-10-29 |
+| [B-076](items/B-076-visa-mer-for-fika-och-snacks-under-maltider.md) | Visa mer för fika och snacks under Måltider | Patch | Pågående | – | 2026-11-02 |
 
 ## Klara
 
