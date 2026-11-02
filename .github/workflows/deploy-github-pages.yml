@@ -15,15 +15,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  firestore:
+  firebase:
     runs-on: ubuntu-latest
     environment:
-      name: github-pages
+      name: production
+      url: https://raski.krispinsson.se
     steps:
       - uses: actions/checkout@v4
 
-      # Rules go out before the app so new app code never runs against old rules.
-      - name: Deploy Firestore rules/indexes
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # Swapped in before publish so the service worker asset hashes match the deployed file.
+      - name: Use production configuration
+        run: |
+          cp deploy/prod/appsettings.json Raski/Raski/wwwroot/appsettings.json
+          PROJECT_ID=$(jq -r '.Firebase.projectId' deploy/prod/appsettings.json)
+          echo "PROJECT_ID=$PROJECT_ID" >> "$GITHUB_ENV"
+
+      - name: Publish
+        run: dotnet publish Raski/Raski/Raski.csproj -c Release
+
+      # Firestore rules are deployed before hosting so new app code never runs against old rules.
+      - name: Deploy hosting and Firestore rules/indexes
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_RASKI }}
         run: |
@@ -31,11 +47,11 @@ jobs:
             echo "::error::Hemligheten FIREBASE_SERVICE_ACCOUNT_RASKI saknas."
             exit 1
           fi
-          PROJECT_ID=$(jq -r '.Firebase.projectId' Raski/Raski/wwwroot/appsettings.json)
           echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
-          npx --yes firebase-tools@latest deploy --only firestore --project "$PROJECT_ID" --non-interactive
+          npx --yes firebase-tools@latest deploy --only firestore,hosting --project "$PROJECT_ID" --non-interactive
 
+  # GitHub Pages runs in parallel until users have moved to raski.krispinsson.se (B-051).
   build:
     runs-on: ubuntu-latest
     steps:
@@ -45,6 +61,9 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+
+      - name: Use production configuration
+        run: cp deploy/prod/appsettings.json Raski/Raski/wwwroot/appsettings.json
 
       - name: Publish
         run: dotnet publish Raski/Raski/Raski.csproj -c Release -o publish
@@ -60,7 +79,7 @@ jobs:
           path: publish/wwwroot
 
   deploy:
-    needs: [ firestore, build ]
+    needs: [ firebase, build ]
     runs-on: ubuntu-latest
     environment:
       name: github-pages

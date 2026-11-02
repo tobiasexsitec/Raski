@@ -32,7 +32,7 @@ Subdomän: `raski.krispinsson.se` (prod) och `test-raski.krispinsson.se` (test).
 - Local storage (t.ex. tema och senast sedda version) följer inte med till ny origin.
 - Allt i webbläsaren (PWA-installation, service worker, inloggningssession, local storage) är bundet till adressen, inte till värden. Därför ska domänbytet bara göras en gång: när appen väl ligger på `raski.krispinsson.se` kan värden (GitHub Pages, Firebase Hosting, Azure Static Web Apps) bytas genom att bara ändra DNS, utan att användarna märker något.
 - Att byta backend (Firebase Auth/Firestore) märks däremot för användarna: lösenordshashar kan inte importeras rakt av till t.ex. Azure Entra (e-postanvändare måste troligen återställa lösenord), alla måste logga in igen, data måste migreras och `firestore.rules` måste ersättas av ett API.
-ska på sikt nås via `test-raski.krispinsson.se`.
+- Prodkonfigurationen ligger i `deploy/prod/appsettings.json` (med `authDomain` `raski.krispinsson.se`) och kopieras in av `deploy-github-pages.yml`, som driftsätter till både Firebase Hosting och GitHub Pages.
 
 ## Beslut
 - Både test och prod ska ligga på Firebase Hosting. Prod flyttas från GitHub Pages, eftersom GitHub Pages bara har en egen domän per repo och då genast skickar vidare från `github.io`, så att det inte går att köra adresserna parallellt.
