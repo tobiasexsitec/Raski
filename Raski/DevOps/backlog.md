@@ -22,6 +22,7 @@
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-078](items/B-078-hojdpunkter-i-nyhetspopupen.md) | Höjdpunkter i nyhetspopupen | Patch | – | 2026-11-02 |
 | [B-075](items/B-075-spara-maltid-nar-ingrediens-laggs-till.md) | Spara måltid när ingrediens läggs till | Patch | – | 2026-11-02 |
 | [B-077](items/B-077-enhet-byter-till-plural-vid-inmatning.md) | Enhet byter till plural vid inmatning | Patch | – | 2026-11-02 |
 | [B-076](items/B-076-visa-mer-for-fika-och-snacks-under-maltider.md) | Visa mer för fika och snacks under Måltider | Patch | – | 2026-11-02 |

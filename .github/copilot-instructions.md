@@ -104,12 +104,14 @@ Mönstret finns i `MealService.ObserveMeals` / `ShoppingListService`: en bounded
   - `Bugg` (`fix`): höj **patch** (t.ex. `0.4.2` → `0.4.3`).
   - `Utveckling` (övriga typer): **ingen** versionshöjning och ingen release notes-post.
   - Innehåller en release minst ett `Funktion`-objekt höjs minor, annars patch om den innehåller `Patch` eller `Bugg`.
-  - Vid versionshöjning (i samband med release till `main`): ange den nya versionen under **Beslut** i objektfilerna som ingår (t.ex. `- Släppt i version 0.5.0.`). Release notes och nyhets-popupen ska bara innehålla `feat`/`fix`. Appen är inte släppt ännu, så versionen ligger på 0.x.y tills 1.0.0 släpps.
-- Branchflöde (förenklad Git Flow):
-  - **Feature:** skapa alltid en ny feature-branch (feature/B-XXX-slug) från develop innan du börjar arbeta på en ny funktion/backlog-objekt, snarare än att arbeta på den för närvarande checkade branchen. Nya funktioner och ändringar utvecklas i en feature-branch som skapas från `develop` och mergas tillbaka till `develop` först när arbetet är klart. `develop` ska alltid gå att släppa; stora funktioner delas upp eller döljs bakom en konfigurationsflagga.
-  - **Test:** push till `develop` publicerar testmiljön (`.github/workflows/deploy-test.yml`, se `deploy/test/README.md`).
+  Appen är inte släppt ännu, så versionen ligger på 0.x.y tills 1.0.0 släpps.
+  - Release notes skrivs i `wwwroot/release-notes.json`. `notes` innehåller alla `feat`/`fix`-rader och visas på Om Raski™. Har releasen fler än cirka 4 rader, lägg även till `highlights`: högst cirka 4 punkter grupperade efter vad användaren märker (kort rubrik + en mening om nyttan, viktigast först). Innehåller releasen flera `Patch`- eller `Bugg`-objekt som inte ryms i de övriga punkterna ska `highlights` alltid avslutas med punkten "Buggfixar och små förbättringar". Popupen visar `highlights` om det finns, annars `notes`.
+  
+## Branchflöde
+- **Feature:** skapa alltid en ny feature-branch (feature/B-XXX-slug) från develop innan du börjar arbeta på en ny funktion/backlog-objekt, snarare än att arbeta på den för närvarande checkade branchen. Nya funktioner och ändringar utvecklas i en feature-branch som skapas från `develop` och mergas tillbaka till `develop` först när arbetet är klart. `develop` ska alltid gå att släppa; stora funktioner delas upp eller döljs bakom en konfigurationsflagga.
+- **Test:** push till `develop` publicerar testmiljön (`.github/workflows/deploy-test.yml`, se `deploy/test/README.md`).
   Öppna en PR `release/vX.Y.Z` → `main` och merga den med **merge commit** (inte rebase, så att `main` och `develop` delar historik). Tagga merge-committen på `main` med `vX.Y.Z` (t.ex. `v0.28.0`). Push till `main` publicerar produktion (en enda körning). Öppna därefter en PR `main` → `develop` och merga den med merge commit så att versionen finns där. Feature-PR:er in i `develop` mergas med rebase.
-  Höj patch i en commit på hotfix-branchen, öppna en PR mot `main` och merga med merge commit, tagga, och merga sedan `main` tillbaka till `develop` via PR med merge commit.
+- Höj patch i en commit på hotfix-branchen, öppna en PR mot `main` och merga med merge commit, tagga, och merga sedan `main` tillbaka till `develop` via PR med merge commit.
 - När du redigerar tabellerna i `Raski/DevOps/backlog.md`, följ reglerna i filen: ersätt alltid hela raden och läs igenom tabellerna efteråt. **Öppna** har kolumnerna ID, Titel, Typ, Status, Prioritet, Skapad i nummerordning; **Klara** har ID, Titel, Typ, Prioritet, Klar med senast klar överst. Varje fil i `items/` ska finnas i exakt en tabell, och typ, status och datum ska matcha objektfilerna.
 
 ## ⚠️ KRITISKT: Redigering av backlog-tabellerna
