@@ -6,7 +6,6 @@
 | --- | --- | --- | --- | --- | --- |
 | [B-003](items/B-003-mark-ingredienser-med-allergener.md) | Märk ingredienser med allergener | Funktion | Redo | – | 2026-09-29 |
 | [B-004](items/B-004-varna-for-allergener-i-maltider.md) | Varna för allergener i måltider | Funktion | Redo | – | 2026-09-29 |
-| [B-041](items/B-041-tema-pa-resan.md) | Tema på resan | Funktion | Idé | – | 2026-10-14 |
 | [B-043](items/B-043-markera-saker-som-saknar-ansvarig.md) | Markera saker som saknar ansvarig | Funktion | Idé | – | 2026-10-14 |
 | [B-044](items/B-044-dashboard-med-nedrakning-till-resan.md) | Dashboard med nedräkning till resan | Funktion | Idé | – | 2026-10-14 |
 | [B-046](items/B-046-koppla-anonym-deltagare-till-befintlig-anvandare.md) | Koppla anonym deltagare till befintlig användare | Funktion | Idé | – | 2026-10-14 |
@@ -87,6 +86,12 @@
 | [B-002](items/B-002-visa-resenarers-allergier-pa-en-resa.md) | Visa resenärers allergier på en resa | Funktion | – | 2026-09-29 |
 | [B-001](items/B-001-profilsida-med-allergier-och-kostpreferenser.md) | Profilsida med allergier och kostpreferenser | Funktion | – | 2026-09-29 |
 
+## Borttagna
+
+| ID | Titel | Typ | Borttagen |
+| --- | --- | --- | --- |
+| [B-041](items/B-041-tema-pa-resan.md) | Tema på resan | Funktion | 2026-11-02 |
+
 ## Struktur
 
 - Den här filen är bara ett **index**. Varje backlog-objekt ligger i en egen fil i
@@ -96,6 +101,8 @@
   båda tabellerna + 1).
 - Öppna objekt listas under **Öppna** med skapat-datum. När ett objekt blir Klar flyttas
   raden till **Klara** med klar-datum, och **Klar:** sätts i objektfilen.
+- Objekt som inte ska göras får status Borttagen och flyttas till **Borttagna** med
+  borttaget-datum, och **Borttagen:** sätts i objektfilen.
 - Beslut som gäller flera objekt ligger i [`beslut/`](beslut/), t.ex.
   [Allergier och kostpreferenser](beslut/allergier-och-kostpreferenser.md).
 
@@ -110,11 +117,13 @@
 >      nummerordning,
 >    - **Klara** har exakt fem kolumner (ID, Titel, Typ, Prioritet, Klar) och är sorterad med
 >      senast klar överst (vid samma datum: högst ID överst),
+>    - **Borttagna** har exakt fyra kolumner (ID, Titel, Typ, Borttagen) och är sorterad med
+>      senast borttagen överst,
 >    - varje fil i `items/` finns i exakt en av tabellerna, och objekt med status Klar
->      ligger i **Klara**, övriga i **Öppna**,
+>      ligger i **Klara**, Borttagen i **Borttagna**, övriga i **Öppna**,
 >    - typ, status och datum stämmer med respektive objektfil,
 >    - länken pekar på en befintlig fil.
 > 4. Om något avviker: rätta tabellerna innan arbetet rapporteras som klart.
 
-**Status:** `Idé` / `Redo` / `Pågår` / `Klar`
+**Status:** `Idé` / `Redo` / `Pågår` / `Klar` / `Borttagen`
 **Prioritet:** `Hög` / `Medel` / `Låg`

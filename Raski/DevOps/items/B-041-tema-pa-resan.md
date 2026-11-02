@@ -1,9 +1,10 @@
 # B-041: Tema på resan
 
-- **Status:** Idé
+- **Status:** Borttagen
 - **Typ:** Funktion
 - **Prioritet:** –
 - **Skapad:** 2026-10-14
+- **Borttagen:** 2026-11-02
 
 ## Beskrivning
 Man ska kunna välja ett tema för resan, t.ex. skidresa eller höstresa, som påverkar
@@ -27,4 +28,4 @@ Som arrangör vill jag ge resan ett tema så att den känns personlig och är l�
 - UI i `TripEditor`, `TripOverview`, `TripList`.
 
 ## Beslut
-- –
+- 2026-11-02: Borttagen. Ikon/gradient, dekorationer i headern och helsidesbakgrund testades men blev inte bra, så implementationen togs bort.
