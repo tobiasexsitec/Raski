@@ -14,6 +14,11 @@ public sealed class Trip
     public string OwnerUid { get; set; } = "";
     public List<string> MemberUids { get; set; } = [];
 
+    /// <summary>Set when the trip is soft deleted; such trips are hidden everywhere.</summary>
+    public DateTimeOffset? DeletedAt { get; set; }
+
+    public bool IsDeleted => DeletedAt is not null;
+
     /// <summary>Every day of the trip, inclusive. Empty when the range is invalid.</summary>
     public IEnumerable<DateOnly> Days()
     {
