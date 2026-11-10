@@ -13,7 +13,9 @@ import {
     signOut as fbSignOut
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {
-    getFirestore,
+    initializeFirestore,
+    persistentLocalCache,
+    persistentMultipleTabManager,
     collection,
     doc,
     getDoc,
@@ -49,7 +51,17 @@ export function initialize(config) {
 
     app = initializeApp(config);
     auth = getAuth(app);
-    db = getFirestore(app);
+    db = createFirestore(app);
+}
+
+// Persistent cache lets previously loaded data render instantly, and long-polling
+// detection avoids stalled streaming connections on proxies, VPNs and some mobile networks.
+// The SDK falls back to a memory cache by itself when IndexedDB is unavailable.
+function createFirestore(firebaseApp) {
+    return initializeFirestore(firebaseApp, {
+        localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+        experimentalAutoDetectLongPolling: true
+    });
 }
 
 function requireDb() {

@@ -153,8 +153,9 @@
 
         try
         {
-            breakfast = await BreakfastService.GetAsync(Trip.Id);
-            await IngredientService.GetUnitsAsync();
+            var breakfastTask = BreakfastService.GetAsync(Trip.Id);
+            await Task.WhenAll(breakfastTask, IngredientService.GetUnitsAsync());
+            breakfast = await breakfastTask;
         }
         catch (Exception)
         {

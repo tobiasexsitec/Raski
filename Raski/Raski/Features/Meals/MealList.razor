@@ -139,9 +139,9 @@
         }
 
         observedTripId = Trip.Id;
-        members = await TripService.GetMembersAsync(Trip.Id);
-        await IngredientService.GetUnitsAsync();
-        await StartListeningAsync();
+        var membersTask = TripService.GetMembersAsync(Trip.Id);
+        await Task.WhenAll(membersTask, IngredientService.GetUnitsAsync(), StartListeningAsync());
+        members = await membersTask;
     }
 
     private async Task StartListeningAsync()

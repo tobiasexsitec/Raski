@@ -202,15 +202,13 @@ else if (trip is not null)
 
         try
         {
+            var policiesTask = LoadPoliciesAsync();
             trip = await TripService.GetAsync(TripId);
+            await policiesTask;
 
             if (trip is null)
             {
                 errorMessage = "Resan hittades inte.";
-            }
-            else
-            {
-                await LoadPoliciesAsync();
             }
         }
         catch (Exception)
