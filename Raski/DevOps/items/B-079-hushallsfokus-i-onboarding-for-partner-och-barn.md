@@ -13,13 +13,13 @@ När man anger partner och barn ska stegen utgå från "hushållet" i stället f
 Som användare vill jag beskriva mitt hushåll genom att lägga till partner och barn så att flödet känns neutralt och inte förutsätter något om min familjesituation.
 
 ## Acceptanskriterier
-- [ ] Partnersteget har rubriken "Hur ser ditt hushåll ut?" (eller liknande hushållsformulering) i stället för "Har du en partner?".
-- [ ] Partnersteget visar en knapp "Lägg till partner" som öppnar sökningen efter partner.
-- [ ] Partnersteget har en Nästa-knapp som går vidare till barnsteget utan att något måste läggas till.
-- [ ] Barnsteget visar en knapp "Lägg till barn" i stället för en ja/nej-fråga.
-- [ ] Inga ja/nej-frågor om partner eller barn finns kvar i flödet.
-- [ ] Redan tillagda partner och barn visas som tidigare och kan tas bort.
-- [ ] Finns inte personen man försöker koppla ihop sig med visas ett meddelande om att det bara går att koppla ihop sig med registrerade användare, och man kan gå vidare med Nästa.
+- [x] Partnersteget har rubriken "Hur ser ditt hushåll ut?" (eller liknande hushållsformulering) i stället för "Har du en partner?".
+- [x] Partnersteget visar en knapp "Lägg till partner" som öppnar sökningen efter partner.
+- [x] Partnersteget har en Nästa-knapp som går vidare till barnsteget utan att något måste läggas till.
+- [x] Barnsteget visar en knapp "Lägg till barn" i stället för en ja/nej-fråga.
+- [x] Inga ja/nej-frågor om partner eller barn finns kvar i flödet.
+- [x] Redan tillagda partner och barn visas som tidigare och kan tas bort.
+- [x] Finns inte personen man försöker koppla ihop sig med visas ett meddelande om att det bara går att koppla ihop sig med registrerade användare, och man kan gå vidare med Nästa.
 
 ## Öppna frågor
 - Ska introsidan ("Reser du med partner eller barn?") också formuleras om kring hushållet?
