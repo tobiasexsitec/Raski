@@ -17,12 +17,12 @@
 | [B-060](items/B-060-installerbar-app-upplevelse-ren-pwa.md) | Installerbar app-upplevelse (ren PWA) | Funktion | Idé | – | 2026-10-26 |
 | [B-063](items/B-063-ios-splash-och-google-inloggning-i-installerad-app.md) | iOS-splash och Google-inloggning i installerad app | Funktion | Idé | – | 2026-10-27 |
 | [B-072](items/B-072-snygg-ikon-nar-appen-installeras.md) | Snygg ikon när appen installeras | Bugg | Idé | – | 2026-10-28 |
-| [B-080](items/B-080-seg-laddning-av-data-fran-firestore.md) | Seg laddning av data från Firestore | Bugg | Pågår | – | 2026-11-10 |
 
 ## Klara
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-080](items/B-080-seg-laddning-av-data-fran-firestore.md) | Seg laddning av data från Firestore | Bugg | – | 2026-11-10 |
 | [B-079](items/B-079-hushallsfokus-i-onboarding-for-partner-och-barn.md) | Hushållsfokus i onboarding för partner och barn | Patch | – | 2026-11-10 |
 | [B-078](items/B-078-hojdpunkter-i-nyhetspopupen.md) | Höjdpunkter i nyhetspopupen | Patch | – | 2026-11-02 |
 | [B-075](items/B-075-spara-maltid-nar-ingrediens-laggs-till.md) | Spara måltid när ingrediens läggs till | Patch | – | 2026-11-02 |
