@@ -137,6 +137,7 @@ internal sealed class TripDocument
     [JsonPropertyName("ownerUid")] public string? OwnerUid { get; set; }
     [JsonPropertyName("memberUids")] public List<string>? MemberUids { get; set; }
     [JsonPropertyName("pendingEmails")] public List<string>? PendingEmails { get; set; }
+    [JsonPropertyName("deletedAt")] public string? DeletedAt { get; set; }
 
     public Trip ToModel() => new()
     {
@@ -150,7 +151,10 @@ internal sealed class TripDocument
         EndDate = FirestoreFormat.ParseDate(EndDate),
         Notes = Notes,
         OwnerUid = OwnerUid ?? "",
-        MemberUids = MemberUids ?? []
+        MemberUids = MemberUids ?? [],
+        DeletedAt = DateTimeOffset.TryParse(DeletedAt, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var deletedAt)
+            ? deletedAt
+            : null
     };
 }
 

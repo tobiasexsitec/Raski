@@ -197,7 +197,7 @@ public sealed class AuthService(FirebaseInterop interop) : IAuthService, IAsyncD
             return;
         }
 
-        foreach (var trip in trips)
+        foreach (var trip in trips.Where(t => string.IsNullOrEmpty(t.DeletedAt)))
         {
             try
             {

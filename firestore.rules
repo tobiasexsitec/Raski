@@ -49,6 +49,12 @@ service cloud.firestore {
 			 == resource.data.get('pendingEmails', []);
 	}
 
+	// Soft deletion (B-081) is reserved for those who manage members.
+	function keepsDeletedAt() {
+	  return request.resource.data.get('deletedAt', null)
+			 == resource.data.get('deletedAt', null);
+	}
+
 	// A participant added by email joins by adding only their own uid.
 	function joinsFromPendingEmail() {
 	  return isPendingEmail(resource.data)
@@ -143,6 +149,7 @@ service cloud.firestore {
 	  allow update: if (isTripMember(tripId)
 						&& (canManageMembers(tripId)
 							|| (request.resource.data.memberUids == resource.data.memberUids
+								&& keepsDeletedAt()
 								&& (keepsPendingEmails() || removesOwnPendingEmail()))))
 					|| joinsFromPendingEmail();
 
