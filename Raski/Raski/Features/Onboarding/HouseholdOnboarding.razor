@@ -8,7 +8,7 @@
     <section class="card-3d" @key="@("household-intro")">
         <div class="hero-emoji wobble" aria-hidden="true">👨‍👩‍👧</div>
         <h1 class="shimmer">@Title</h1>
-        <p class="lead">Reser du med partner eller barn? Koppla ihop er och lägg till barnen, så räknas de med på resorna.</p>
+        <p class="lead">Berätta vilka som ingår i ditt hushåll. Lägg till partner och barn, så räknas de med på resorna.</p>
         <p class="lead">Du kan alltid ändra det under din profil.</p>
 
         <div class="actions">
@@ -23,7 +23,7 @@ else if (page == Page.Partner)
 {
     <section class="card-3d" @key="@("household-partner")">
         <div class="hero-emoji wobble" aria-hidden="true">💑</div>
-        <h1 class="shimmer">Har du en partner?</h1>
+        <h1 class="shimmer">Hur ser ditt hushåll ut?</h1>
 
         @if (errorMessage is not null)
         {
@@ -54,6 +54,12 @@ else if (page == Page.Partner)
                 </div>
             }
         }
+        else if (!showPartnerSearch)
+        {
+            <button type="button" class="btn btn-secondary" @onclick="() => showPartnerSearch = true" disabled="@Busy">
+                + Lägg till partner
+            </button>
+        }
         else
         {
             <p class="lead">Sök på namn eller e-post. Din partner behöver ha ett konto i Raski™.</p>
@@ -74,12 +80,16 @@ else if (page == Page.Partner)
                     @(isSaving ? "Kopplar…" : "Koppla ihop oss")
                 </button>
             </form>
+            @if (partnerNotFound)
+            {
+                <p class="lead" role="status">Personen finns inte i Raski™. Det går bara att koppla ihop sig med registrerade användare. Du kan gå vidare med Nästa och lägga till din partner senare under din profil.</p>
+            }
         }
 
         <div class="actions">
             <button type="button" class="btn btn-secondary" @onclick="PartnerBack" disabled="@isSaving">@(ShowIntro ? "Tillbaka" : BackLabel)</button>
             <button type="button" class="btn btn-primary mega" @onclick="() => Go(Page.Children)" disabled="@isSaving">
-                @(partners.Count > 0 ? "Nästa" : "Hoppa över") <span class="arrow" aria-hidden="true">✨</span>
+                Nästa <span class="arrow" aria-hidden="true">✨</span>
             </button>
         </div>
     </section>
@@ -88,7 +98,7 @@ else if (page == Page.Children)
 {
     <section class="card-3d" @key="@("household-children")">
         <div class="hero-emoji wobble" aria-hidden="true">🧒</div>
-        <h1 class="shimmer">@(children.Count == 0 ? "Har du barn?" : "Något mer barn?")</h1>
+        <h1 class="shimmer">Barn i hushållet</h1>
 
         @if (errorMessage is not null)
         {
@@ -124,7 +134,7 @@ else if (page == Page.Children)
         }
 
         <button type="button" class="btn btn-secondary" @onclick="StartChild" disabled="@Busy">
-            + Lägg till @(children.Count == 0 ? "ett barn" : "ett barn till")
+            + Lägg till barn
         </button>
 
         <div class="actions">
@@ -193,6 +203,8 @@ else
     private string childAllergies = "";
     private bool isSaving;
     private bool confirmUnlink;
+    private bool showPartnerSearch;
+    private bool partnerNotFound;
     private Child? childToRemove;
     private string? errorMessage;
 
@@ -269,18 +281,40 @@ else
             .Take(8)];
     }
 
-    private Task LinkAsync() =>
-        RunAsync(async () =>
+    private async Task LinkAsync()
+    {
+        partnerNotFound = false;
+        var emailKey = partnerEmail.Trim();
+
+        try
+        {
+            allUsers ??= await UserService.GetAllAsync();
+        }
+        catch (Exception)
+        {
+            // Let the link attempt report any real problem.
+        }
+
+        if (allUsers is not null && !allUsers.Any(u => string.Equals(u.Email, emailKey, StringComparison.OrdinalIgnoreCase)))
+        {
+            errorMessage = null;
+            partnerNotFound = true;
+            return;
+        }
+
+        await RunAsync(async () =>
         {
             await ApplyAsync(await HouseholdService.LinkPartnerAsync(partnerEmail));
             partnerEmail = "";
         }, "Kunde inte koppla ihop er.");
+    }
 
     private Task UnlinkAsync() =>
         RunAsync(async () =>
         {
             await ApplyAsync(await HouseholdService.UnlinkAsync());
             confirmUnlink = false;
+            showPartnerSearch = false;
         }, "Kunde inte ta bort kopplingen.");
 
     private Task RemoveChildAsync() =>

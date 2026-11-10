@@ -106,7 +106,7 @@ public sealed class HouseholdService(FirebaseInterop interop, IAuthService authS
         }, ct);
 
         var partner = matches.FirstOrDefault()
-            ?? throw new InvalidOperationException($"Hittade ingen användare med e-postadressen {emailKey}.");
+            ?? throw new InvalidOperationException($"{emailKey} finns inte i Raski™. Det går bara att koppla ihop sig med registrerade användare.");
 
         if (partner.Id == uid)
         {
