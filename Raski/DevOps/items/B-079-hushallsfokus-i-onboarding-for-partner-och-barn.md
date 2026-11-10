@@ -4,7 +4,7 @@
 - **Typ:** Patch
 - **Prioritet:** –
 - **Skapad:** 2026-11-03
-- **Klar:** 2026-11-03
+- **Klar:** 2026-11-10
 
 ## Beskrivning
 När man anger partner och barn ska stegen utgå från "hushållet" i stället för att ställa frågor. I dag frågar partnersteget "Har du en partner?". Det ska i stället stå något i stil med "Hur ser ditt hushåll ut?" med en knapp för att lägga till partner. Därefter klickar man Nästa och kommer till steget där man kan lägga till barn. Användaren ska inte få frågan om hen har partner/barn – bara möjligheten att lägga till.
