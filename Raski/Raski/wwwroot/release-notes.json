@@ -1,5 +1,11 @@
 [
-  { "version": "1.0.0", "date": "2026-11-02",
+  { "version": "1.0.1", "date": "2026-11-10",
+    "notes": [
+      "Onboardingen fokuserar nu på hushållet, med partner och barn.",
+      "Snabbare laddning av resor och måltider."
+    ]
+  },
+  { "version": "1.0.0"
     "highlights": [
       "Raski™ 1.0 är här! 🎉",
       "Regler för resan: arrangören kan sätta regler som deltagarna bekräftar och låta andra hjälpa till att administrera.",

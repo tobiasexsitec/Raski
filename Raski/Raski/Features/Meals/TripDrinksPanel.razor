@@ -185,6 +185,8 @@
         isLoading = true;
         errorMessage = null;
 
+        var membersTask = TripService.GetMembersAsync(Trip.Id);
+
         try
         {
             drinks = await TripDrinkService.GetAsync(Trip.Id);
@@ -201,7 +203,7 @@
 
         try
         {
-            members = await TripService.GetMembersAsync(Trip.Id);
+            members = await membersTask;
         }
         catch (Exception)
         {
