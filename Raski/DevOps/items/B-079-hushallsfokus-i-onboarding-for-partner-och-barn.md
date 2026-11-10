@@ -32,4 +32,4 @@ Som användare vill jag beskriva mitt hushåll genom att lägga till partner och
 
 ## Beslut
 - 2026-11-03: Typ satt till Patch (mindre förbättring som användaren märker).
-- 2026-11-03: Introsidan formuleras också om kring hushållet. Komponenten delas av onboarding och profilen, så ändringen gäller båda.
+- 2026-11-10: Introsidan
