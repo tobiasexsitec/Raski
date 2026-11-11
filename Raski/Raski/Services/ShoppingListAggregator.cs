@@ -50,12 +50,21 @@ public static class ShoppingListAggregator
                     amounts[key] = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
                 }
 
+                var unit = ingredient.Unit?.Trim() ?? "";
+                unit = canonicalUnit?.Invoke(unit) ?? unit;
+
                 if (ingredient.Amount > 0)
                 {
-                    var unit = ingredient.Unit?.Trim() ?? "";
-                    unit = canonicalUnit?.Invoke(unit) ?? unit;
                     amounts[key][unit] = amounts[key].GetValueOrDefault(unit) + ingredient.Amount;
                 }
+
+                item.Sources.Add(new ShoppingListSource(
+                    string.IsNullOrEmpty(meal.Id) ? "title:" + meal.Title : meal.Id,
+                    meal.Title,
+                    meal.ResponsibleUid,
+                    meal.ResponsibleName,
+                    unit,
+                    Math.Max(ingredient.Amount, 0)));
 
                 if (!item.UsedInMeals.Contains(meal.Title))
                 {

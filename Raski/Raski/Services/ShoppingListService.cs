@@ -40,7 +40,7 @@ public sealed class ShoppingListService(
         // meal's drinks and the trip-wide drinks become pseudo meals.
         var drinkMeals = meals
             .Where(m => m.Drinks.Count > 0)
-            .Select(m => DrinksAsMeal(m.Title, m.Drinks))
+            .Select(m => DrinksAsMeal(m.Title, m.Drinks, m))
             .ToList();
 
         if (tripDrinks.Count > 0)
@@ -212,9 +212,12 @@ public sealed class ShoppingListService(
 
     private const string DrinkTag = "drycker";
 
-    private static Meal DrinksAsMeal(string title, IEnumerable<MealDrink> drinks) => new()
+    private static Meal DrinksAsMeal(string title, IEnumerable<MealDrink> drinks, Meal? owner = null) => new()
     {
+        Id = owner?.Id ?? "",
         Title = title,
+        ResponsibleUid = owner?.ResponsibleUid ?? "",
+        ResponsibleName = owner?.ResponsibleName ?? "",
         Ingredients =
         [
             .. drinks

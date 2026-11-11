@@ -3,6 +3,7 @@
 @inject IShoppingListService ShoppingListService
 @inject ITripService TripService
 @inject IIngredientService IngredientService
+@inject IAuthService AuthService
 
 <PageTitle>Inköpslista – Raski™</PageTitle>
 
@@ -58,9 +59,40 @@ else
                 }
             </select>
 
+            <button type="button"
+                    class="btn btn-secondary btn-sm"
+                    aria-expanded="@(showAdvanced ? "true" : "false")"
+                    aria-controls="advanced-filters"
+                    @onclick="() => showAdvanced = !showAdvanced">
+                Avancerad filtrering@(AdvancedFilterCount > 0 ? $" ({AdvancedFilterCount})" : "")
+            </button>
+
             @if (IsFiltering)
             {
                 <button type="button" class="btn btn-secondary btn-sm" @onclick="ClearFilters">Rensa</button>
+            }
+
+            @if (showAdvanced)
+            {
+                <div id="advanced-filters" class="advanced-filters">
+                    <label class="field-label" for="filter-responsible">Ansvarig</label>
+                    <select id="filter-responsible" class="field" @bind="selectedResponsible">
+                        <option value="">Alla</option>
+                        @foreach (var (key, name) in AvailableResponsibles)
+                        {
+                            <option value="@key">@name</option>
+                        }
+                    </select>
+
+                    <label class="field-label" for="filter-meal">Maträtt</label>
+                    <select id="filter-meal" class="field" @bind="selectedMeal">
+                        <option value="">Alla</option>
+                        @foreach (var (key, title) in AvailableMeals)
+                        {
+                            <option value="@key">@title</option>
+                        }
+                    </select>
+                </div>
             }
         </div>
     }
@@ -204,11 +236,50 @@ else
 
     private string searchText = "";
     private string selectedTag = "";
+    private string selectedResponsible = "";
+    private string selectedMeal = "";
+    private bool showAdvanced;
 
     private int TotalCount => items.Count;
     private int CheckedCount => items.Count(i => i.Checked);
 
-    private bool IsFiltering => !string.IsNullOrWhiteSpace(searchText) || selectedTag.Length > 0;
+    private bool IsAdvancedFiltering => selectedResponsible.Length > 0 || selectedMeal.Length > 0;
+
+    private int AdvancedFilterCount =>
+        (selectedResponsible.Length > 0 ? 1 : 0) + (selectedMeal.Length > 0 ? 1 : 0);
+
+    private bool IsFiltering => !string.IsNullOrWhiteSpace(searchText) || selectedTag.Length > 0 || IsAdvancedFiltering;
+
+    private static readonly string[] ExtraTitles =
+        [ExtraCategories.Display(ExtraCategories.Snacks), ExtraCategories.Display(ExtraCategories.Other)];
+
+    private IEnumerable<(string Key, string Name)> AvailableResponsibles
+    {
+        get
+        {
+            var currentUid = AuthService.Current?.Uid;
+
+            return items
+                .SelectMany(i => i.Sources)
+                .Where(s => s.ResponsibleKey.Length > 0)
+                .GroupBy(s => s.ResponsibleKey)
+                .Select(g => (Key: g.Key, Name: g.Key == currentUid ? "Jag" : g.First().ResponsibleName.Trim()))
+                .OrderBy(r => r.Key == currentUid ? 0 : 1)
+                .ThenBy(r => r.Name, StringComparer.CurrentCultureIgnoreCase);
+        }
+    }
+
+    private IEnumerable<(string Key, string Title)> AvailableMeals =>
+        items
+            .SelectMany(i => i.Sources)
+            .Where(s => !ExtraTitles.Contains(s.MealTitle) && !string.IsNullOrWhiteSpace(s.MealTitle))
+            .GroupBy(s => s.MealKey)
+            .Select(g => (Key: g.Key, Title: g.First().MealTitle))
+            .OrderBy(m => m.Title, StringComparer.CurrentCultureIgnoreCase);
+
+    private bool MatchesSource(ShoppingListSource source) =>
+        (selectedResponsible.Length == 0 || source.ResponsibleKey == selectedResponsible)
+        && (selectedMeal.Length == 0 || source.MealKey == selectedMeal);
 
     private IEnumerable<string> AvailableTags =>
         items.Select(i => i.PrimaryTag)
@@ -225,6 +296,11 @@ else
             return false;
         }
 
+        if (IsAdvancedFiltering && !item.Sources.Any(MatchesSource))
+        {
+            return false;
+        }
+
         return selectedTag.Length == 0
             || string.Equals(item.PrimaryTag, selectedTag, StringComparison.OrdinalIgnoreCase)
             || item.Tags.Contains(selectedTag, StringComparer.OrdinalIgnoreCase);
@@ -234,6 +310,8 @@ else
     {
         searchText = "";
         selectedTag = "";
+        selectedResponsible = "";
+        selectedMeal = "";
     }
 
     protected override async Task OnParametersSetAsync()
@@ -386,11 +464,28 @@ else
         await confetti.CelebrateAsync();
     }
 
-    private string FormatAmounts(ShoppingListItem item) =>
-        string.Join(" + ", item.Amounts.Select(a =>
-            string.IsNullOrWhiteSpace(a.Unit)
-                ? Format(a.Amount)
-                : $"{Format(a.Amount)} {IngredientService.FormatUnit(a.Unit, a.Amount)}"));
+    private string FormatAmounts(ShoppingListItem item)
+    {
+        if (!IsAdvancedFiltering)
+        {
+            return string.Join(" + ", item.Amounts.Select(a => FormatAmount(a.Amount, a.Unit)));
+        }
+
+        // Shown as "2 dl (av 5 dl)" so it is clear how much of the total the filter needs.
+        var filtered = item.Sources
+            .Where(MatchesSource)
+            .GroupBy(s => s.Unit, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.Sum(s => s.Amount), StringComparer.OrdinalIgnoreCase);
+
+        return string.Join(" + ", item.Amounts
+            .Where(a => filtered.GetValueOrDefault(a.Unit) > 0)
+            .Select(a => $"{FormatAmount(filtered[a.Unit], a.Unit)} (av {FormatAmount(a.Amount, a.Unit)})"));
+    }
+
+    private string FormatAmount(decimal amount, string unit) =>
+        string.IsNullOrWhiteSpace(unit)
+            ? Format(amount)
+            : $"{Format(amount)} {IngredientService.FormatUnit(unit, amount)}";
 
     private static string Format(decimal value) =>
         value == decimal.Truncate(value) ? ((long)value).ToString() : value.ToString("0.##");

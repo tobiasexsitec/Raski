@@ -22,6 +22,7 @@
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-082](items/B-082-avancerad-filtrering-i-inkopslistan.md) | Avancerad filtrering i inköpslistan | Patch | – | 2026-11-11 |
 | [B-080](items/B-080-seg-laddning-av-data-fran-firestore.md) | Seg laddning av data från Firestore | Bugg | – | 2026-11-10 |
 | [B-079](items/B-079-hushallsfokus-i-onboarding-for-partner-och-barn.md) | Hushållsfokus i onboarding för partner och barn | Patch | – | 2026-11-10 |
 | [B-078](items/B-078-hojdpunkter-i-nyhetspopupen.md) | Höjdpunkter i nyhetspopupen | Patch | – | 2026-11-02 |
