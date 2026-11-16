@@ -17,12 +17,12 @@
 | [B-063](items/B-063-ios-splash-och-google-inloggning-i-installerad-app.md) | iOS-splash och Google-inloggning i installerad app | Funktion | Idé | – | 2026-10-27 |
 | [B-072](items/B-072-snygg-ikon-nar-appen-installeras.md) | Snygg ikon när appen installeras | Bugg | Idé | – | 2026-10-28 |
 | [B-083](items/B-083-hushall-med-namn-som-ansvarig.md) | Hushåll med namn som ansvarig | Funktion | Idé | – | 2026-11-11 |
-| [B-084](items/B-084-fordela-inkop-mellan-bilar.md) | Fördela inköp mellan bilar | Funktion | Idé | – | 2026-11-15 |
 
 ## Klara
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-084](items/B-084-fordela-inkop-mellan-bilar.md) | Fördela inköp mellan bilar | Funktion | – | 2026-11-15 |
 | [B-051](items/B-051-flytta-appen-till-domanen-krispinsson-se.md) | Flytta appen till domänen krispinsson.se | Utveckling | – | 2026-11-15 |
 | [B-081](items/B-081-ta-bort-en-resa.md) | Ta bort en resa | Funktion | – | 2026-11-15 |
 | [B-082](items/B-082-avancerad-filtrering-i-inkopslistan.md) | Avancerad filtrering i inköpslistan | Patch | – | 2026-11-11 |
