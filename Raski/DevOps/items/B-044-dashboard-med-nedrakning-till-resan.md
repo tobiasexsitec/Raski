@@ -23,4 +23,4 @@ Som resenär vill jag se hur länge det är kvar till resan så att jag får en 
 - Ny komponent under `Features/`. Svensk route om egen sida.
 
 ## Beslut
-- –
+där nedräkningen visas i kortet på resans översikt. B-044 ligger kvar och stängs samtidigt som B-085.

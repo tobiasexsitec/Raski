@@ -17,6 +17,7 @@
 | [B-063](items/B-063-ios-splash-och-google-inloggning-i-installerad-app.md) | iOS-splash och Google-inloggning i installerad app | Funktion | Idé | – | 2026-10-27 |
 | [B-072](items/B-072-snygg-ikon-nar-appen-installeras.md) | Snygg ikon när appen installeras | Bugg | Idé | – | 2026-10-28 |
 | [B-083](items/B-083-hushall-med-namn-som-ansvarig.md) | Hushåll med namn som ansvarig | Funktion | Idé | – | 2026-11-11 |
+| [B-085](items/B-085-att-tanka-pa-pa-oversikten.md) | "Att tänka på" på översikten | Funktion | Idé | – | 2026-11-15 |
 
 ## Klara
 
