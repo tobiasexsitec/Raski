@@ -40,6 +40,10 @@ else
                     <div class="identity">
                         <span class="name">@(string.IsNullOrWhiteSpace(user.DisplayName) ? user.Email : user.DisplayName)</span>
                         <span class="muted">@user.Email</span>
+                        @if (user.CreatedAt is { } at)
+                        {
+                            <span class="muted">Registrerad <time datetime="@at.ToString("O")">@at.ToLocalTime().ToString("yyyy-MM-dd")</time></span>
+                        }
                     </div>
 
                     @if (user.IsGlobalAdmin)

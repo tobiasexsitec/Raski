@@ -23,6 +23,7 @@
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-086](items/B-086-sortera-anvandare-pa-registreringsdatum.md) | Sortera användare på registreringsdatum | Patch | – | 2026-11-15 |
 | [B-084](items/B-084-fordela-inkop-mellan-bilar.md) | Fördela inköp mellan bilar | Funktion | – | 2026-11-15 |
 | [B-051](items/B-051-flytta-appen-till-domanen-krispinsson-se.md) | Flytta appen till domänen krispinsson.se | Utveckling | – | 2026-11-15 |
 | [B-081](items/B-081-ta-bort-en-resa.md) | Ta bort en resa | Funktion | – | 2026-11-15 |

@@ -43,6 +43,7 @@ internal sealed class UserDocument
     // Missing on users onboarded before versioning; they completed version 1.
     [JsonPropertyName("onboardingVersion")] public int? OnboardingVersion { get; set; }
     [JsonPropertyName("lastSeenVersion")] public string? LastSeenVersion { get; set; }
+    [JsonPropertyName("createdAt")] public string? CreatedAt { get; set; }
 
     public UserProfile ToModel() => new()
     {
@@ -57,7 +58,10 @@ internal sealed class UserDocument
         Alcohol = AlcoholPreferenceExtensions.ParseAlcoholPreference(Alcohol),
         OnboardingCompleted = OnboardingCompleted ?? true,
         OnboardingVersion = OnboardingVersion ?? 1,
-        LastSeenVersion = LastSeenVersion
+        LastSeenVersion = LastSeenVersion,
+        CreatedAt = DateTimeOffset.TryParse(CreatedAt, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var at)
+            ? at
+            : null
     };
 }
 

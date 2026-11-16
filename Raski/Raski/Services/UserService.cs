@@ -82,7 +82,8 @@ public sealed class UserService(FirebaseInterop interop, IAuthService authServic
 
         return [.. documents
             .Select(d => d.ToModel())
-            .OrderBy(u => u.DisplayName, StringComparer.CurrentCultureIgnoreCase)];
+            .OrderByDescending(u => u.CreatedAt ?? DateTimeOffset.MinValue)
+            .ThenBy(u => u.DisplayName, StringComparer.CurrentCultureIgnoreCase)];
     }
 
     public async Task<UserProfile?> GetAsync(string uid, CancellationToken ct = default)
