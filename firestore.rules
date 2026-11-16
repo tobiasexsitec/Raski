@@ -260,6 +260,11 @@ service cloud.firestore {
 	  match /shoppingExtras/{extraId} {
 		allow read, write: if isTripMember(tripId);
 	  }
+
+	  // Cars that split the shopping between them, managed by any member.
+	  match /cars/{carId} {
+		allow read, write: if isTripMember(tripId);
+	  }
 	}
 
 	// The global ingredient and unit registries are shared by all trips.

@@ -13,6 +13,8 @@
             <span class="brand-name">Raski™</span>
         </a>
 
+        <SectionOutlet SectionName="page-title" />
+
         @if (!Environment.IsProduction)
         {
             <span class="tag tag-accent env-tag" role="status" title="Du använder testmiljön – data här påverkar inte produktion">@Environment.Name</span>

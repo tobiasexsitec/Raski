@@ -1,0 +1,232 @@
+@inject ICarService CarService
+@inject IHouseholdService HouseholdService
+
+<section class="stack">
+    <p class="muted">Lägg till bilarna som handlar och vilka som åker i dem. Sedan kan ni välja vilken bil som köper varje vara.</p>
+
+    @if (errorMessage is not null)
+    {
+        <div class="error-banner">@errorMessage</div>
+    }
+
+    @if (Cars.Count == 0)
+    {
+        <p class="empty-state">Inga bilar än.</p>
+    }
+
+    @foreach (var car in Cars)
+    {
+        <div class="card stack car-card">
+            @if (editing?.Id == car.Id)
+            {
+                @EditorFields("Spara", () => SaveEditAsync(), () => editing = null)
+            }
+            else
+            {
+                <div class="car-header">
+                    <h3>@car.Name</h3>
+                    <span class="spacer"></span>
+                    <button type="button" class="btn btn-secondary btn-sm" aria-label="@($"Redigera {car.Name}")" @onclick="() => StartEdit(car)">Redigera</button>
+                    <button type="button" class="btn btn-icon btn-sm" aria-label="@($"Ta bort {car.Name}")" disabled="@isSaving" @onclick="() => carToDelete = car">✕</button>
+                </div>
+                <p class="muted">@(car.MemberUids.Count == 0 ? "Inga personer valda" : string.Join(", ", car.MemberUids.Select(MemberName)))</p>
+            }
+        </div>
+    }
+
+    @if (editing is not null && string.IsNullOrEmpty(editing.Id))
+    {
+        <div class="card stack">
+            @EditorFields("Lägg till", () => SaveEditAsync(), () => editing = null)
+        </div>
+    }
+    else if (editing is null)
+    {
+        <div class="row-inline">
+            <button type="button" class="btn btn-primary" @onclick="StartNew">Lägg till bil</button>
+            @if (Cars.Count == 0 && suggestions.Count > 0)
+            {
+                <button type="button" class="btn btn-secondary" disabled="@isSaving" @onclick="AddSuggestionsAsync">Föreslå bilar från hushåll</button>
+            }
+        </div>
+    }
+</section>
+
+@if (carToDelete is not null)
+{
+    <div class="backdrop">
+        <div class="dialog card stack" role="dialog" aria-modal="true" aria-labelledby="delete-car-title">
+            <h3 id="delete-car-title">Ta bort @carToDelete.Name?</h3>
+            <p>Varor som bilen skulle köpa får ingen bil.</p>
+            <div class="row-inline">
+                <button type="button" class="btn btn-danger" disabled="@isSaving" @onclick="DeleteAsync">Ta bort</button>
+                <button type="button" class="btn btn-secondary" @onclick="() => carToDelete = null">Avbryt</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public string TripId { get; set; } = "";
+    [Parameter, EditorRequired] public IReadOnlyList<Car> Cars { get; set; } = [];
+    [Parameter, EditorRequired] public IReadOnlyList<TripMember> Members { get; set; } = [];
+
+    private Car? editing;
+    private Car? carToDelete;
+    private bool isSaving;
+    private string? errorMessage;
+    private List<List<string>> suggestions = [];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (suggestions.Count > 0 || Members.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            var uids = Members.Where(m => !m.IsPending).Select(m => m.Uid).ToList();
+            var households = await HouseholdService.GetForMembersAsync(uids);
+            var grouped = households
+                .Select(h => h.MemberUids.Where(uids.Contains).ToList())
+                .Where(g => g.Count > 0)
+                .ToList();
+            var covered = grouped.SelectMany(g => g).ToHashSet();
+
+            suggestions = [.. grouped, .. uids.Where(u => !covered.Contains(u)).Select(u => new List<string> { u })];
+        }
+        catch (Exception)
+        {
+            // Suggestions are optional; cars can still be added by hand.
+        }
+    }
+
+    private RenderFragment EditorFields(string saveText, Func<Task> onSave, Action onCancel) => __builder =>
+    {
+        if (editing is null)
+        {
+            return;
+        }
+
+        <label class="field-label" for="car-name">Namn</label>
+        <input id="car-name" class="field" placeholder="T.ex. Annas bil" @bind="editing.Name" @bind:event="oninput" />
+
+        <fieldset class="car-members">
+            <legend class="field-label">Vilka åker i bilen?</legend>
+            @foreach (var member in Members)
+            {
+                <label class="row-inline">
+                    <input type="checkbox"
+                           checked="@editing.MemberUids.Contains(member.Uid)"
+                           @onchange="e => ToggleMember(member.Uid, e.Value is true)" />
+                    @MemberName(member.Uid)
+                </label>
+            }
+        </fieldset>
+
+        <div class="row-inline">
+            <button type="button" class="btn btn-primary" disabled="@isSaving" @onclick="onSave">@saveText</button>
+            <button type="button" class="btn btn-secondary" @onclick="onCancel">Avbryt</button>
+        </div>
+    };
+
+    private string MemberName(string uid)
+    {
+        var member = Members.FirstOrDefault(m => m.Uid == uid);
+        return member is null ? "Okänd"
+            : !string.IsNullOrWhiteSpace(member.DisplayName) ? member.DisplayName
+            : member.Email;
+    }
+
+    private void StartNew()
+    {
+        errorMessage = null;
+        editing = new Car();
+    }
+
+    private void StartEdit(Car car)
+    {
+        errorMessage = null;
+        editing = new Car { Id = car.Id, Name = car.Name, MemberUids = [.. car.MemberUids] };
+    }
+
+    private void ToggleMember(string uid, bool include)
+    {
+        if (editing is null)
+        {
+            return;
+        }
+
+        editing.MemberUids.Remove(uid);
+        if (include)
+        {
+            editing.MemberUids.Add(uid);
+        }
+    }
+
+    private async Task SaveEditAsync()
+    {
+        if (editing is null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(editing.Name))
+        {
+            errorMessage = "Ge bilen ett namn.";
+            return;
+        }
+
+        await RunAsync(async () =>
+        {
+            if (string.IsNullOrEmpty(editing.Id))
+            {
+                await CarService.AddAsync(TripId, editing.Name, editing.MemberUids);
+            }
+            else
+            {
+                await CarService.UpdateAsync(TripId, editing);
+            }
+
+            editing = null;
+        }, "Kunde inte spara bilen.");
+    }
+
+    private Task AddSuggestionsAsync() => RunAsync(async () =>
+    {
+        foreach (var group in suggestions)
+        {
+            await CarService.AddAsync(TripId, $"{MemberName(group[0])}s bil", group);
+        }
+    }, "Kunde inte lägga till bilarna.");
+
+    private Task DeleteAsync() => RunAsync(async () =>
+    {
+        if (carToDelete is not null)
+        {
+            await CarService.DeleteAsync(TripId, carToDelete.Id);
+        }
+
+        carToDelete = null;
+    }, "Kunde inte ta bort bilen.");
+
+    private async Task RunAsync(Func<Task> action, string failure)
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            await action();
+        }
+        catch (Exception)
+        {
+            errorMessage = failure;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+}
