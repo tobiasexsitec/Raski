@@ -9,6 +9,9 @@ public interface ITripService
     Task<string> CreateAsync(Trip trip, CancellationToken ct = default);
     Task UpdateAsync(Trip trip, CancellationToken ct = default);
 
+    /// <summary>Soft deletes the trip so it is hidden for all participants.</summary>
+    Task DeleteAsync(string tripId, CancellationToken ct = default);
+
     Task<IReadOnlyList<TripMember>> GetMembersAsync(string tripId, CancellationToken ct = default);
 
     /// <summary>

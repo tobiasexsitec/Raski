@@ -18,14 +18,22 @@ public sealed class TripService(FirebaseInterop interop, IAuthService authServic
         };
 
         var documents = await interop.QueryAsync<TripDocument>("trips", query, ct);
-        return documents.Select(d => d.ToModel()).OrderBy(t => t.StartDate).ToList();
+        return documents.Select(d => d.ToModel()).Where(t => !t.IsDeleted).OrderBy(t => t.StartDate).ToList();
     }
 
     public async Task<Trip?> GetAsync(string tripId, CancellationToken ct = default)
     {
         var document = await interop.GetDocumentAsync<TripDocument>($"trips/{tripId}", ct);
-        return document?.ToModel();
+        var trip = document?.ToModel();
+        return trip is { IsDeleted: false } ? trip : null;
     }
+
+    public Task DeleteAsync(string tripId, CancellationToken ct = default) =>
+        interop.UpdateDocumentAsync($"trips/{tripId}", new
+        {
+            deletedAt = FirestoreFormat.UtcNow(),
+            deletedBy = CurrentUid
+        }, ct);
 
     public async Task<string> CreateAsync(Trip trip, CancellationToken ct = default)
     {
