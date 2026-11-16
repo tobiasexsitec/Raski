@@ -67,6 +67,16 @@ public sealed class ShoppingListService(
         // rows shared with a meal are summed into the meal's row.
         AttachExtras(items, extras, registry, onlyExtraRows: true);
 
+        var carState = state
+            .Where(s => !string.IsNullOrEmpty(s.CarId))
+            .GroupBy(s => s.Id, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.First().CarId ?? "", StringComparer.Ordinal);
+
+        foreach (var item in items)
+        {
+            item.CarId = carState.GetValueOrDefault(item.IngredientId, "");
+        }
+
         var drinkNames = drinkMeals
             .SelectMany(m => m.Ingredients)
             .Select(i => i.Name.Trim())
@@ -241,11 +251,11 @@ public sealed class ShoppingListService(
             ? value
             : 0;
 
-    public async IAsyncEnumerable<IReadOnlyDictionary<string, bool>> ObserveCheckedState(
+    public async IAsyncEnumerable<IReadOnlyDictionary<string, ShoppingItemState>> ObserveState(
         string tripId,
         [EnumeratorCancellation] CancellationToken ct)
     {
-        var channel = Channel.CreateBounded<IReadOnlyDictionary<string, bool>>(
+        var channel = Channel.CreateBounded<IReadOnlyDictionary<string, ShoppingItemState>>(
             new BoundedChannelOptions(1)
             {
                 FullMode = BoundedChannelFullMode.DropOldest,
@@ -287,20 +297,33 @@ public sealed class ShoppingListService(
 
         return interop.SetDocumentAsync($"{StatePath(tripId)}/{ingredientId}", data, ct: ct);
     }
+
+    public Task SetCarAsync(string tripId, string ingredientId, string? carId, CancellationToken ct = default)
+    {
+        var data = new Dictionary<string, object?>
+        {
+            ["carId"] = string.IsNullOrEmpty(carId) ? null : carId
+        };
+
+        return interop.SetDocumentAsync($"{StatePath(tripId)}/{ingredientId}", data, ct: ct);
+    }
 }
 
 /// <summary>
 /// Bridges the JS onSnapshot callback for shopping state into a channel.
 /// Must be public so the JS interop layer can invoke it.
 /// </summary>
-public sealed class ShoppingStateBridge(ChannelWriter<IReadOnlyDictionary<string, bool>> writer) : IAsyncDisposable
+public sealed class ShoppingStateBridge(ChannelWriter<IReadOnlyDictionary<string, ShoppingItemState>> writer) : IAsyncDisposable
 {
     [JSInvokable]
     public Task OnSnapshotAsync(List<ShoppingStatePayload> documents)
     {
         var state = documents
             .GroupBy(d => d.Id, StringComparer.Ordinal)
-            .ToDictionary(g => g.Key, g => g.First().Checked, StringComparer.Ordinal);
+            .ToDictionary(
+                g => g.Key,
+                g => new ShoppingItemState(g.First().Checked, g.First().CarId ?? ""),
+                StringComparer.Ordinal);
 
         writer.TryWrite(state);
         return Task.CompletedTask;

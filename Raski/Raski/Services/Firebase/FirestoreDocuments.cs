@@ -429,6 +429,14 @@ internal sealed class ShoppingStateDocument
     [JsonPropertyName("checked")] public bool Checked { get; set; }
     [JsonPropertyName("checkedByUid")] public string? CheckedByUid { get; set; }
     [JsonPropertyName("checkedAt")] public string? CheckedAt { get; set; }
+    [JsonPropertyName("carId")] public string? CarId { get; set; }
+}
+
+internal sealed class CarDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("name")] public string? Name { get; set; }
+    [JsonPropertyName("memberUids")] public List<string>? MemberUids { get; set; }
 }
 
 internal sealed class ShoppingExtraDocument
