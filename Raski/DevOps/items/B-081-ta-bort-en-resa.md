@@ -1,9 +1,10 @@
 # B-081: Ta bort en resa
 
-- **Status:** Pågår
+- **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
 - **Skapad:** 2026-11-10
+- **Klar:** 2026-11-15
 
 ## Beskrivning
 Det ska gå att ta bort en resa. Endast resans admin (ägaren) och global admin får göra det.
