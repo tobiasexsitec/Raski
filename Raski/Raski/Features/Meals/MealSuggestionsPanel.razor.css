@@ -1,0 +1,58 @@
+.suggestions {
+    margin-bottom: var(--space-4);
+}
+
+.suggestions-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+
+.suggestion-form {
+    margin-bottom: var(--space-4);
+}
+
+.suggestion-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.suggestion-list li {
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.suggestion-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.suggestion-head .name {
+    font-weight: 600;
+}
+
+.comment {
+    margin: var(--space-1) 0 0;
+    white-space: pre-line;
+}
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3);
+    background: rgb(0 0 0 / 55%);
+    overflow-y: auto;
+}
+
+.dialog {
+    width: min(32rem, 100%);
+    max-height: 90vh;
+}

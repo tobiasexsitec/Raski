@@ -18,12 +18,12 @@
 | [B-072](items/B-072-snygg-ikon-nar-appen-installeras.md) | Snygg ikon när appen installeras | Bugg | Idé | – | 2026-10-28 |
 | [B-083](items/B-083-hushall-med-namn-som-ansvarig.md) | Hushåll med namn som ansvarig | Funktion | Idé | – | 2026-11-11 |
 | [B-085](items/B-085-att-tanka-pa-pa-oversikten.md) | "Att tänka på" på översikten | Funktion | Idé | – | 2026-11-15 |
-| [B-087](items/B-087-forslag-pa-mat.md) | Förslag på mat | Funktion | Idé | – | 2026-11-16 |
 
 ## Klara
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-087](items/B-087-forslag-pa-mat.md) | Förslag på mat | Funktion | – | 2026-11-16 |
 | [B-086](items/B-086-sortera-anvandare-pa-registreringsdatum.md) | Sortera användare på registreringsdatum | Patch | – | 2026-11-15 |
 | [B-084](items/B-084-fordela-inkop-mellan-bilar.md) | Fördela inköp mellan bilar | Funktion | – | 2026-11-15 |
 | [B-051](items/B-051-flytta-appen-till-domanen-krispinsson-se.md) | Flytta appen till domänen krispinsson.se | Utveckling | – | 2026-11-15 |

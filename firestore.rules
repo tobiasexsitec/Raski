@@ -183,6 +183,11 @@ service cloud.firestore {
 		allow read, write: if isTripMember(tripId);
 	  }
 
+	  // Dish ideas not yet placed on a day, edited by any member.
+	  match /suggestions/{suggestionId} {
+		allow read, write: if isTripMember(tripId);
+	  }
+
 	  // The shared breakfast for the whole trip, edited by any member.
 	  match /breakfast/{breakfastId} {
 		allow read, write: if isTripMember(tripId);

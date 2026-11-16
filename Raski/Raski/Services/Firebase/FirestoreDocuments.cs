@@ -286,6 +286,23 @@ internal sealed class BringItemDocument
     };
 }
 
+internal sealed class MealSuggestionDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("title")] public string? Title { get; set; }
+    [JsonPropertyName("recipeUrl")] public string? RecipeUrl { get; set; }
+    [JsonPropertyName("comment")] public string? Comment { get; set; }
+
+    public MealSuggestion ToModel(string tripId) => new()
+    {
+        Id = Id,
+        TripId = tripId,
+        Title = Title ?? "",
+        RecipeUrl = RecipeUrl ?? "",
+        Comment = Comment ?? ""
+    };
+}
+
 internal sealed class BringSectionDocument
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";

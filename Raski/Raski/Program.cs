@@ -25,6 +25,7 @@ builder.Services.AddSingleton<IHouseholdService, HouseholdService>();
 builder.Services.AddSingleton<ITripService, TripService>();
 builder.Services.AddSingleton<IIngredientService, IngredientService>();
 builder.Services.AddSingleton<IMealService, MealService>();
+builder.Services.AddSingleton<IMealSuggestionService, MealSuggestionService>();
 builder.Services.AddSingleton<IBreakfastService, BreakfastService>();
 builder.Services.AddSingleton<ITripDrinkService, TripDrinkService>();
 builder.Services.AddSingleton<IBringItemService, BringItemService>();
