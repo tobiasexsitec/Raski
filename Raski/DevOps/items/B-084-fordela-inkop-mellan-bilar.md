@@ -1,9 +1,10 @@
 # B-084: Fördela inköp mellan bilar
 
-- **Status:** Idé
+- **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
 - **Skapad:** 2026-11-15
+- **Klar:** 2026-11-15
 
 ## Beskrivning
 En användare vill enkelt få en överblick över just de varor hen ska handla. Ofta åker
