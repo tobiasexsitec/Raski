@@ -68,12 +68,14 @@ internal sealed class UserDocument
 internal sealed class HouseholdDocument
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("name")] public string? Name { get; set; }
     [JsonPropertyName("memberUids")] public List<string>? MemberUids { get; set; }
     [JsonPropertyName("children")] public List<ChildDocument>? Children { get; set; }
 
     public Household ToModel() => new()
     {
         Id = Id,
+        Name = Name ?? "",
         MemberUids = MemberUids ?? [],
         Children = [.. (Children ?? []).Select(c => c.ToModel())]
     };

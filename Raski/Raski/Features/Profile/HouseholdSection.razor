@@ -11,6 +11,15 @@
         <div class="error-banner" role="alert">@errorMessage</div>
     }
 
+    <form class="stack" @onsubmit="RenameAsync" @onsubmit:preventDefault>
+        <label class="field-label" for="household-name">Hushållets namn</label>
+        <div class="row-inline nowrap">
+            <input id="household-name" class="grow" type="text" placeholder="@SuggestedName" @bind="householdName" @bind:event="oninput" />
+            <button type="submit" class="btn btn-primary" disabled="@(isSaving || householdName.Trim() == (household?.Name ?? ""))">Spara</button>
+        </div>
+        <span class="muted">Visas när hushållet är ansvarigt för något på en resa. Lämnas det tomt används @(string.IsNullOrEmpty(SuggestedName) ? "de vuxnas förnamn" : $"\"{SuggestedName}\"").</span>
+    </form>
+
     <h3>Partner</h3>
     @if (partners.Count > 0)
     {
@@ -166,6 +175,14 @@
     private bool confirmUnlink;
     private bool isSaving;
     private string? errorMessage;
+    private string householdName = "";
+
+    private string SuggestedName =>
+        Household.SuggestName([AuthService.Current?.DisplayName ?? "", .. partners.Select(p => p.DisplayName)]);
+
+    private async Task RenameAsync() =>
+        await RunAsync(async () => await ApplyAsync(await HouseholdService.RenameAsync(householdName)),
+            "Kunde inte spara namnet.");
 
     private static DateOnly Today => DateOnly.FromDateTime(DateTime.Today);
 
@@ -184,6 +201,7 @@
     private async Task ApplyAsync(Household? updated)
     {
         household = updated;
+        householdName = updated?.Name ?? "";
         children = [.. (updated?.Children ?? []).OrderBy(c => c.BirthDate)];
 
         var me = AuthService.Current?.Uid;

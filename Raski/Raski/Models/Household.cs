@@ -4,8 +4,28 @@ namespace Raski.Models;
 public sealed class Household
 {
     public string Id { get; set; } = "";
+
+    /// <summary>Chosen by the household; empty means the adults' first names are shown instead.</summary>
+    public string Name { get; set; } = "";
+
     public List<string> MemberUids { get; set; } = [];
     public List<Child> Children { get; set; } = [];
+
+    public string DisplayName(IEnumerable<string> adultNames) =>
+        string.IsNullOrWhiteSpace(Name) ? SuggestName(adultNames) : Name.Trim();
+
+    /// <summary>The adults' first names, e.g. "Anna och Erik".</summary>
+    public static string SuggestName(IEnumerable<string> adultNames)
+    {
+        List<string> firstNames = [.. adultNames
+            .Select(n => n.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "")
+            .Where(n => n.Length > 0)
+            .Distinct(StringComparer.CurrentCultureIgnoreCase)];
+
+        return firstNames.Count <= 1
+            ? firstNames.FirstOrDefault() ?? ""
+            : $"{string.Join(", ", firstNames[..^1])} och {firstNames[^1]}";
+    }
 }
 
 public sealed class Child
