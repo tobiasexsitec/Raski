@@ -1,9 +1,10 @@
 # B-083: Hushåll med namn som ansvarig
 
-- **Status:** Idé
+- **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
 - **Skapad:** 2026-11-11
+- **Klar:** 2026-11-18
 
 ## Beskrivning
 Det ska gå att sätta ett hushåll som ansvarig för saker på resan, på samma sätt som man i dag kan sätta en person som ansvarig. För att hushållet ska kunna visas och väljas behöver det ha ett namn. Namnet sätts i onboardingen. Användare som redan har lagt till ett hushåll ska inte behöva gå igenom onboardingen igen, utan kan i stället ändra hushållets namn under profilen.
@@ -36,3 +37,5 @@ Som deltagare vill jag kunna sätta ett hushåll som ansvarigt för något så a
 - 2026-11-11: Typ bekräftad som Funktion.
 - 2026-11-11: Standardnamn och reservnamn är förnamnen på båda i hushållet.
 - 2026-11-11: Ett hushåll räknas som ansvarig, även i B-043.
+- Ett hushåll kan bara väljas som ansvarig om det har minst två vuxna (en partner är kopplad) och någon av dem är med på resan. Ett hushåll med bara en person skulle annars bli en dubblett av personen.
+- Ansvarigt hushåll sparas i det befintliga ansvarig-fältet som `household:<id>` tillsammans med namnet, så ingen ändring av `firestore.rules` behövs.

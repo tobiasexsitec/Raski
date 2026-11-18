@@ -15,6 +15,9 @@ public interface IHouseholdService
 
     Task<Household?> RemoveChildAsync(string childId, CancellationToken ct = default);
 
+    /// <summary>Sets the household's name, creating the household if needed. An empty name falls back to the adults' first names.</summary>
+    Task<Household> RenameAsync(string name, CancellationToken ct = default);
+
     /// <summary>
     /// Links the signed-in user with the user who has the given email. The link
     /// applies immediately; the partner's children are merged into the shared household.

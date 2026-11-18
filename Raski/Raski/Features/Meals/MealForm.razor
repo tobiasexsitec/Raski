@@ -1,5 +1,6 @@
 @inject IIngredientService IngredientService
 @inject IMealService MealService
+@inject IHouseholdService HouseholdService
 
 <div class="meal-form card">
     <h3>@(IsNew ? "Ny måltid" : "Redigera måltid")</h3>
@@ -35,9 +36,9 @@
         <label for="meal-responsible">Ansvarig</label>
         <select id="meal-responsible" @bind="responsibleUid">
             <option value="">Välj ansvarig</option>
-            @foreach (var member in Members)
+            @foreach (var option in responsibleOptions)
             {
-                <option value="@member.Uid">@member.DisplayName</option>
+                <option value="@option.Key">@option.Name</option>
             }
         </select>
     </div>
@@ -219,6 +220,8 @@
     private MealType mealType = MealType.Dinner;
     private string title = "";
     private string responsibleUid = "";
+    private IReadOnlyList<ResponsibleOption> responsibleOptions = [];
+    private IReadOnlyList<TripMember>? optionsMembers;
     private string recipeUrl = "";
     private string comment = "";
     private bool isSaving;
@@ -234,6 +237,27 @@
         !string.IsNullOrWhiteSpace(row.Name)
         && row.Amount is > 0
         && !string.IsNullOrWhiteSpace(row.Unit);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ReferenceEquals(optionsMembers, Members))
+        {
+            return;
+        }
+
+        optionsMembers = Members;
+        responsibleOptions = ResponsibleOptions.Build(Members, []);
+
+        try
+        {
+            var households = await HouseholdService.GetForMembersAsync(Members.Select(m => m.Uid));
+            responsibleOptions = ResponsibleOptions.Build(Members, households);
+        }
+        catch (Exception)
+        {
+            // Members alone are still useful if households can't be read.
+        }
+    }
 
     protected override void OnInitialized()
     {
@@ -443,7 +467,10 @@
                 });
             }
 
-            var responsible = Members.FirstOrDefault(m => m.Uid == responsibleUid);
+            var responsible = responsibleOptions.FirstOrDefault(o => o.Key == responsibleUid)
+                ?? (Meal is not null && responsibleUid.Length > 0 && responsibleUid == Meal.ResponsibleUid
+                    ? new ResponsibleOption(Meal.ResponsibleUid, Meal.ResponsibleName, ResponsibleOptions.IsHousehold(Meal.ResponsibleUid))
+                    : null);
 
             foreach (var drink in drinks)
             {
@@ -459,8 +486,8 @@
                 Date = DateOnly.Parse(selectedDate),
                 Type = mealType,
                 Title = title.Trim(),
-                ResponsibleUid = responsible?.Uid ?? "",
-                ResponsibleName = responsible?.DisplayName ?? "",
+                ResponsibleUid = responsible?.Key ?? "",
+                ResponsibleName = responsible?.Name ?? "",
                 RecipeUrl = trimmedRecipeUrl,
                 Comment = comment.Trim(),
                 Ingredients = ingredients,

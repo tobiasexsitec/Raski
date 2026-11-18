@@ -94,6 +94,20 @@ public sealed class HouseholdService(FirebaseInterop interop, IAuthService authS
         return household;
     }
 
+    public async Task<Household> RenameAsync(string name, CancellationToken ct = default)
+    {
+        var household = await GetMineAsync(ct) ?? await CreateAsync([CurrentUid], [], ct);
+        household.Name = name.Trim();
+
+        await interop.UpdateDocumentAsync($"households/{household.Id}", new
+        {
+            name = household.Name,
+            updatedAt = FirestoreFormat.UtcNow()
+        }, ct);
+
+        return household;
+    }
+
     public async Task<Household> LinkPartnerAsync(string email, CancellationToken ct = default)
     {
         var uid = CurrentUid;
