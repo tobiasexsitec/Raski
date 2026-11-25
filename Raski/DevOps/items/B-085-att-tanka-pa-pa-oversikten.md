@@ -1,9 +1,10 @@
 # B-085: "Att tänka på" på översikten
 
-- **Status:** Pågår
+- **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
 - **Skapad:** 2026-11-15
+- **Klar:** 2026-11-25
 
 ## Beskrivning
 Ett personligt kort högst upp på resans översikt (`/resor/{TripId}`) som samlar det den inloggade användaren behöver göra eller hålla koll på: obesvarade omröstningar, saker man (eller ens hushåll) är ansvarig för och liknande. Syftet är att man direkt ska se om något väntar på en, utan att leta igenom alla sektioner. Kortet slås ihop med dashboarden i B-044 och visar därför även nedräkning till resan.

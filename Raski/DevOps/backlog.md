@@ -16,7 +16,6 @@
 | [B-060](items/B-060-installerbar-app-upplevelse-ren-pwa.md) | Installerbar app-upplevelse (ren PWA) | Funktion | Idé | – | 2026-10-26 |
 | [B-063](items/B-063-ios-splash-och-google-inloggning-i-installerad-app.md) | iOS-splash och Google-inloggning i installerad app | Funktion | Idé | – | 2026-10-27 |
 | [B-072](items/B-072-snygg-ikon-nar-appen-installeras.md) | Snygg ikon när appen installeras | Bugg | Idé | – | 2026-10-28 |
-| [B-085](items/B-085-att-tanka-pa-pa-oversikten.md) | "Att tänka på" på översikten | Funktion | Pågår | – | 2026-11-15 |
 | [B-088](items/B-088-flera-ansvariga-pa-en-maltid.md) | Flera ansvariga på en måltid | Funktion | Idé | – | 2026-11-18 |
 | [B-089](items/B-089-kompaktare-inkopslista.md) | Kompaktare inköpslista | Patch | Pågår | – | 2026-11-18 |
 
@@ -24,6 +23,7 @@
 
 | ID | Titel | Typ | Prioritet | Klar |
 | --- | --- | --- | --- | --- |
+| [B-085](items/B-085-att-tanka-pa-pa-oversikten.md) | "Att tänka på" på översikten | Funktion | – | 2026-11-25 |
 | [B-083](items/B-083-hushall-med-namn-som-ansvarig.md) | Hushåll med namn som ansvarig | Funktion | – | 2026-11-18 |
 | [B-087](items/B-087-forslag-pa-mat.md) | Förslag på mat | Funktion | – | 2026-11-16 |
 | [B-086](items/B-086-sortera-anvandare-pa-registreringsdatum.md) | Sortera användare på registreringsdatum | Patch | – | 2026-11-15 |
