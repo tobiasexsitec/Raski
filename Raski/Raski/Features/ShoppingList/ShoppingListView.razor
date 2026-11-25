@@ -311,10 +311,22 @@ else
     private bool showAdmin;
     private string carFilter = AllCars;
 
-    private IEnumerable<(string Key, string Label)> CarFilters =>
-        MyCarId is null
-            ? [(AllCars, "Allt"), (NoCar, "Utan bil")]
-            : [(AllCars, "Allt"), (MyCar, "Min bil"), (NoCar, "Utan bil")];
+    private const string CarPrefix = "car:";
+
+    private IEnumerable<(string Key, string Label)> CarFilters
+    {
+        get
+        {
+            var myCarId = MyCarId;
+            IEnumerable<(string Key, string Label)> filters = myCarId is null
+                ? [(AllCars, "Allt")]
+                : [(AllCars, "Allt"), (MyCar, "Min bil")];
+
+            return filters
+                .Concat(cars.Where(c => c.Id != myCarId).Select(c => (CarPrefix + c.Id, c.Name)))
+                .Append((NoCar, "Utan bil"));
+        }
+    }
 
     private string? MyCarId
     {
@@ -329,6 +341,9 @@ else
     private string EffectiveCarId(ShoppingListItem item) =>
         cars.Any(c => c.Id == item.CarId) ? item.CarId : "";
 
+    private string CarName(string carId) =>
+        cars.FirstOrDefault(c => c.Id == carId)?.Name ?? "";
+
     private RenderFragment CarPicker(ShoppingListItem item) => __builder =>
     {
         var canDelete = item.ExtraIds.Count > 0;
@@ -340,7 +355,12 @@ else
 
         var current = EffectiveCarId(item);
         var myCarId = MyCarId;
-        if (myCarId is not null)
+        var takenByOther = current.Length > 0 && current != myCarId;
+        if (takenByOther)
+        {
+            <span class="tag car-tag" aria-label="@($"{item.Name} köps av {CarName(current)}")">@CarName(current)</span>
+        }
+        else if (myCarId is not null)
         {
             var inMyCar = current == myCarId;
             <button type="button"
@@ -531,7 +551,8 @@ else
         }
 
         if (carFilter == NoCar && EffectiveCarId(item).Length > 0
-            || carFilter == MyCar && EffectiveCarId(item) != MyCarId)
+            || carFilter == MyCar && EffectiveCarId(item) != MyCarId
+            || carFilter.StartsWith(CarPrefix, StringComparison.Ordinal) && EffectiveCarId(item) != carFilter[CarPrefix.Length..])
         {
             return false;
         }

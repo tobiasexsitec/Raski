@@ -27,6 +27,9 @@ bil ska köpa så att inköpen delas upp och jag enkelt får en överblick i but
 - [ ] En snabbväxel överst i listan har valen "Allt", "Min bil" och "Utan bil".
 - [ ] "Min bil" visar varorna som tilldelats den bil användaren är med i. Är man inte med i någon bil visas ett tomt läge med en länk till Administration.
 - [ ] Växeln kan kombineras med fritextsökning och filtren från B-082.
+- [ ] Bilfiltret har även ett val per tillagd bil, inte bara "Min bil" och "Utan bil".
+- [ ] På varje rad står vilken bil som har tagit varan.
+- [ ] Har en annan bil tagit varan visas inte "+ Min bil" på raden. Bilen byts då via menyn med tre prickar.
 - [ ] Tas en bil bort blir dess varor utan bil.
 - [ ] Alla deltagare kan skapa bilar och fördela varor.
 - [ ] Ändringar syns i realtid för andra deltagare.
@@ -49,3 +52,4 @@ bil ska köpa så att inköpen delas upp och jag enkelt får en överblick i but
 - 2026-11-15: En vara köps av högst en bil. Mängder delas inte mellan bilar.
 - 2026-11-15: Alla deltagare får skapa bilar och fördela varor.
 - 2026-11-15: Valet i snabbväxeln sparas inte mellan besök, som i B-082.
+- Tillägg: filter per bil, bilens namn på raden och ingen "+ Min bil" när en annan bil tagit varan.
