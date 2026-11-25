@@ -1,6 +1,6 @@
 # B-085: "Att tänka på" på översikten
 
-- **Status:** Idé
+- **Status:** Pågår
 - **Typ:** Funktion
 - **Prioritet:** –
 - **Skapad:** 2026-11-15
@@ -35,7 +35,8 @@ Som deltagare på en resa vill jag direkt på översikten se vad som väntar på
 - [ ] Obesvarade omröstningar visas med antal och länkar till omröstningen.
 - [ ] Måltider där användaren (eller användarens hushåll) är ansvarig sammanfattas med antal och namn/dag.
 - [ ] Saker i "Vem tar med" som användaren eller användarens hushåll ansvarar för sammanfattas med antal.
-- [ ] Varje rad är klickbar och tar användaren till rätt sektion/sida.
+- [ ] Antal ej avbockade varor som användarens bil ansvarar för visas ("Din bil ansvarar för X varor") och leder till inköpslistan filtrerad på Min bil (`?bil=min`).
+- [ ] Varje rad är klickbar
 - [ ] Rader utan innehåll döljs; finns inget som väntar visas bara nedräkningen.
 - [ ] Kortet uppdateras i realtid när data ändras.
 - [ ] Tillgängligt: klickbara rader har `role`/`tabindex` och tydlig `aria-label`.
@@ -49,6 +50,8 @@ Som deltagare på en resa vill jag direkt på översikten se vad som väntar på
 - Beräkningen görs på klienten utifrån data som översikten redan lyssnar på (måltider, "Vem tar med", omröstningar)
 returnerar en lista med poster.
 - Ingen ändring i `firestore.rules` om inga nya fält läggs till.
+- Implementerat i `Features/Trips/TripTodoCard.razor`. Måltider uppdateras i realtid via `ObserveMeals`; omröstningar och "Vem tar med" saknar lyssnare i dag och hämtas när översikten öppnas (kortet laddas om vid varje flikbyte).
+- Efter resans slut visas ingen nedräkning; kortet döljs helt om inget väntar.
 
 ## Beslut
 - 2026-11-15: Omröstningar finns redan i appen och ingår.

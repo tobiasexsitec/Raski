@@ -284,6 +284,8 @@ else
 @code {
     [Parameter] public string TripId { get; set; } = "";
 
+    [SupplyParameterFromQuery(Name = "bil")] public string? CarQuery { get; set; }
+
     private Trip? trip;
     private IReadOnlyList<ShoppingListItem> items = [];
     private IReadOnlyList<ShoppingListGroup> groups = [];
@@ -575,6 +577,12 @@ else
     {
         isLoading = true;
         errorMessage = null;
+
+        if (CarQuery == "min")
+        {
+            carFilter = MyCar;
+            showAdvanced = true;
+        }
 
         try
         {

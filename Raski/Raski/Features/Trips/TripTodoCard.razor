@@ -1,0 +1,269 @@
+@implements IAsyncDisposable
+@inject IMealService MealService
+@inject IPollService PollService
+@inject IBringItemService BringItemService
+@inject IHouseholdService HouseholdService
+@inject ICarService CarService
+@inject IShoppingListService ShoppingListService
+@inject NavigationManager Navigation
+
+@if (HasPending)
+{
+    <section class="card todo-card" aria-labelledby="todo-heading">
+        <h2 id="todo-heading">Att tänka på för dig</h2>
+        <ul class="todo-list">
+            @if (unansweredPolls.Count > 0)
+            {
+                <li class="todo-row todo-link" role="link" tabindex="0"
+                    aria-label="@($"{PollText}. Gå till omröstningar.")"
+                    @onclick="@(() => Go("omrostningar"))"
+                    @onkeydown="@(e => OnKey(e, "omrostningar"))">
+                    <span class="todo-icon" aria-hidden="true">🗳</span>
+                    <span class="todo-text">
+                        @PollText
+                        <span class="muted todo-sub">@Preview(unansweredPolls.Select(p => p.Question))</span>
+                    </span>
+                    <span class="todo-chevron" aria-hidden="true">›</span>
+                </li>
+            }
+            @if (myMeals.Count > 0)
+            {
+                <li class="todo-row todo-link" role="link" tabindex="0"
+                    aria-label="@($"{MealText}. Gå till måltider.")"
+                    @onclick="@(() => Go("maltider"))"
+                    @onkeydown="@(e => OnKey(e, "maltider"))">
+                    <span class="todo-icon" aria-hidden="true">🍳</span>
+                    <span class="todo-text">
+                        @MealText
+                        <span class="muted todo-sub">@Preview(myMeals.Select(FormatMeal))</span>
+                    </span>
+                    <span class="todo-chevron" aria-hidden="true">›</span>
+                </li>
+            }
+            @if (myItems.Count > 0)
+            {
+                <li class="todo-row todo-link" role="link" tabindex="0"
+                    aria-label="@($"{ItemText}. Gå till Vem tar med.")"
+                    @onclick="@(() => Go("vem-tar-med"))"
+                    @onkeydown="@(e => OnKey(e, "vem-tar-med"))">
+                    <span class="todo-icon" aria-hidden="true">🧺</span>
+                    <span class="todo-text">
+                        @ItemText
+                        <span class="muted todo-sub">@Preview(myItems.Select(i => i.Name))</span>
+                    </span>
+                    <span class="todo-chevron" aria-hidden="true">›</span>
+                </li>
+            }
+            @if (MyCarItemCount > 0)
+            {
+                <li class="todo-row todo-link" role="link" tabindex="0"
+                    aria-label="@($"{CarText}. Gå till inköpslistan för din bil.")"
+                    @onclick="@(() => Go("inkopslista?bil=min"))"
+                    @onkeydown="@(e => OnKey(e, "inkopslista?bil=min"))">
+                    <span class="todo-icon" aria-hidden="true">🚗</span>
+                    <span class="todo-text">@CarText</span>
+                    <span class="todo-chevron" aria-hidden="true">›</span>
+                </li>
+            }
+        </ul>
+    </section>
+}
+
+@code {
+    [Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
+
+    [CascadingParameter(Name = "CurrentUser")]
+    private UserProfile? CurrentUser { get; set; }
+
+    private static readonly System.Globalization.CultureInfo Swedish =
+        System.Globalization.CultureInfo.GetCultureInfo("sv-SE");
+
+    private List<Poll> unansweredPolls = [];
+    private List<Meal> myMeals = [];
+    private List<BringItem> myItems = [];
+    private HashSet<string> myKeys = [];
+    private string? myCarId;
+    private IReadOnlyDictionary<string, ShoppingItemState> shoppingState = new Dictionary<string, ShoppingItemState>();
+
+    // Only rows still to buy count, so the line disappears once the car has shopped.
+    private int MyCarItemCount =>
+        myCarId is null ? 0 : shoppingState.Values.Count(s => !s.Checked && s.CarId == myCarId);
+
+    private string CarText => $"Din bil ansvarar för {MyCarItemCount} {(MyCarItemCount == 1 ? "vara" : "varor")}";
+    private CancellationTokenSource? listenerCts;
+    private string? observedTripId;
+
+    private bool HasPending => unansweredPolls.Count > 0 || myMeals.Count > 0 || myItems.Count > 0 || MyCarItemCount > 0;
+
+    private string PollText => $"{unansweredPolls.Count} {(unansweredPolls.Count == 1 ? "omröstning väntar" : "omröstningar väntar")} på ditt svar";
+    private string MealText => $"Du lagar {myMeals.Count} {(myMeals.Count == 1 ? "måltid" : "måltider")}";
+    private string ItemText => $"Du tar med {myItems.Count} {(myItems.Count == 1 ? "sak" : "saker")}";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (observedTripId == Trip.Id)
+        {
+            return;
+        }
+
+        observedTripId = Trip.Id;
+        var uid = CurrentUser?.Uid;
+        if (string.IsNullOrEmpty(uid))
+        {
+            return;
+        }
+
+        try
+        {
+            var household = await HouseholdService.GetMineAsync();
+            myKeys = [uid];
+            if (household is not null)
+            {
+                myKeys.Add(ResponsibleOptions.HouseholdKey(household.Id));
+            }
+        }
+        catch (Exception)
+        {
+            // Without the household only the user's own responsibilities are shown.
+            myKeys = [uid];
+        }
+
+        var pollsTask = LoadPollsAsync(uid);
+        var itemsTask = LoadItemsAsync();
+        await StartListeningAsync();
+        await Task.WhenAll(pollsTask, itemsTask);
+    }
+
+    private async Task LoadPollsAsync(string uid)
+    {
+        try
+        {
+            var now = DateTimeOffset.Now;
+            var polls = await PollService.GetAsync(Trip.Id);
+            unansweredPolls = [.. polls.Where(p => p.IsOpen(now) && p.Votes.All(v => v.VoterUid != uid))];
+        }
+        catch (Exception)
+        {
+            unansweredPolls = [];
+        }
+    }
+
+    private async Task LoadItemsAsync()
+    {
+        try
+        {
+            var items = await BringItemService.GetAsync(Trip.Id);
+            myItems = [.. items.Where(i => myKeys.Contains(i.ResponsibleUid))];
+        }
+        catch (Exception)
+        {
+            myItems = [];
+        }
+    }
+
+    private async Task StartListeningAsync()
+    {
+        await StopListeningAsync();
+
+        listenerCts = new CancellationTokenSource();
+        var token = listenerCts.Token;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await foreach (var snapshot in MealService.ObserveMeals(Trip.Id, token))
+                {
+                    myMeals = [.. snapshot
+                        .Where(m => myKeys.Contains(m.ResponsibleUid))
+                        .OrderBy(m => m.Date)
+                        .ThenBy(m => m.Type)];
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception)
+            {
+                // The card is a summary; the meals tab shows the error.
+            }
+        }, token);
+
+        var uid = CurrentUser?.Uid;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await foreach (var snapshot in CarService.ObserveCars(Trip.Id, token))
+                {
+                    myCarId = uid is null ? null : snapshot.FirstOrDefault(c => c.MemberUids.Contains(uid))?.Id;
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception)
+            {
+            }
+        }, token);
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await foreach (var snapshot in ShoppingListService.ObserveState(Trip.Id, token))
+                {
+                    shoppingState = snapshot;
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception)
+            {
+            }
+        }, token);
+    }
+
+    private static string FormatMeal(Meal meal)
+    {
+        var title = string.IsNullOrWhiteSpace(meal.Title) ? meal.Type.ToSwedish() : meal.Title;
+        return $"{title} ({meal.Date.ToDateTime(TimeOnly.MinValue).ToString("ddd", Swedish)})";
+    }
+
+    private static string Preview(IEnumerable<string> values)
+    {
+        var list = values.Where(v => !string.IsNullOrWhiteSpace(v)).ToList();
+        var shown = string.Join(", ", list.Take(3));
+        return list.Count > 3 ? $"{shown} …" : shown;
+    }
+
+    private void Go(string tab) => Navigation.NavigateTo($"resor/{Trip.Id}/{tab}");
+
+    private void OnKey(KeyboardEventArgs e, string tab)
+    {
+        if (e.Key is "Enter" or " ")
+        {
+            Go(tab);
+        }
+    }
+
+    private async Task StopListeningAsync()
+    {
+        if (listenerCts is not null)
+        {
+            await listenerCts.CancelAsync();
+            listenerCts.Dispose();
+            listenerCts = null;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await StopListeningAsync();
+    }
+}
