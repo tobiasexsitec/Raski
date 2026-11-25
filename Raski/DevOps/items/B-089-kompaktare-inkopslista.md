@@ -1,10 +1,10 @@
 # B-089: Kompaktare inköpslista
 
-- **Status:** Pågår
+- **Status:** Klar
 - **Typ:** Patch
 - **Prioritet:** –
 - **Skapad:** 2026-11-18
-- **Klar:** –
+- **Klar:** 2026-11-25
 
 ## Beskrivning
 Inköpslistan är luftig och man ser få varor per skärm. Raderna ska ta mindre plats så att mer
