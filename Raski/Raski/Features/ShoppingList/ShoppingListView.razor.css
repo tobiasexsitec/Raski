@@ -97,6 +97,13 @@
     white-space: nowrap;
 }
 
+.car-tag {
+    max-width: 8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .filter-toggle {
     position: relative;
     flex: 0 0 auto;
