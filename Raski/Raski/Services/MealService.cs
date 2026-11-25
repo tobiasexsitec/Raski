@@ -82,13 +82,21 @@ public sealed class MealService(FirebaseInterop interop, IAuthService authServic
             })
             .ToArray();
 
+        var responsibles = meal.Responsibles
+            .Where(r => r.Key.Length > 0)
+            .DistinctBy(r => r.Key)
+            .Select(r => new { uid = r.Uid, name = r.Name.Trim() })
+            .ToArray();
+
         var data = new Dictionary<string, object?>
         {
             ["date"] = FirestoreFormat.ToIso(meal.Date),
             ["type"] = meal.Type.ToFirestore(),
             ["title"] = meal.Title.Trim(),
-            ["responsibleUid"] = meal.ResponsibleUid,
-            ["responsibleName"] = meal.ResponsibleName,
+            // The first responsible is also kept in the old fields for clients that predate the list.
+            ["responsibleUid"] = responsibles.FirstOrDefault()?.uid ?? "",
+            ["responsibleName"] = responsibles.FirstOrDefault()?.name ?? "",
+            ["responsibles"] = responsibles,
             ["recipeUrl"] = meal.RecipeUrl.Trim(),
             ["comment"] = meal.Comment.Trim(),
             ["ingredients"] = ingredients,

@@ -226,8 +226,7 @@ public sealed class ShoppingListService(
     {
         Id = owner?.Id ?? "",
         Title = title,
-        ResponsibleUid = owner?.ResponsibleUid ?? "",
-        ResponsibleName = owner?.ResponsibleName ?? "",
+        Responsibles = owner?.Responsibles ?? [],
         Ingredients =
         [
             .. drinks

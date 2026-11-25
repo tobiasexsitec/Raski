@@ -42,12 +42,55 @@ public sealed class Meal
     public DateOnly Date { get; set; }
     public MealType Type { get; set; }
     public string Title { get; set; } = "";
-    public string ResponsibleUid { get; set; } = "";
-    public string ResponsibleName { get; set; } = "";
+    public List<MealResponsible> Responsibles { get; set; } = [];
     public string RecipeUrl { get; set; } = "";
     public string Comment { get; set; } = "";
     public List<MealIngredient> Ingredients { get; set; } = [];
     public List<MealDrink> Drinks { get; set; } = [];
+
+    public bool HasResponsible => Responsibles.Count > 0;
+
+    public IEnumerable<string> ResponsibleKeys => Responsibles.Select(r => r.Key).Where(k => k.Length > 0);
+
+    /// <summary>Comma-separated names, shortened to the first two and "+N" when there are more.</summary>
+    public string ResponsibleSummary
+    {
+        get
+        {
+            var names = Responsibles.Select(r => r.Name.Trim()).Where(n => n.Length > 0).ToList();
+            return names.Count <= 2
+                ? string.Join(", ", names)
+                : $"{string.Join(", ", names.Take(2))} +{names.Count - 2}";
+        }
+    }
+
+    public string ResponsibleNames => string.Join(", ", Responsibles.Select(r => r.Name.Trim()).Where(n => n.Length > 0));
+}
+
+/// <summary>
+/// A member, a household (prefixed uid, see <see cref="ResponsibleOptions"/>) or a free-text name
+/// responsible for a meal.
+/// </summary>
+public sealed record MealResponsible(string Uid, string Name)
+{
+    /// <summary>Uid for members and households, otherwise the free-text name so anonymous people can be filtered too.</summary>
+    public string Key =>
+        !string.IsNullOrEmpty(Uid) ? Uid
+        : string.IsNullOrWhiteSpace(Name) ? ""
+        : "name:" + Name.Trim().ToLowerInvariant();
+
+    /// <summary>Reads the list, falling back to the single responsible stored before multiple were supported.</summary>
+    public static List<MealResponsible> FromStored(IEnumerable<MealResponsible>? list, string? legacyUid, string? legacyName)
+    {
+        var stored = list?.Where(r => r.Key.Length > 0).ToList() ?? [];
+        if (stored.Count > 0)
+        {
+            return stored;
+        }
+
+        var legacy = new MealResponsible(legacyUid ?? "", legacyName ?? "");
+        return legacy.Key.Length > 0 ? [legacy] : [];
+    }
 }
 
 public sealed class MealDrink

@@ -15,6 +15,7 @@ public sealed class MealDocumentPayload
     [JsonPropertyName("title")] public string? Title { get; set; }
     [JsonPropertyName("responsibleUid")] public string? ResponsibleUid { get; set; }
     [JsonPropertyName("responsibleName")] public string? ResponsibleName { get; set; }
+    [JsonPropertyName("responsibles")] public List<MealResponsiblePayload>? Responsibles { get; set; }
     [JsonPropertyName("recipeUrl")] public string? RecipeUrl { get; set; }
     [JsonPropertyName("comment")] public string? Comment { get; set; }
     [JsonPropertyName("ingredients")] public List<MealIngredientPayload>? Ingredients { get; set; }
@@ -27,13 +28,20 @@ public sealed class MealDocumentPayload
         Date = FirestoreFormat.ParseDate(Date),
         Type = MealTypeExtensions.ParseMealType(Type),
         Title = Title ?? "",
-        ResponsibleUid = ResponsibleUid ?? "",
-        ResponsibleName = ResponsibleName ?? "",
+        Responsibles = MealResponsible.FromStored(Responsibles?.Select(r => r.ToModel()), ResponsibleUid, ResponsibleName),
         RecipeUrl = RecipeUrl ?? "",
         Comment = Comment ?? "",
         Ingredients = Ingredients?.Select(i => i.ToModel()).ToList() ?? [],
         Drinks = Drinks?.Select(d => d.ToModel()).ToList() ?? []
     };
+}
+
+public sealed class MealResponsiblePayload
+{
+    [JsonPropertyName("uid")] public string? Uid { get; set; }
+    [JsonPropertyName("name")] public string? Name { get; set; }
+
+    public MealResponsible ToModel() => new(Uid ?? "", Name ?? "");
 }
 
 public sealed class MealDrinkPayload
