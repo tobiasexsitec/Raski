@@ -512,9 +512,10 @@ else
 
             return items
                 .SelectMany(i => i.Sources)
-                .Where(s => s.ResponsibleKey.Length > 0)
-                .GroupBy(s => s.ResponsibleKey)
-                .Select(g => (Key: g.Key, Name: g.Key == currentUid ? "Jag" : g.First().ResponsibleName.Trim()))
+                .SelectMany(s => s.Responsibles)
+                .Where(r => r.Key.Length > 0)
+                .GroupBy(r => r.Key)
+                .Select(g => (Key: g.Key, Name: g.Key == currentUid ? "Jag" : g.First().Name.Trim()))
                 .OrderBy(r => r.Key == currentUid ? 0 : 1)
                 .ThenBy(r => r.Name, StringComparer.CurrentCultureIgnoreCase);
         }
@@ -529,7 +530,7 @@ else
             .OrderBy(m => m.Title, StringComparer.CurrentCultureIgnoreCase);
 
     private bool MatchesSource(ShoppingListSource source) =>
-        (selectedResponsible.Length == 0 || source.ResponsibleKey == selectedResponsible)
+        (selectedResponsible.Length == 0 || source.HasResponsible(selectedResponsible))
         && (selectedMeal.Length == 0 || source.MealKey == selectedMeal);
 
     private IEnumerable<string> AvailableTags =>

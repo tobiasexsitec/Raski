@@ -12,9 +12,9 @@
 
         <p class="muted">@FormatDay(Meal.Date)</p>
 
-        @if (!string.IsNullOrWhiteSpace(Meal.ResponsibleName))
+        @if (Meal.HasResponsible)
         {
-            <p class="muted">Ansvarig: @Meal.ResponsibleName</p>
+            <p class="muted">Ansvarig: @Meal.ResponsibleNames</p>
         }
 
         @if (!string.IsNullOrWhiteSpace(Meal.RecipeUrl))

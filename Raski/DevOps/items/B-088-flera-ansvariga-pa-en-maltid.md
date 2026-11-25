@@ -1,9 +1,10 @@
 # B-088: Flera ansvariga på en måltid
 
-- **Status:** Idé
+- **Status:** Klar
 - **Typ:** Funktion
 - **Prioritet:** –
 - **Skapad:** 2026-11-18
+- **Klar:** 2026-11-25
 
 ## Beskrivning
 I dag kan en måltid bara ha en ansvarig (deltagare, hushåll eller fritt namn). Ofta lagar flera personer eller hushåll en måltid tillsammans, så det ska gå att välja flera ansvariga.

@@ -175,7 +175,7 @@
                 await foreach (var snapshot in MealService.ObserveMeals(Trip.Id, token))
                 {
                     myMeals = [.. snapshot
-                        .Where(m => myKeys.Contains(m.ResponsibleUid))
+                        .Where(m => m.ResponsibleKeys.Any(myKeys.Contains))
                         .OrderBy(m => m.Date)
                         .ThenBy(m => m.Type)];
                     await InvokeAsync(StateHasChanged);

@@ -9,16 +9,11 @@ public sealed record ShoppingItemState(bool Checked, string CarId);
 public sealed record ShoppingListSource(
     string MealKey,
     string MealTitle,
-    string ResponsibleUid,
-    string ResponsibleName,
+    IReadOnlyList<MealResponsible> Responsibles,
     string Unit,
     decimal Amount)
 {
-    /// <summary>Uid for members, otherwise the free-text name so anonymous people can be filtered too.</summary>
-    public string ResponsibleKey =>
-        !string.IsNullOrEmpty(ResponsibleUid) ? ResponsibleUid
-        : string.IsNullOrWhiteSpace(ResponsibleName) ? ""
-        : "name:" + ResponsibleName.Trim().ToLowerInvariant();
+    public bool HasResponsible(string key) => Responsibles.Any(r => r.Key == key);
 }
 
 public static class ExtraCategories

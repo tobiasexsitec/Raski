@@ -32,16 +32,69 @@
         <input id="meal-title" type="text" placeholder="Köttbullar med potatismos" @bind="title" @bind:event="oninput" />
     </div>
 
-    <div class="field">
-        <label for="meal-responsible">Ansvarig</label>
-        <select id="meal-responsible" @bind="responsibleUid">
-            <option value="">Välj ansvarig</option>
-            @foreach (var option in responsibleOptions)
+    <fieldset class="field responsibles">
+        <legend>Ansvariga</legend>
+
+        @if (responsibles.Count > 0)
+        {
+            <ul class="row-inline responsible-chips" aria-label="Valda ansvariga">
+                @foreach (var responsible in responsibles)
+                {
+                    <li class="tag tag-accent">
+                        @DisplayName(responsible)
+                        <button type="button"
+                                class="chip-remove"
+                                aria-label="@($"Ta bort {DisplayName(responsible)} som ansvarig")"
+                                @onclick="() => RemoveResponsibleAsync(responsible)">
+                            ✕
+                        </button>
+                    </li>
+                }
+            </ul>
+        }
+
+        @if (MyOption is { } me && !IsSelected(me.Key))
+        {
+            <button type="button" class="btn btn-secondary btn-sm add-me" @onclick="() => AddOptionAsync(me)">
+                + Jag
+            </button>
+        }
+
+        <div class="responsible-search">
+            <input type="text"
+                   role="combobox"
+                   aria-label="Sök ansvarig"
+                   aria-expanded="@(Suggestions.Count > 0 ? "true" : "false")"
+                   aria-controls="responsible-suggestions"
+                   autocomplete="off"
+                   placeholder="Sök deltagare eller skriv ett namn"
+                   @bind="responsibleSearch"
+                   @bind:event="oninput"
+                   @onkeydown="OnResponsibleSearchKeyDown" />
+
+            @if (responsibleSearch.Trim().Length > 0)
             {
-                <option value="@option.Key">@option.Name</option>
+                <ul id="responsible-suggestions" class="card responsible-suggestions" role="listbox">
+                    @foreach (var option in Suggestions)
+                    {
+                        <li role="option" aria-selected="false" tabindex="0"
+                            @onclick="() => AddOptionAsync(option)"
+                            @onkeydown="e => OnSuggestionKeyDown(e, option)">
+                            @option.Name
+                        </li>
+                    }
+                    @if (!Suggestions.Any(o => string.Equals(o.Name, responsibleSearch.Trim(), StringComparison.OrdinalIgnoreCase)))
+                    {
+                        <li role="option" aria-selected="false" tabindex="0" class="muted"
+                            @onclick="AddFreeResponsibleAsync"
+                            @onkeydown="e => OnFreeSuggestionKeyDown(e)">
+                            Lägg till ”@responsibleSearch.Trim()”
+                        </li>
+                    }
+                </ul>
             }
-        </select>
-    </div>
+        </div>
+    </fieldset>
 
     <div class="field">
         <label for="meal-recipe">Receptlänk (valfritt)</label>
@@ -219,7 +272,29 @@
     private string selectedDate = "";
     private MealType mealType = MealType.Dinner;
     private string title = "";
-    private string responsibleUid = "";
+    private readonly List<MealResponsible> responsibles = [];
+    private string responsibleSearch = "";
+    private bool autoSaveQueued;
+
+    [CascadingParameter(Name = "CurrentUser")]
+    private UserProfile? CurrentUser { get; set; }
+
+    private ResponsibleOption? MyOption =>
+        CurrentUser is null ? null : responsibleOptions.FirstOrDefault(o => o.Key == CurrentUser.Uid);
+
+    private IReadOnlyList<ResponsibleOption> Suggestions
+    {
+        get
+        {
+            var term = responsibleSearch.Trim();
+
+            return term.Length == 0
+                ? []
+                : [.. responsibleOptions
+                    .Where(o => !IsSelected(o.Key) && o.Name.Contains(term, StringComparison.OrdinalIgnoreCase))
+                    .Take(6)];
+        }
+    }
     private IReadOnlyList<ResponsibleOption> responsibleOptions = [];
     private IReadOnlyList<TripMember>? optionsMembers;
     private string recipeUrl = "";
@@ -267,7 +342,7 @@
             selectedDate = Meal.Date.ToString("yyyy-MM-dd");
             mealType = Meal.Type;
             title = Meal.Title;
-            responsibleUid = Meal.ResponsibleUid;
+            responsibles.AddRange(Meal.Responsibles);
             recipeUrl = Meal.RecipeUrl;
             comment = Meal.Comment;
             drinkRows.AddRange(Meal.Drinks.Select(d => new MealDrink
@@ -301,6 +376,90 @@
     }
 
     private void AddRow() => rows.Add(new IngredientRow());
+
+    private bool IsSelected(string key) => responsibles.Any(r => r.Key == key);
+
+    private string DisplayName(MealResponsible responsible) =>
+        responsibleOptions.FirstOrDefault(o => o.Key == responsible.Key)?.Name ?? responsible.Name;
+
+    private Task AddOptionAsync(ResponsibleOption option) =>
+        AddResponsibleAsync(new MealResponsible(option.Key, option.Name));
+
+    private Task AddFreeResponsibleAsync() =>
+        AddResponsibleAsync(new MealResponsible("", responsibleSearch.Trim()));
+
+    private async Task AddResponsibleAsync(MealResponsible responsible)
+    {
+        responsibleSearch = "";
+
+        if (responsible.Key.Length == 0 || IsSelected(responsible.Key))
+        {
+            return;
+        }
+
+        responsibles.Add(responsible);
+        await AutoSaveAsync();
+    }
+
+    private async Task RemoveResponsibleAsync(MealResponsible responsible)
+    {
+        responsibles.RemoveAll(r => r.Key == responsible.Key);
+        await AutoSaveAsync();
+    }
+
+    private async Task OnResponsibleSearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key != "Enter" || responsibleSearch.Trim().Length == 0)
+        {
+            return;
+        }
+
+        if (Suggestions is [var only])
+        {
+            await AddOptionAsync(only);
+        }
+        else if (Suggestions.FirstOrDefault(o => string.Equals(o.Name, responsibleSearch.Trim(), StringComparison.OrdinalIgnoreCase)) is { } exact)
+        {
+            await AddOptionAsync(exact);
+        }
+        else if (Suggestions.Count == 0)
+        {
+            await AddFreeResponsibleAsync();
+        }
+    }
+
+    private async Task OnSuggestionKeyDown(KeyboardEventArgs e, ResponsibleOption option)
+    {
+        if (e.Key is "Enter" or " ")
+        {
+            await AddOptionAsync(option);
+        }
+    }
+
+    private async Task OnFreeSuggestionKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key is "Enter" or " ")
+        {
+            await AddFreeResponsibleAsync();
+        }
+    }
+
+    // Saves are serialized so a quick series of picks can't create the meal twice.
+    private async Task AutoSaveAsync()
+    {
+        if (isSaving)
+        {
+            autoSaveQueued = true;
+            return;
+        }
+
+        do
+        {
+            autoSaveQueued = false;
+            await PersistAsync(silent: true);
+        }
+        while (autoSaveQueued);
+    }
 
     private async Task AddRowAndSaveAsync()
     {
@@ -467,10 +626,10 @@
                 });
             }
 
-            var responsible = responsibleOptions.FirstOrDefault(o => o.Key == responsibleUid)
-                ?? (Meal is not null && responsibleUid.Length > 0 && responsibleUid == Meal.ResponsibleUid
-                    ? new ResponsibleOption(Meal.ResponsibleUid, Meal.ResponsibleName, ResponsibleOptions.IsHousehold(Meal.ResponsibleUid))
-                    : null);
+            // Members and households get their current name; unknown keys keep the stored one.
+            var savedResponsibles = responsibles
+                .Select(r => r with { Name = DisplayName(r) })
+                .ToList();
 
             foreach (var drink in drinks)
             {
@@ -486,8 +645,7 @@
                 Date = DateOnly.Parse(selectedDate),
                 Type = mealType,
                 Title = title.Trim(),
-                ResponsibleUid = responsible?.Key ?? "",
-                ResponsibleName = responsible?.Name ?? "",
+                Responsibles = savedResponsibles,
                 RecipeUrl = trimmedRecipeUrl,
                 Comment = comment.Trim(),
                 Ingredients = ingredients,

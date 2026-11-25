@@ -61,8 +61,7 @@ public static class ShoppingListAggregator
                 item.Sources.Add(new ShoppingListSource(
                     string.IsNullOrEmpty(meal.Id) ? "title:" + meal.Title : meal.Id,
                     meal.Title,
-                    meal.ResponsibleUid,
-                    meal.ResponsibleName,
+                    meal.Responsibles,
                     unit,
                     Math.Max(ingredient.Amount, 0)));
 

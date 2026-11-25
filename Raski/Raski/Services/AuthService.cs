@@ -213,7 +213,7 @@ public sealed class AuthService(FirebaseInterop interop) : IAuthService, IAsyncD
                     alcohol = profile.Alcohol?.ToFirestore()
                 });
 
-                await ReassignResponsibilitiesAsync<MealDocument>($"trips/{trip.Id}/meals", d => d.Id, pendingId, profile.Uid, profile.DisplayName);
+                await ReassignMealResponsibilitiesAsync($"trips/{trip.Id}/meals", pendingId, profile.Uid, profile.DisplayName);
                 await ReassignResponsibilitiesAsync<BringItemDocument>($"trips/{trip.Id}/bringItems", d => d.Id, pendingId, profile.Uid, profile.DisplayName);
 
                 await interop.DeleteDocumentAsync($"trips/{trip.Id}/members/{pendingId}");
@@ -239,6 +239,36 @@ public sealed class AuthService(FirebaseInterop interop) : IAuthService, IAsyncD
             {
                 responsibleUid = toUid,
                 responsibleName = toName ?? ""
+            });
+        }
+    }
+
+    // Meals can have several responsibles in a list, which can't be queried on a single uid.
+    private async Task ReassignMealResponsibilitiesAsync(string collectionPath, string fromUid, string toUid, string? toName)
+    {
+        var documents = await interop.QueryAsync<MealDocument>(collectionPath, new FirestoreQuery());
+
+        foreach (var document in documents)
+        {
+            var responsibles = MealResponsible.FromStored(
+                document.Responsibles?.Select(r => r.ToModel()), document.ResponsibleUid, document.ResponsibleName);
+
+            if (!responsibles.Any(r => r.Uid == fromUid))
+            {
+                continue;
+            }
+
+            var updated = responsibles
+                .Select(r => r.Uid == fromUid ? new MealResponsible(toUid, toName ?? "") : r)
+                .DistinctBy(r => r.Key)
+                .Select(r => new { uid = r.Uid, name = r.Name })
+                .ToArray();
+
+            await interop.UpdateDocumentAsync($"{collectionPath}/{document.Id}", new
+            {
+                responsibleUid = updated[0].uid,
+                responsibleName = updated[0].name,
+                responsibles = updated
             });
         }
     }
