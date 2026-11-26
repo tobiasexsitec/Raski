@@ -60,7 +60,7 @@ Läs om tabellerna med radnummer och kontrollera:
 
 - [ ] Varje rad börjar med `| [B-XXX](items/B-XXX-....md) |`.
 - [ ] **Öppna** har exakt sex kolumner per rad och är i nummerordning.
-- [ ] **Klara** är orörd (fem kolumner, senast klar överst).
+**Klara** är orörd (sex kolumner inkl. Released, senast klar överst).
 - [ ] Inga rader har försvunnit eller dubblerats jämfört med före ändringen.
 - [ ] Den nya raden länkar till den skapade filen, och typ, status och datum matchar filen.
 

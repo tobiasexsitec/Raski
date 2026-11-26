@@ -20,84 +20,85 @@
 
 ## Klara
 
-| ID | Titel | Typ | Prioritet | Klar |
-| --- | --- | --- | --- | --- |
-| [B-086](items/B-086-sortera-anvandare-pa-registreringsdatum.md) | Sortera användare på registreringsdatum och senaste inloggning | Patch | – | 2026-11-25 |
-| [B-088](items/B-088-flera-ansvariga-pa-en-maltid.md) | Flera ansvariga på en måltid | Funktion | – | 2026-11-25 |
-| [B-089](items/B-089-kompaktare-inkopslista.md) | Kompaktare inköpslista | Patch | – | 2026-11-25 |
-| [B-085](items/B-085-att-tanka-pa-pa-oversikten.md) | "Att tänka på" på översikten | Funktion | – | 2026-11-25 |
-| [B-083](items/B-083-hushall-med-namn-som-ansvarig.md) | Hushåll med namn som ansvarig | Funktion | – | 2026-11-18 |
-| [B-087](items/B-087-forslag-pa-mat.md) | Förslag på mat | Funktion | – | 2026-11-16 |
-| [B-084](items/B-084-fordela-inkop-mellan-bilar.md) | Fördela inköp mellan bilar | Funktion | – | 2026-11-15 |
-| [B-051](items/B-051-flytta-appen-till-domanen-krispinsson-se.md) | Flytta appen till domänen krispinsson.se | Utveckling | – | 2026-11-15 |
-| [B-081](items/B-081-ta-bort-en-resa.md) | Ta bort en resa | Funktion | – | 2026-11-15 |
-| [B-082](items/B-082-avancerad-filtrering-i-inkopslistan.md) | Avancerad filtrering i inköpslistan | Patch | – | 2026-11-11 |
-| [B-080](items/B-080-seg-laddning-av-data-fran-firestore.md) | Seg laddning av data från Firestore | Bugg | – | 2026-11-10 |
-| [B-079](items/B-079-hushallsfokus-i-onboarding-for-partner-och-barn.md) | Hushållsfokus i onboarding för partner och barn | Patch | – | 2026-11-10 |
-| [B-078](items/B-078-hojdpunkter-i-nyhetspopupen.md) | Höjdpunkter i nyhetspopupen | Patch | – | 2026-11-02 |
-| [B-075](items/B-075-spara-maltid-nar-ingrediens-laggs-till.md) | Spara måltid när ingrediens läggs till | Patch | – | 2026-11-02 |
-| [B-077](items/B-077-enhet-byter-till-plural-vid-inmatning.md) | Enhet byter till plural vid inmatning | Patch | – | 2026-11-02 |
-| [B-076](items/B-076-visa-mer-for-fika-och-snacks-under-maltider.md) | Visa mer för fika och snacks under Måltider | Patch | – | 2026-11-02 |
-| [B-021](items/B-021-sok-och-filtrera-i-inkopslistan.md) | Sök och filtrera i inköpslistan | Funktion | – | 2026-10-29 |
-| [B-074](items/B-074-enheter-sparas-alltid-med-sma-bokstaver.md) | Enheter sparas alltid med små bokstäver | Bugg | – | 2026-10-28 |
-| [B-073](items/B-073-redigera-fika-och-ovrigt.md) | Redigera fika och övrigt | Patch | – | 2026-10-28 |
-| [B-071](items/B-071-admin-flik-for-global-administration.md) | Admin-flik med administrationslådor | Patch | – | 2026-10-28 |
-| [B-070](items/B-070-profil-i-avatarmenyn.md) | Profil i avatarmenyn | Patch | – | 2026-10-28 |
-| [B-069](items/B-069-singular-och-plural-for-enheter.md) | Singular och plural för enheter | Funktion | – | 2026-10-28 |
-| [B-068](items/B-068-ovrigt-under-maltider.md) | Övrigt under Måltider | Funktion | – | 2026-10-28 |
-| [B-067](items/B-067-luft-mellan-kort-och-lagg-till-knapp-pa-oversikten.md) | Luft mellan kort och Lägg till-knapp på översikten | Bugg | – | 2026-10-28 |
-| [B-066](items/B-066-visa-mer-for-ovrig-info-pa-oversikten.md) | Visa mer för Övrig info på översikten | Patch | – | 2026-10-28 |
-| [B-065](items/B-065-dra-for-att-uppdatera.md) | Dra för att uppdatera | Patch | – | 2026-10-27 |
-| [B-064](items/B-064-appkansla-i-installerat-lage.md) | Appkänsla i installerat läge: ingen dubbeltrycks-zoom och temafärgat statusfält | Patch | – | 2026-10-27 |
-| [B-056](items/B-056-policyer-for-resan.md) | Policyer för resan | Funktion | – | 2026-10-27 |
-| [B-062](items/B-062-produktionspipelinen-deployar-firestore-regler.md) | Produktionspipelinen deployar Firestore-regler | Utveckling | – | 2026-10-27 |
-| [B-061](items/B-061-alla-kan-skapa-egna-resor.md) | Alla kan skapa egna resor | Funktion | – | 2026-10-27 |
-| [B-058](items/B-058-testmiljo-fore-produktion.md) | Testmiljö före produktion | Utveckling | – | 2026-10-27 |
-| [B-042](items/B-042-antal-personer-pa-oversikten.md) | Antal personer på översikten | Funktion | – | 2026-10-22 |
-| [B-055](items/B-055-onboarding-for-partner-och-barn-till-befintliga-anvandare.md) | Onboarding för partner och barn till befintliga användare | Funktion | Hög | 2026-10-22 |
-| [B-047](items/B-047-barn-och-sallskap-pa-deltagare.md) | Barn och sällskap på deltagare | Funktion | Hög | 2026-10-22 |
-| [B-045](items/B-045-anonyma-deltagare-via-e-post.md) | Anonyma deltagare via e-post | Funktion | – | 2026-10-22 |
-| [B-053](items/B-053-dela-upp-backloggen-i-oppna-och-klara-med-datum.md) | Dela upp backloggen i öppna och klara med datum | Utveckling | – | 2026-10-22 |
-| [B-052](items/B-052-conventional-commits-och-versionshojning-per-typ.md) | Conventional commits och versionshöjning per typ | Utveckling | – | 2026-10-22 |
-| [B-050](items/B-050-lagg-till-sak-fran-vem-tar-med-pa-inkopslistan.md) | Lägg till sak från "Vem tar med" på inköpslistan | Funktion | – | 2026-10-14 |
-| [B-048](items/B-048-popup-med-nyheter-vid-ny-version.md) | Popup med nyheter vid ny version | Funktion | – | 2026-10-14 |
-| [B-026](items/B-026-lagga-till-feature-requests-i-appen.md) | Lägga till feature requests i appen | Funktion | – | 2026-10-14 |
-| [B-022](items/B-022-ovrigt-att-inhandla.md) | Övrigt att inhandla | Funktion | – | 2026-10-14 |
-| [B-040](items/B-040-datum-i-release-notes.md) | Datum i release notes | Funktion | – | 2026-10-05 |
-| [B-039](items/B-039-sidfot-med-om-raski-och-version.md) | Sidfot med Om Raski™ och version | Funktion | – | 2026-10-05 |
-| [B-038](items/B-038-flytta-temavaljaren-till-profilsidan.md) | Flytta temaväljaren till profilsidan | Funktion | – | 2026-10-05 |
-| [B-037](items/B-037-lank-till-destination-och-boende-pa-oversikten.md) | Länk till destination och boende på översikten | Funktion | – | 2026-10-05 |
-| [B-036](items/B-036-storre-textruta-for-ovrig-info-pa-mobil.md) | Större textruta för Övrig info på mobil | Funktion | – | 2026-10-05 |
-| [B-035](items/B-035-langre-text-i-ovrig-info.md) | Längre text i Övrig info | Funktion | – | 2026-10-05 |
-| [B-034](items/B-034-bugg-release-notes-laddas-inte-pa-about-sidan.md) | Bugg: Release notes laddas inte på About-sidan | Bugg | Hög | 2026-10-05 |
-| [B-033](items/B-033-klickbara-lankar-i-texter.md) | Klickbara länkar i texter | Funktion | – | 2026-10-05 |
-| [B-025](items/B-025-release-notes-i-appen.md) | Release notes i appen | Funktion | – | 2026-10-05 |
-| [B-032](items/B-032-ny-appikon.md) | Ny appikon | Funktion | – | 2026-10-04 |
-| [B-031](items/B-031-om-raski-i-onboarding.md) | Om Raski™ i onboarding | Funktion | – | 2026-10-04 |
-| [B-030](items/B-030-raski-som-varumarke.md) | Raski™ som varumärke | Funktion | – | 2026-10-04 |
-| [B-029](items/B-029-about-sida.md) | About-sida | Funktion | – | 2026-10-04 |
-| [B-027](items/B-027-versionsnummer-0-x-y-fore-slapp.md) | Versionsnummer 0.x.y före släpp | Utveckling | – | 2026-10-04 |
-| [B-020](items/B-020-byt-ikon-bredvid-appnamnet.md) | Byt ikon bredvid appnamnet | Funktion | – | 2026-10-04 |
-| [B-028](items/B-028-egna-sektioner-under-vem-tar-med.md) | Egna sektioner under "Vem tar med" | Funktion | – | 2026-10-02 |
-| [B-024](items/B-024-omrostningar-pa-en-resa.md) | Omröstningar på en resa | Funktion | – | 2026-10-02 |
-| [B-023](items/B-023-ange-om-man-dricker-alkohol.md) | Ange om man dricker alkohol | Funktion | – | 2026-10-02 |
-| [B-019](items/B-019-gemensam-dryck-for-hela-resan.md) | Gemensam dryck för hela resan | Funktion | – | 2026-10-01 |
-| [B-018](items/B-018-drycker-med-lank-pa-maltider.md) | Drycker med länk på måltider | Funktion | – | 2026-10-01 |
-| [B-017](items/B-017-forratt-efterratt-och-kommentar-pa-maltider.md) | Förrätt, efterrätt och kommentar på måltider | Funktion | – | 2026-10-01 |
-| [B-016](items/B-016-valj-befintliga-anvandare-vid-inbjudan.md) | Välj befintliga användare vid inbjudan | Funktion | – | 2026-10-01 |
-| [B-015](items/B-015-rubriker-och-fet-stil-i-ovrig-info.md) | Rubriker och fet stil i Övrig info | Funktion | – | 2026-10-01 |
-| [B-014](items/B-014-tvinga-omladdning-vid-ny-version.md) | Tvinga omladdning vid ny version | Funktion | – | 2026-10-01 |
-| [B-013](items/B-013-hoj-versionsnumret-vid-varje-release.md) | Höj versionsnumret vid varje release | Utveckling | – | 2026-09-30 |
-| [B-012](items/B-012-versionsnummer-synligt-i-appen.md) | Versionsnummer synligt i appen | Funktion | – | 2026-09-30 |
-| [B-011](items/B-011-google-inloggning-som-fungerar-pa-ios.md) | Google-inloggning som fungerar på iOS | Funktion | – | 2026-09-30 |
-| [B-010](items/B-010-onboarding-for-nya-anvandare.md) | Onboarding för nya användare | Funktion | – | 2026-09-29 |
-| [B-009](items/B-009-deltagarlista-med-allergier-och-telefonnummer-pa-oversikt.md) | Deltagarlista med allergier och telefonnummer på Översikt | Funktion | – | 2026-09-29 |
-| [B-008](items/B-008-oversiktsflik-pa-resan.md) | Översiktsflik på resan | Funktion | – | 2026-09-29 |
-| [B-007](items/B-007-flikar-pa-resan-och-vem-tar-med.md) | Flikar på resan och "Vem tar med" | Funktion | – | 2026-09-29 |
-| [B-006](items/B-006-endast-globala-admins-kan-sla-ihop-och-ta-bort-ingredienser.md) | Endast globala admins kan slå ihop och ta bort ingredienser | Funktion | – | 2026-09-29 |
-| [B-005](items/B-005-gemensam-frukost-for-hela-resan.md) | Gemensam frukost för hela resan | Funktion | – | 2026-09-29 |
-| [B-002](items/B-002-visa-resenarers-allergier-pa-en-resa.md) | Visa resenärers allergier på en resa | Funktion | – | 2026-09-29 |
-| [B-001](items/B-001-profilsida-med-allergier-och-kostpreferenser.md) | Profilsida med allergier och kostpreferenser | Funktion | – | 2026-09-29 |
+| ID | Titel | Typ | Prioritet | Klar | Released |
+| --- | --- | --- | --- | --- | --- |
+| [B-091](items/B-091-release-candidates-och-released-i-backloggen.md) | Release candidates i test och Released i backloggen | Utveckling | – | 2026-11-26 |  |
+| [B-086](items/B-086-sortera-anvandare-pa-registreringsdatum.md) | Sortera användare på registreringsdatum och senaste inloggning | Patch | – | 2026-11-25 |  |
+| [B-088](items/B-088-flera-ansvariga-pa-en-maltid.md) | Flera ansvariga på en måltid | Funktion | – | 2026-11-25 |  |
+| [B-089](items/B-089-kompaktare-inkopslista.md) | Kompaktare inköpslista | Patch | – | 2026-11-25 |  |
+| [B-085](items/B-085-att-tanka-pa-pa-oversikten.md) | "Att tänka på" på översikten | Funktion | – | 2026-11-25 |  |
+| [B-083](items/B-083-hushall-med-namn-som-ansvarig.md) | Hushåll med namn som ansvarig | Funktion | – | 2026-11-18 |  |
+| [B-087](items/B-087-forslag-pa-mat.md) | Förslag på mat | Funktion | – | 2026-11-16 |  |
+| [B-084](items/B-084-fordela-inkop-mellan-bilar.md) | Fördela inköp mellan bilar | Funktion | – | 2026-11-15 |  |
+| [B-051](items/B-051-flytta-appen-till-domanen-krispinsson-se.md) | Flytta appen till domänen krispinsson.se | Utveckling | – | 2026-11-15 |  |
+| [B-081](items/B-081-ta-bort-en-resa.md) | Ta bort en resa | Funktion | – | 2026-11-15 |  |
+| [B-082](items/B-082-avancerad-filtrering-i-inkopslistan.md) | Avancerad filtrering i inköpslistan | Patch | – | 2026-11-11 |  |
+| [B-080](items/B-080-seg-laddning-av-data-fran-firestore.md) | Seg laddning av data från Firestore | Bugg | – | 2026-11-10 | 1.0.1 |
+| [B-079](items/B-079-hushallsfokus-i-onboarding-for-partner-och-barn.md) | Hushållsfokus i onboarding för partner och barn | Patch | – | 2026-11-10 | 1.0.1 |
+| [B-078](items/B-078-hojdpunkter-i-nyhetspopupen.md) | Höjdpunkter i nyhetspopupen | Patch | – | 2026-11-02 | 1.0.0 |
+| [B-075](items/B-075-spara-maltid-nar-ingrediens-laggs-till.md) | Spara måltid när ingrediens läggs till | Patch | – | 2026-11-02 | 1.0.0 |
+| [B-077](items/B-077-enhet-byter-till-plural-vid-inmatning.md) | Enhet byter till plural vid inmatning | Patch | – | 2026-11-02 | 1.0.0 |
+| [B-076](items/B-076-visa-mer-for-fika-och-snacks-under-maltider.md) | Visa mer för fika och snacks under Måltider | Patch | – | 2026-11-02 | 1.0.0 |
+| [B-021](items/B-021-sok-och-filtrera-i-inkopslistan.md) | Sök och filtrera i inköpslistan | Funktion | – | 2026-10-29 | 1.0.0 |
+| [B-074](items/B-074-enheter-sparas-alltid-med-sma-bokstaver.md) | Enheter sparas alltid med små bokstäver | Bugg | – | 2026-10-28 | 1.0.0 |
+| [B-073](items/B-073-redigera-fika-och-ovrigt.md) | Redigera fika och övrigt | Patch | – | 2026-10-28 | 1.0.0 |
+| [B-071](items/B-071-admin-flik-for-global-administration.md) | Admin-flik med administrationslådor | Patch | – | 2026-10-28 | 1.0.0 |
+| [B-070](items/B-070-profil-i-avatarmenyn.md) | Profil i avatarmenyn | Patch | – | 2026-10-28 | 1.0.0 |
+| [B-069](items/B-069-singular-och-plural-for-enheter.md) | Singular och plural för enheter | Funktion | – | 2026-10-28 | 1.0.0 |
+| [B-068](items/B-068-ovrigt-under-maltider.md) | Övrigt under Måltider | Funktion | – | 2026-10-28 | 1.0.0 |
+| [B-067](items/B-067-luft-mellan-kort-och-lagg-till-knapp-pa-oversikten.md) | Luft mellan kort och Lägg till-knapp på översikten | Bugg | – | 2026-10-28 | 1.0.0 |
+| [B-066](items/B-066-visa-mer-for-ovrig-info-pa-oversikten.md) | Visa mer för Övrig info på översikten | Patch | – | 2026-10-28 | 1.0.0 |
+| [B-065](items/B-065-dra-for-att-uppdatera.md) | Dra för att uppdatera | Patch | – | 2026-10-27 | 1.0.0 |
+| [B-064](items/B-064-appkansla-i-installerat-lage.md) | Appkänsla i installerat läge: ingen dubbeltrycks-zoom och temafärgat statusfält | Patch | – | 2026-10-27 | 1.0.0 |
+| [B-056](items/B-056-policyer-for-resan.md) | Policyer för resan | Funktion | – | 2026-10-27 | 1.0.0 |
+| [B-062](items/B-062-produktionspipelinen-deployar-firestore-regler.md) | Produktionspipelinen deployar Firestore-regler | Utveckling | – | 2026-10-27 | 0.28.0 |
+| [B-061](items/B-061-alla-kan-skapa-egna-resor.md) | Alla kan skapa egna resor | Funktion | – | 2026-10-27 | 0.28.0 |
+| [B-058](items/B-058-testmiljo-fore-produktion.md) | Testmiljö före produktion | Utveckling | – | 2026-10-27 | 0.28.0 |
+| [B-042](items/B-042-antal-personer-pa-oversikten.md) | Antal personer på översikten | Funktion | – | 2026-10-22 | 0.27.0 |
+| [B-055](items/B-055-onboarding-for-partner-och-barn-till-befintliga-anvandare.md) | Onboarding för partner och barn till befintliga användare | Funktion | Hög | 2026-10-22 | 0.27.0 |
+| [B-047](items/B-047-barn-och-sallskap-pa-deltagare.md) | Barn och sällskap på deltagare | Funktion | Hög | 2026-10-22 | 0.27.0 |
+| [B-045](items/B-045-anonyma-deltagare-via-e-post.md) | Anonyma deltagare via e-post | Funktion | – | 2026-10-22 | 0.26.0 |
+| [B-053](items/B-053-dela-upp-backloggen-i-oppna-och-klara-med-datum.md) | Dela upp backloggen i öppna och klara med datum | Utveckling | – | 2026-10-22 | 0.25.0 |
+| [B-052](items/B-052-conventional-commits-och-versionshojning-per-typ.md) | Conventional commits och versionshöjning per typ | Utveckling | – | 2026-10-22 | 0.25.0 |
+| [B-050](items/B-050-lagg-till-sak-fran-vem-tar-med-pa-inkopslistan.md) | Lägg till sak från "Vem tar med" på inköpslistan | Funktion | – | 2026-10-14 | 0.23.0 |
+| [B-048](items/B-048-popup-med-nyheter-vid-ny-version.md) | Popup med nyheter vid ny version | Funktion | – | 2026-10-14 | 0.25.0 |
+| [B-026](items/B-026-lagga-till-feature-requests-i-appen.md) | Lägga till feature requests i appen | Funktion | – | 2026-10-14 | 0.21.0 |
+| [B-022](items/B-022-ovrigt-att-inhandla.md) | Övrigt att inhandla | Funktion | – | 2026-10-14 | 0.22.0 |
+| [B-040](items/B-040-datum-i-release-notes.md) | Datum i release notes | Funktion | – | 2026-10-05 | 0.20.0 |
+| [B-039](items/B-039-sidfot-med-om-raski-och-version.md) | Sidfot med Om Raski™ och version | Funktion | – | 2026-10-05 | 0.20.0 |
+| [B-038](items/B-038-flytta-temavaljaren-till-profilsidan.md) | Flytta temaväljaren till profilsidan | Funktion | – | 2026-10-05 | 0.20.0 |
+| [B-037](items/B-037-lank-till-destination-och-boende-pa-oversikten.md) | Länk till destination och boende på översikten | Funktion | – | 2026-10-05 | 0.19.0 |
+| [B-036](items/B-036-storre-textruta-for-ovrig-info-pa-mobil.md) | Större textruta för Övrig info på mobil | Funktion | – | 2026-10-05 | 0.18.0 |
+| [B-035](items/B-035-langre-text-i-ovrig-info.md) | Längre text i Övrig info | Funktion | – | 2026-10-05 | 0.18.0 |
+| [B-034](items/B-034-bugg-release-notes-laddas-inte-pa-about-sidan.md) | Bugg: Release notes laddas inte på About-sidan | Bugg | Hög | 2026-10-05 | 0.17.0 |
+| [B-033](items/B-033-klickbara-lankar-i-texter.md) | Klickbara länkar i texter | Funktion | – | 2026-10-05 | 0.16.0 |
+| [B-025](items/B-025-release-notes-i-appen.md) | Release notes i appen | Funktion | – | 2026-10-05 | 0.15.0 |
+| [B-032](items/B-032-ny-appikon.md) | Ny appikon | Funktion | – | 2026-10-04 | 0.13.0 |
+| [B-031](items/B-031-om-raski-i-onboarding.md) | Om Raski™ i onboarding | Funktion | – | 2026-10-04 | 0.11.0 |
+| [B-030](items/B-030-raski-som-varumarke.md) | Raski™ som varumärke | Funktion | – | 2026-10-04 | 0.10.0 |
+| [B-029](items/B-029-about-sida.md) | About-sida | Funktion | – | 2026-10-04 | 0.11.0 |
+| [B-027](items/B-027-versionsnummer-0-x-y-fore-slapp.md) | Versionsnummer 0.x.y före släpp | Utveckling | – | 2026-10-04 | 0.14.0 |
+| [B-020](items/B-020-byt-ikon-bredvid-appnamnet.md) | Byt ikon bredvid appnamnet | Funktion | – | 2026-10-04 | 0.12.0 |
+| [B-028](items/B-028-egna-sektioner-under-vem-tar-med.md) | Egna sektioner under "Vem tar med" | Funktion | – | 2026-10-02 | 0.7.0 |
+| [B-024](items/B-024-omrostningar-pa-en-resa.md) | Omröstningar på en resa | Funktion | – | 2026-10-02 | 0.8.0 |
+| [B-023](items/B-023-ange-om-man-dricker-alkohol.md) | Ange om man dricker alkohol | Funktion | – | 2026-10-02 | 0.9.0 |
+| [B-019](items/B-019-gemensam-dryck-for-hela-resan.md) | Gemensam dryck för hela resan | Funktion | – | 2026-10-01 | 0.6.0 |
+| [B-018](items/B-018-drycker-med-lank-pa-maltider.md) | Drycker med länk på måltider | Funktion | – | 2026-10-01 | 0.5.0 |
+| [B-017](items/B-017-forratt-efterratt-och-kommentar-pa-maltider.md) | Förrätt, efterrätt och kommentar på måltider | Funktion | – | 2026-10-01 | 0.4.0 |
+| [B-016](items/B-016-valj-befintliga-anvandare-vid-inbjudan.md) | Välj befintliga användare vid inbjudan | Funktion | – | 2026-10-01 | 0.3.0 |
+| [B-015](items/B-015-rubriker-och-fet-stil-i-ovrig-info.md) | Rubriker och fet stil i Övrig info | Funktion | – | 2026-10-01 | 0.3.0 |
+| [B-014](items/B-014-tvinga-omladdning-vid-ny-version.md) | Tvinga omladdning vid ny version | Funktion | – | 2026-10-01 | 0.2.0 |
+| [B-013](items/B-013-hoj-versionsnumret-vid-varje-release.md) | Höj versionsnumret vid varje release | Utveckling | – | 2026-09-30 | 0.1.0 |
+| [B-012](items/B-012-versionsnummer-synligt-i-appen.md) | Versionsnummer synligt i appen | Funktion | – | 2026-09-30 | 0.1.0 |
+| [B-011](items/B-011-google-inloggning-som-fungerar-pa-ios.md) | Google-inloggning som fungerar på iOS | Funktion | – | 2026-09-30 | 0.1.0 |
+| [B-010](items/B-010-onboarding-for-nya-anvandare.md) | Onboarding för nya användare | Funktion | – | 2026-09-29 | 0.1.0 |
+| [B-009](items/B-009-deltagarlista-med-allergier-och-telefonnummer-pa-oversikt.md) | Deltagarlista med allergier och telefonnummer på Översikt | Funktion | – | 2026-09-29 | 0.1.0 |
+| [B-008](items/B-008-oversiktsflik-pa-resan.md) | Översiktsflik på resan | Funktion | – | 2026-09-29 | 0.1.0 |
+| [B-007](items/B-007-flikar-pa-resan-och-vem-tar-med.md) | Flikar på resan och "Vem tar med" | Funktion | – | 2026-09-29 | 0.1.0 |
+| [B-006](items/B-006-endast-globala-admins-kan-sla-ihop-och-ta-bort-ingredienser.md) | Endast globala admins kan slå ihop och ta bort ingredienser | Funktion | – | 2026-09-29 | 0.1.0 |
+| [B-005](items/B-005-gemensam-frukost-for-hela-resan.md) | Gemensam frukost för hela resan | Funktion | – | 2026-09-29 | 0.1.0 |
+| [B-002](items/B-002-visa-resenarers-allergier-pa-en-resa.md) | Visa resenärers allergier på en resa | Funktion | – | 2026-09-29 | 0.1.0 |
+| [B-001](items/B-001-profilsida-med-allergier-och-kostpreferenser.md) | Profilsida med allergier och kostpreferenser | Funktion | – | 2026-09-29 | 0.1.0 |
 
 ## Borttagna
 
@@ -128,8 +129,9 @@
 >    - varje rad börjar med `| [B-XXX](items/B-XXX-....md) |`,
 >    - **Öppna** har exakt sex kolumner (ID, Titel, Typ, Status, Prioritet, Skapad) och är i
 >      nummerordning,
->    - **Klara** har exakt fem kolumner (ID, Titel, Typ, Prioritet, Klar) och är sorterad med
->      senast klar överst (vid samma datum: högst ID överst),
+>    - **Klara** har exakt sex kolumner (ID, Titel, Typ, Prioritet, Klar, Released) och är
+>      sorterad med senast klar överst (vid samma datum: högst ID överst). **Released** är
+>      versionen där objektet nådde produktion (`main`) och är tom så länge det bara finns i test,
 >    - **Borttagna** har exakt fyra kolumner (ID, Titel, Typ, Borttagen) och är sorterad med
 >      senast borttagen överst,
 >    - varje fil i `items/` finns i exakt en av tabellerna, och objekt med status Klar
