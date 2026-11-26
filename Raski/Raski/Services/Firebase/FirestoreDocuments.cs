@@ -44,6 +44,7 @@ internal sealed class UserDocument
     [JsonPropertyName("onboardingVersion")] public int? OnboardingVersion { get; set; }
     [JsonPropertyName("lastSeenVersion")] public string? LastSeenVersion { get; set; }
     [JsonPropertyName("createdAt")] public string? CreatedAt { get; set; }
+    [JsonPropertyName("lastLoginAt")] public string? LastLoginAt { get; set; }
 
     public UserProfile ToModel() => new()
     {
@@ -61,6 +62,9 @@ internal sealed class UserDocument
         LastSeenVersion = LastSeenVersion,
         CreatedAt = DateTimeOffset.TryParse(CreatedAt, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var at)
             ? at
+            : null,
+        LastLoginAt = DateTimeOffset.TryParse(LastLoginAt, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var login)
+            ? login
             : null
     };
 }
