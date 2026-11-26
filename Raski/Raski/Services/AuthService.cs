@@ -112,6 +112,7 @@ public sealed class AuthService(FirebaseInterop interop) : IAuthService, IAsyncD
             ["email"] = profile.Email,
             ["photoUrl"] = profile.PhotoUrl,
             ["theme"] = profile.Theme,
+            ["lastLoginAt"] = FirestoreFormat.UtcNow(),
             ["updatedAt"] = FirestoreFormat.UtcNow()
         };
 
