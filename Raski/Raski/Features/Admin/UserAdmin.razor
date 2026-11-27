@@ -33,37 +33,113 @@ else
     }
     else
     {
+        <div class="field sort">
+            <label class="field-label" for="user-sort">Sortera på</label>
+            <select id="user-sort" @bind="sortOrder">
+                <option value="@UserSort.LastLogin">Senast inloggad</option>
+                <option value="@UserSort.Registered">Registreringsdatum</option>
+                <option value="@UserSort.Name">Namn</option>
+            </select>
+        </div>
+
         <ul class="user-list">
-            @foreach (var user in users)
+            @foreach (var user in SortedUsers)
             {
-                <li class="card user">
+                <li class="card card-interactive user"
+                    role="button"
+                    tabindex="0"
+                    aria-label="Visa detaljer för @NameOf(user)"
+                    @onclick="() => selectedUser = user"
+                    @onkeydown="e => OnRowKeyDown(e, user)">
                     <div class="identity">
-                        <span class="name">@(string.IsNullOrWhiteSpace(user.DisplayName) ? user.Email : user.DisplayName)</span>
+                        <span class="name">@NameOf(user)</span>
                         <span class="muted">@user.Email</span>
+                        <span class="muted">Senast inloggad @FormatDate(user.LastLoginAt)</span>
                     </div>
 
                     @if (user.IsGlobalAdmin)
                     {
                         <span class="tag tag-accent">Global admin</span>
                     }
-
-                    <button type="button"
-                            class="btn btn-sm @(user.IsGlobalAdmin ? "btn-danger" : "btn-secondary")"
-                            disabled="@(savingUid == user.Uid || user.Uid == AuthService.Current?.Uid)"
-                            @onclick="() => ToggleAsync(user)">
-                        @(user.IsGlobalAdmin ? "Ta bort admin" : "Gör till admin")
-                    </button>
                 </li>
             }
         </ul>
     }
 }
 
+@if (selectedUser is { } selected)
+{
+    <div class="backdrop" @onclick="() => selectedUser = null">
+        <div class="dialog card stack" role="dialog" aria-modal="true" aria-labelledby="user-details-title" @onclick:stopPropagation="true">
+            <h3 id="user-details-title">@NameOf(selected)</h3>
+            <dl class="details">
+                <dt>E-post</dt>
+                <dd>@selected.Email</dd>
+                @if (!string.IsNullOrWhiteSpace(selected.Phone))
+                {
+                    <dt>Telefon</dt>
+                    <dd>@selected.Phone</dd>
+                }
+                <dt>Registrerad</dt>
+                <dd>@FormatDateTime(selected.CreatedAt)</dd>
+                <dt>Senast inloggad</dt>
+                <dd>@FormatDateTime(selected.LastLoginAt)</dd>
+                <dt>Senast sedda version</dt>
+                <dd>@(selected.LastSeenVersion ?? "–")</dd>
+                <dt>Behörighet</dt>
+                <dd>@(selected.IsGlobalAdmin ? "Global admin" : "Användare")</dd>
+            </dl>
+            <div class="row-inline">
+                <button type="button"
+                        class="btn @(selected.IsGlobalAdmin ? "btn-danger" : "btn-secondary")"
+                        disabled="@(savingUid == selected.Uid || selected.Uid == AuthService.Current?.Uid)"
+                        @onclick="() => ToggleAsync(selected)">
+                    @(selected.IsGlobalAdmin ? "Ta bort admin" : "Gör till admin")
+                </button>
+                <span class="spacer"></span>
+                <button type="button" class="btn btn-primary" @onclick="() => selectedUser = null">Stäng</button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
+    private enum UserSort { LastLogin, Registered, Name }
+
     private List<UserProfile> users = [];
+    private UserSort sortOrder = UserSort.LastLogin;
+    private UserProfile? selectedUser;
     private bool isLoading = true;
     private string? savingUid;
     private string? errorMessage;
+
+    private IEnumerable<UserProfile> SortedUsers => sortOrder switch
+    {
+        UserSort.Name => users.OrderBy(NameOf, StringComparer.CurrentCultureIgnoreCase),
+        UserSort.Registered => users
+            .OrderByDescending(u => u.CreatedAt ?? DateTimeOffset.MinValue)
+            .ThenBy(NameOf, StringComparer.CurrentCultureIgnoreCase),
+        _ => users
+            .OrderByDescending(u => u.LastLoginAt ?? DateTimeOffset.MinValue)
+            .ThenBy(NameOf, StringComparer.CurrentCultureIgnoreCase)
+    };
+
+    private static string NameOf(UserProfile user) =>
+        string.IsNullOrWhiteSpace(user.DisplayName) ? user.Email : user.DisplayName;
+
+    private static string FormatDate(DateTimeOffset? at) =>
+        at is { } value ? value.ToLocalTime().ToString("yyyy-MM-dd") : "–";
+
+    private static string FormatDateTime(DateTimeOffset? at) =>
+        at is { } value ? value.ToLocalTime().ToString("yyyy-MM-dd HH:mm") : "–";
+
+    private void OnRowKeyDown(KeyboardEventArgs e, UserProfile user)
+    {
+        if (e.Key is "Enter" or " ")
+        {
+            selectedUser = user;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {

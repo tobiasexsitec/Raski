@@ -14,6 +14,8 @@
         }
     </div>
 
+    <MealSuggestionsPanel Trip="Trip" Members="members" />
+
     @foreach (var day in Trip.Days())
     {
         var dayMeals = meals.Where(m => m.Date == day).OrderBy(m => m.Type).ToList();
@@ -78,9 +80,9 @@
                             </button>
                         </div>
 
-                        @if (!string.IsNullOrWhiteSpace(meal.ResponsibleName))
+                        @if (meal.HasResponsible)
                         {
-                            <p class="muted">Ansvarig: @meal.ResponsibleName</p>
+                            <p class="muted" title="@meal.ResponsibleNames">Ansvarig: @meal.ResponsibleSummary</p>
                         }
 
                         @if (meal.Drinks.Count > 0)

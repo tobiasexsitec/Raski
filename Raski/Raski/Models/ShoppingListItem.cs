@@ -2,6 +2,20 @@ namespace Raski.Models;
 
 public sealed record AmountPerUnit(string Unit, decimal Amount);
 
+/// <summary>The shared state of a shopping list row: whether it is bought and which car buys it.</summary>
+public sealed record ShoppingItemState(bool Checked, string CarId);
+
+/// <summary>One meal's contribution to a shopping list row, used for filtering by meal or responsible.</summary>
+public sealed record ShoppingListSource(
+    string MealKey,
+    string MealTitle,
+    IReadOnlyList<MealResponsible> Responsibles,
+    string Unit,
+    decimal Amount)
+{
+    public bool HasResponsible(string key) => Responsibles.Any(r => r.Key == key);
+}
+
 public static class ExtraCategories
 {
     public const string Snacks = "fika";
@@ -21,7 +35,11 @@ public sealed class ShoppingListItem
     public List<string> Tags { get; set; } = [];
     public List<AmountPerUnit> Amounts { get; set; } = [];
     public List<string> UsedInMeals { get; set; } = [];
+    public List<ShoppingListSource> Sources { get; set; } = [];
     public bool Checked { get; set; }
+
+    /// <summary>The car that buys this row, or empty when no car has been chosen.</summary>
+    public string CarId { get; set; } = "";
 
     /// <summary>
     /// The "övrigt" entries behind this row. Only set when the row comes solely from

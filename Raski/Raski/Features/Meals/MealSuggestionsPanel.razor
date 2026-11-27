@@ -1,0 +1,298 @@
+@inject IMealSuggestionService SuggestionService
+
+<section class="card suggestions" aria-labelledby="suggestions-heading">
+    <div class="suggestions-header">
+        <h2 id="suggestions-heading">Förslag på mat</h2>
+        @if (!isLoading && !isFormOpen)
+        {
+            <button type="button" class="btn btn-secondary btn-sm" @onclick="StartCreate">+ Förslag</button>
+        }
+    </div>
+    <p class="muted">Idéer att planera utifrån. Förslag hamnar inte i inköpslistan.</p>
+
+    @if (errorMessage is not null)
+    {
+        <div class="error-banner">@errorMessage</div>
+    }
+
+    @if (isFormOpen)
+    {
+        <form class="stack suggestion-form" @onsubmit="SaveAsync">
+            <h3>@(string.IsNullOrEmpty(editingId) ? "Nytt förslag" : "Redigera förslag")</h3>
+            <div class="field">
+                <label for="suggestion-title">Rätt</label>
+                <input id="suggestion-title" type="text" placeholder="Tacos" @bind="title" @bind:event="oninput" />
+            </div>
+            <div class="field">
+                <label for="suggestion-recipe">Receptlänk (valfritt)</label>
+                <input id="suggestion-recipe" type="url" inputmode="url" placeholder="https://…" @bind="recipeUrl" @bind:event="oninput" />
+            </div>
+            <div class="field">
+                <label for="suggestion-comment">Kommentar (valfritt)</label>
+                <textarea id="suggestion-comment" rows="2" @bind="comment" @bind:event="oninput"></textarea>
+            </div>
+            @if (formError is not null)
+            {
+                <div class="error-banner">@formError</div>
+            }
+            <div class="row-inline">
+                <button type="submit" class="btn btn-primary" disabled="@isSaving">@(isSaving ? "Sparar…" : "Spara förslag")</button>
+                <button type="button" class="btn btn-secondary" @onclick="CloseForm">Avbryt</button>
+            </div>
+        </form>
+    }
+
+    @if (converting is not null)
+    {
+        <MealForm Trip="Trip"
+                  Members="Members"
+                  Meal="convertingMeal"
+                  OnSaved="OnConvertedAsync"
+                  OnCancel="() => converting = null" />
+    }
+
+    @if (isLoading)
+    {
+        <p class="muted">Hämtar…</p>
+    }
+    else if (suggestions.Count == 0 && !isFormOpen)
+    {
+        <p class="muted">Inga förslag än.</p>
+    }
+    else
+    {
+        <ul class="suggestion-list">
+            @foreach (var suggestion in suggestions)
+            {
+                <li>
+                    <div class="suggestion-head">
+                        <span class="name">@suggestion.Title</span>
+                        @if (!string.IsNullOrWhiteSpace(suggestion.RecipeUrl))
+                        {
+                            <a class="tag" href="@suggestion.RecipeUrl" target="_blank" rel="noopener noreferrer">Recept</a>
+                        }
+                        <span class="spacer"></span>
+                        <button type="button"
+                                class="btn btn-secondary btn-sm"
+                                aria-label="@($"Gör {suggestion.Title} till måltid")"
+                                disabled="@isSaving"
+                                @onclick="() => StartConvert(suggestion)">Planera</button>
+                        <button type="button"
+                                class="btn btn-icon btn-sm"
+                                aria-label="@($"Redigera {suggestion.Title}")"
+                                disabled="@isSaving"
+                                @onclick="() => StartEdit(suggestion)">✎</button>
+                        <button type="button"
+                                class="btn btn-icon btn-sm"
+                                aria-label="@($"Ta bort {suggestion.Title}")"
+                                disabled="@isSaving"
+                                @onclick="() => deleting = suggestion">✕</button>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(suggestion.Comment))
+                    {
+                        <p class="muted comment">@suggestion.Comment</p>
+                    }
+                </li>
+            }
+        </ul>
+    }
+</section>
+
+@if (deleting is not null)
+{
+    <div class="backdrop" @onclick="() => deleting = null">
+        <div class="dialog card stack"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="delete-suggestion-heading"
+             @onclick:stopPropagation="true">
+            <h3 id="delete-suggestion-heading">Ta bort @deleting.Title?</h3>
+            <p class="muted">Förslaget tas bort från listan.</p>
+            <div class="row-inline">
+                <button type="button" class="btn btn-danger" disabled="@isSaving" @onclick="ConfirmDeleteAsync">Ta bort</button>
+                <button type="button" class="btn btn-secondary" @onclick="() => deleting = null">Avbryt</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
+    [Parameter, EditorRequired] public IReadOnlyList<TripMember> Members { get; set; } = [];
+
+    private IReadOnlyList<MealSuggestion> suggestions = [];
+    private string? loadedTripId;
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+
+    private bool isFormOpen;
+    private string editingId = "";
+    private string title = "";
+    private string recipeUrl = "";
+    private string comment = "";
+    private string? formError;
+
+    private MealSuggestion? deleting;
+    private MealSuggestion? converting;
+    private Meal? convertingMeal;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (loadedTripId == Trip.Id)
+        {
+            return;
+        }
+
+        loadedTripId = Trip.Id;
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            suggestions = await SuggestionService.GetAsync(Trip.Id);
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte hämta förslagen.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void StartCreate() => OpenForm(new MealSuggestion());
+
+    private void StartEdit(MealSuggestion suggestion) => OpenForm(suggestion);
+
+    private void OpenForm(MealSuggestion suggestion)
+    {
+        converting = null;
+        editingId = suggestion.Id;
+        title = suggestion.Title;
+        recipeUrl = suggestion.RecipeUrl;
+        comment = suggestion.Comment;
+        formError = null;
+        isFormOpen = true;
+    }
+
+    private void CloseForm()
+    {
+        isFormOpen = false;
+        formError = null;
+    }
+
+    private async Task SaveAsync()
+    {
+        formError = null;
+
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            formError = "Ange vilken rätt du föreslår.";
+            return;
+        }
+
+        var trimmedRecipeUrl = recipeUrl.Trim();
+
+        if (trimmedRecipeUrl.Length > 0 && !IsHttpUrl(trimmedRecipeUrl))
+        {
+            formError = "Receptlänken måste börja med http:// eller https://.";
+            return;
+        }
+
+        isSaving = true;
+
+        try
+        {
+            await SuggestionService.SaveAsync(new MealSuggestion
+            {
+                Id = editingId,
+                TripId = Trip.Id,
+                Title = title,
+                RecipeUrl = trimmedRecipeUrl,
+                Comment = comment
+            });
+
+            CloseForm();
+            await LoadAsync();
+        }
+        catch (Exception)
+        {
+            formError = "Kunde inte spara förslaget.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (deleting is null)
+        {
+            return;
+        }
+
+        isSaving = true;
+
+        try
+        {
+            await SuggestionService.DeleteAsync(Trip.Id, deleting.Id);
+            deleting = null;
+            await LoadAsync();
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kunde inte ta bort förslaget.";
+            deleting = null;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void StartConvert(MealSuggestion suggestion)
+    {
+        isFormOpen = false;
+        converting = suggestion;
+        convertingMeal = new Meal
+        {
+            TripId = Trip.Id,
+            Date = Trip.StartDate,
+            Type = MealType.Dinner,
+            Title = suggestion.Title,
+            RecipeUrl = suggestion.RecipeUrl,
+            Comment = suggestion.Comment
+        };
+    }
+
+    private async Task OnConvertedAsync()
+    {
+        if (converting is null)
+        {
+            return;
+        }
+
+        var suggestionId = converting.Id;
+        converting = null;
+        convertingMeal = null;
+
+        try
+        {
+            await SuggestionService.DeleteAsync(Trip.Id, suggestionId);
+            await LoadAsync();
+        }
+        catch (Exception)
+        {
+            errorMessage = "Måltiden sparades men förslaget kunde inte tas bort.";
+        }
+    }
+
+    private static bool IsHttpUrl(string value) =>
+        Uri.TryCreate(value, UriKind.Absolute, out var uri)
+        && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+}

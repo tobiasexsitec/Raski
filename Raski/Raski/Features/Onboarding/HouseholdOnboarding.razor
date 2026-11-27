@@ -137,9 +137,14 @@ else if (page == Page.Children)
             + Lägg till barn
         </button>
 
+        <label class="field-label" for="onb-household-name">Vad heter ert hushåll?</label>
+        <div class="glow-input">
+            <input id="onb-household-name" type="text" placeholder="@SuggestedName" @bind="householdName" @bind:event="oninput" />
+        </div>
+
         <div class="actions">
             <button type="button" class="btn btn-secondary" @onclick="() => Go(Page.Partner)" disabled="@Busy">Tillbaka</button>
-            <button type="button" class="btn btn-primary mega" @onclick="OnDone" disabled="@Busy">
+            <button type="button" class="btn btn-primary mega" @onclick="DoneAsync" disabled="@Busy">
                 @(Busy ? "Sparar…" : "Klar!") <span class="arrow" aria-hidden="true">🎊</span>
             </button>
         </div>
@@ -207,6 +212,34 @@ else
     private bool partnerNotFound;
     private Child? childToRemove;
     private string? errorMessage;
+    private string householdName = "";
+    private string savedHouseholdName = "";
+
+    private string SuggestedName =>
+        Household.SuggestName([AuthService.Current?.DisplayName ?? "", .. partners.Select(p => p.DisplayName)]);
+
+    private async Task DoneAsync()
+    {
+        var name = string.IsNullOrWhiteSpace(householdName) ? "" : householdName.Trim();
+
+        if (name != savedHouseholdName)
+        {
+            var saved = false;
+            await RunAsync(async () =>
+            {
+                await HouseholdService.RenameAsync(name);
+                savedHouseholdName = name;
+                saved = true;
+            }, "Kunde inte spara hushållets namn.");
+
+            if (!saved)
+            {
+                return;
+            }
+        }
+
+        await OnDone.InvokeAsync();
+    }
 
     private bool Busy => isSaving || IsSaving;
     private static DateOnly Today => DateOnly.FromDateTime(DateTime.Today);
@@ -252,6 +285,11 @@ else
     private async Task ApplyAsync(Household? updated)
     {
         children = [.. (updated?.Children ?? []).OrderBy(c => c.BirthDate)];
+        savedHouseholdName = updated?.Name ?? "";
+        if (string.IsNullOrWhiteSpace(householdName))
+        {
+            householdName = savedHouseholdName;
+        }
 
         var me = AuthService.Current?.Uid;
         var partnerUids = (updated?.MemberUids ?? []).Where(uid => uid != me).ToList();

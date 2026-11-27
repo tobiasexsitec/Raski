@@ -43,6 +43,8 @@ internal sealed class UserDocument
     // Missing on users onboarded before versioning; they completed version 1.
     [JsonPropertyName("onboardingVersion")] public int? OnboardingVersion { get; set; }
     [JsonPropertyName("lastSeenVersion")] public string? LastSeenVersion { get; set; }
+    [JsonPropertyName("createdAt")] public string? CreatedAt { get; set; }
+    [JsonPropertyName("lastLoginAt")] public string? LastLoginAt { get; set; }
 
     public UserProfile ToModel() => new()
     {
@@ -57,19 +59,27 @@ internal sealed class UserDocument
         Alcohol = AlcoholPreferenceExtensions.ParseAlcoholPreference(Alcohol),
         OnboardingCompleted = OnboardingCompleted ?? true,
         OnboardingVersion = OnboardingVersion ?? 1,
-        LastSeenVersion = LastSeenVersion
+        LastSeenVersion = LastSeenVersion,
+        CreatedAt = DateTimeOffset.TryParse(CreatedAt, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var at)
+            ? at
+            : null,
+        LastLoginAt = DateTimeOffset.TryParse(LastLoginAt, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var login)
+            ? login
+            : null
     };
 }
 
 internal sealed class HouseholdDocument
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("name")] public string? Name { get; set; }
     [JsonPropertyName("memberUids")] public List<string>? MemberUids { get; set; }
     [JsonPropertyName("children")] public List<ChildDocument>? Children { get; set; }
 
     public Household ToModel() => new()
     {
         Id = Id,
+        Name = Name ?? "",
         MemberUids = MemberUids ?? [],
         Children = [.. (Children ?? []).Select(c => c.ToModel())]
     };
@@ -137,6 +147,7 @@ internal sealed class TripDocument
     [JsonPropertyName("ownerUid")] public string? OwnerUid { get; set; }
     [JsonPropertyName("memberUids")] public List<string>? MemberUids { get; set; }
     [JsonPropertyName("pendingEmails")] public List<string>? PendingEmails { get; set; }
+    [JsonPropertyName("deletedAt")] public string? DeletedAt { get; set; }
 
     public Trip ToModel() => new()
     {
@@ -150,7 +161,10 @@ internal sealed class TripDocument
         EndDate = FirestoreFormat.ParseDate(EndDate),
         Notes = Notes,
         OwnerUid = OwnerUid ?? "",
-        MemberUids = MemberUids ?? []
+        MemberUids = MemberUids ?? [],
+        DeletedAt = DateTimeOffset.TryParse(DeletedAt, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var deletedAt)
+            ? deletedAt
+            : null
     };
 }
 
@@ -184,6 +198,7 @@ internal sealed class MealDocument
     [JsonPropertyName("title")] public string? Title { get; set; }
     [JsonPropertyName("responsibleUid")] public string? ResponsibleUid { get; set; }
     [JsonPropertyName("responsibleName")] public string? ResponsibleName { get; set; }
+    [JsonPropertyName("responsibles")] public List<MealResponsiblePayload>? Responsibles { get; set; }
     [JsonPropertyName("recipeUrl")] public string? RecipeUrl { get; set; }
     [JsonPropertyName("comment")] public string? Comment { get; set; }
     [JsonPropertyName("ingredients")] public List<MealIngredientDocument>? Ingredients { get; set; }
@@ -196,8 +211,7 @@ internal sealed class MealDocument
         Date = FirestoreFormat.ParseDate(Date),
         Type = MealTypeExtensions.ParseMealType(Type),
         Title = Title ?? "",
-        ResponsibleUid = ResponsibleUid ?? "",
-        ResponsibleName = ResponsibleName ?? "",
+        Responsibles = MealResponsible.FromStored(Responsibles?.Select(r => r.ToModel()), ResponsibleUid, ResponsibleName),
         RecipeUrl = RecipeUrl ?? "",
         Comment = Comment ?? "",
         Ingredients = Ingredients?.Select(i => i.ToModel()).ToList() ?? [],
@@ -275,6 +289,23 @@ internal sealed class BringItemDocument
         Quantity = Quantity < 1 ? 1 : Quantity,
         ResponsibleUid = ResponsibleUid ?? "",
         ResponsibleName = ResponsibleName ?? ""
+    };
+}
+
+internal sealed class MealSuggestionDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("title")] public string? Title { get; set; }
+    [JsonPropertyName("recipeUrl")] public string? RecipeUrl { get; set; }
+    [JsonPropertyName("comment")] public string? Comment { get; set; }
+
+    public MealSuggestion ToModel(string tripId) => new()
+    {
+        Id = Id,
+        TripId = tripId,
+        Title = Title ?? "",
+        RecipeUrl = RecipeUrl ?? "",
+        Comment = Comment ?? ""
     };
 }
 
@@ -425,6 +456,14 @@ internal sealed class ShoppingStateDocument
     [JsonPropertyName("checked")] public bool Checked { get; set; }
     [JsonPropertyName("checkedByUid")] public string? CheckedByUid { get; set; }
     [JsonPropertyName("checkedAt")] public string? CheckedAt { get; set; }
+    [JsonPropertyName("carId")] public string? CarId { get; set; }
+}
+
+internal sealed class CarDocument
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("name")] public string? Name { get; set; }
+    [JsonPropertyName("memberUids")] public List<string>? MemberUids { get; set; }
 }
 
 internal sealed class ShoppingExtraDocument

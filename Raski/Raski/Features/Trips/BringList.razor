@@ -1,6 +1,7 @@
 @inject IBringItemService BringItemService
 @inject IShoppingListService ShoppingListService
 @inject ITripService TripService
+@inject IHouseholdService HouseholdService
 
 <section class="card bring-card" aria-labelledby="@HeadingId">
     <div class="bring-header">
@@ -148,6 +149,7 @@
 
     private List<BringItem> items = [];
     private List<TripMember> members = [];
+    private IReadOnlyList<ResponsibleOption> responsibleOptions = [];
     private ItemForm draft = new();
     private ItemForm? editing;
     private bool isLoading = true;
@@ -174,6 +176,7 @@
 
             members = [.. (await membersTask).OrderBy(m => m.DisplayName, StringComparer.CurrentCultureIgnoreCase)];
             items = [.. (await itemsTask).Where(i => i.SectionId == SectionId)];
+            responsibleOptions = await LoadResponsibleOptionsAsync();
         }
         catch (Exception)
         {
@@ -211,9 +214,9 @@
                 <label for="@($"{idPrefix}-responsible")">Ansvarig</label>
                 <select id="@($"{idPrefix}-responsible")" @bind="form.ResponsibleChoice">
                     <option value="">Ingen ansvarig</option>
-                    @foreach (var member in members)
+                    @foreach (var option in responsibleOptions)
                     {
-                        <option value="@member.Uid">@member.DisplayName</option>
+                        <option value="@option.Key">@option.Name</option>
                     }
                     <option value="@OtherOption">Annan (skriv namn)</option>
                 </select>
@@ -236,14 +239,28 @@
     {
         if (!string.IsNullOrEmpty(item.ResponsibleUid))
         {
-            var member = members.FirstOrDefault(m => m.Uid == item.ResponsibleUid);
-            if (member is not null && !string.IsNullOrWhiteSpace(member.DisplayName))
+            var option = responsibleOptions.FirstOrDefault(o => o.Key == item.ResponsibleUid);
+            if (option is not null && !string.IsNullOrWhiteSpace(option.Name))
             {
-                return member.DisplayName;
+                return option.Name;
             }
         }
 
         return item.ResponsibleName;
+    }
+
+    private async Task<IReadOnlyList<ResponsibleOption>> LoadResponsibleOptionsAsync()
+    {
+        try
+        {
+            var households = await HouseholdService.GetForMembersAsync(members.Select(m => m.Uid));
+            return ResponsibleOptions.Build(members, households);
+        }
+        catch (Exception)
+        {
+            // Members alone are still useful if households can't be read.
+            return ResponsibleOptions.Build(members, []);
+        }
     }
 
     private BringItem ToItem(ItemForm form)
@@ -263,9 +280,9 @@
         }
         else if (!string.IsNullOrEmpty(form.ResponsibleChoice))
         {
-            var member = members.FirstOrDefault(m => m.Uid == form.ResponsibleChoice);
+            var option = responsibleOptions.FirstOrDefault(o => o.Key == form.ResponsibleChoice);
             item.ResponsibleUid = form.ResponsibleChoice;
-            item.ResponsibleName = member?.DisplayName ?? "";
+            item.ResponsibleName = option?.Name ?? "";
         }
 
         return item;

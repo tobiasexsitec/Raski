@@ -35,6 +35,12 @@ public sealed class UserProfile
 
     public bool NeedsOnboarding => !OnboardingCompleted || (OnboardingVersion < CurrentOnboardingVersion && !OnboardingPostponed);
 
+    /// <summary>When the user first signed in; null for users created before it was recorded.</summary>
+    public DateTimeOffset? CreatedAt { get; set; }
+
+    /// <summary>When the app last signed the user in (including restored sessions); null if never recorded.</summary>
+    public DateTimeOffset? LastLoginAt { get; set; }
+
     /// <summary>App version whose news the user has seen; null if never recorded.</summary>
     public string? LastSeenVersion { get; set; }
 }

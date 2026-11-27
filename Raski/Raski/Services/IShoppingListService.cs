@@ -8,10 +8,13 @@ public interface IShoppingListService
     Task<IReadOnlyList<ShoppingListItem>> BuildAsync(string tripId, CancellationToken ct = default);
 
     /// <summary>
-    /// Streams the shared checked state so every participant sees check-offs live.
+    /// Streams the shared checked state and car assignments so every participant sees them live.
     /// Keyed by ingredient id.
     /// </summary>
-    IAsyncEnumerable<IReadOnlyDictionary<string, bool>> ObserveCheckedState(string tripId, CancellationToken ct);
+    IAsyncEnumerable<IReadOnlyDictionary<string, ShoppingItemState>> ObserveState(string tripId, CancellationToken ct);
+
+    /// <summary>Chooses which car buys a row; null or empty clears the choice.</summary>
+    Task SetCarAsync(string tripId, string ingredientId, string? carId, CancellationToken ct = default);
 
     /// <summary>Persists the checked state so it is shared by every participant.</summary>
     Task SetCheckedAsync(string tripId, string ingredientId, bool isChecked, CancellationToken ct = default);

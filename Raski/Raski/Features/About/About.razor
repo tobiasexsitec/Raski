@@ -97,13 +97,7 @@
     private const string ContactName = "Tobias Krispinsson";
     private const string ContactEmail = "tobias.krispinsson@gmail.com";
 
-    private static readonly string AppVersion =
-        (typeof(About).Assembly
-            .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
-            .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
-            .FirstOrDefault()?.InformationalVersion
-        ?? typeof(About).Assembly.GetName().Version?.ToString()
-        ?? "?").Split('+')[0];
+    private static readonly string AppVersion = AppInfo.Version;
 
     private IReadOnlyList<ReleaseNote>? releases;
     private string? errorMessage;

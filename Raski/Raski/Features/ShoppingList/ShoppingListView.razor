@@ -3,24 +3,33 @@
 @inject IShoppingListService ShoppingListService
 @inject ITripService TripService
 @inject IIngredientService IngredientService
+@inject IAuthService AuthService
+@inject ICarService CarService
 
 <PageTitle>Inköpslista – Raski™</PageTitle>
 
 <Confetti @ref="confetti" />
 
-<div class="page-header">
-    <div>
-        <h1>Inköpslista</h1>
-        @if (trip is not null)
-        {
-            <p class="muted">@trip.Name</p>
-        }
-    </div>
+<SectionContent SectionName="page-title">
+    <span class="page-title">– Inköpslista</span>
+</SectionContent>
 
-    <a class="btn btn-secondary" href="@($"resor/{TripId}")">Till resan</a>
+<h1 class="visually-hidden">Inköpslista</h1>
+
+<div class="list-tabs">
+    <nav class="list-tabs-nav" role="tablist" aria-label="Inköpslistans flikar">
+        <button type="button" role="tab" class="list-tab @(showAdmin ? "" : "active")" aria-selected="@(showAdmin ? "false" : "true")" @onclick="() => showAdmin = false">Lista</button>
+        <button type="button" role="tab" class="list-tab @(showAdmin ? "active" : "")" aria-selected="@(showAdmin ? "true" : "false")" @onclick="() => showAdmin = true">Administration</button>
+    </nav>
+
+    <a class="trip-link" href="@($"resor/{TripId}")" aria-label="@($"Till resan {trip?.Name}")">← @(trip?.Name ?? "Till resan")</a>
 </div>
 
-@if (isLoading)
+@if (showAdmin)
+{
+    <CarAdmin TripId="@TripId" Cars="cars" Members="members" />
+}
+else if (isLoading)
 {
     <p class="muted">Räknar ihop ingredienser…</p>
 }
@@ -50,17 +59,76 @@ else
                    @bind="searchText"
                    @bind:event="oninput" />
 
-            <select class="field filter-tag" aria-label="Filtrera på tagg" @bind="selectedTag">
-                <option value="">Alla taggar</option>
-                @foreach (var tag in AvailableTags)
+            <button type="button"
+                    class="btn btn-icon btn-sm filter-toggle @(showAdvanced || AdvancedFilterCount > 0 ? "is-active" : "")"
+                    title="Avancerad filtrering"
+                    aria-label="@($"Avancerad filtrering{(AdvancedFilterCount > 0 ? $", {AdvancedFilterCount} aktiva" : "")}")"
+                    aria-expanded="@(showAdvanced ? "true" : "false")"
+                    aria-controls="advanced-filters"
+                    @onclick="() => showAdvanced = !showAdvanced">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 6h16M7 12h10M10 18h4" />
+                </svg>
+                @if (AdvancedFilterCount > 0)
                 {
-                    <option value="@tag">@IngredientTags.Display(tag)</option>
+                    <span class="filter-badge" aria-hidden="true">@AdvancedFilterCount</span>
                 }
-            </select>
+            </button>
 
             @if (IsFiltering)
             {
                 <button type="button" class="btn btn-secondary btn-sm" @onclick="ClearFilters">Rensa</button>
+            }
+
+            @if (showAdvanced)
+            {
+                <div id="advanced-filters" class="advanced-filters">
+                    @if (cars.Count > 0)
+                    {
+                        <span class="field-label" id="filter-car-label">Bil</span>
+                        <div class="car-filter" role="group" aria-labelledby="filter-car-label">
+                            @foreach (var (key, label) in CarFilters)
+                            {
+                                <button type="button"
+                                        class="btn btn-sm @(carFilter == key ? "btn-primary" : "btn-secondary")"
+                                        aria-pressed="@(carFilter == key ? "true" : "false")"
+                                        @onclick="() => carFilter = key">@label</button>
+                            }
+                        </div>
+
+                        @if (MyCarId is null)
+                        {
+                            <p class="muted car-hint">Du är inte med i någon bil. Lägg till dig under <button type="button" class="link-btn" @onclick="() => showAdmin = true">Administration</button> för att få snabbknappen "Min bil".</p>
+                        }
+                    }
+
+                    <label class="field-label" for="filter-tag">Tagg</label>
+                    <select id="filter-tag" class="field" @bind="selectedTag">
+                        <option value="">Alla</option>
+                        @foreach (var tag in AvailableTags)
+                        {
+                            <option value="@tag">@IngredientTags.Display(tag)</option>
+                        }
+                    </select>
+
+                    <label class="field-label" for="filter-responsible">Ansvarig</label>
+                    <select id="filter-responsible" class="field" @bind="selectedResponsible">
+                        <option value="">Alla</option>
+                        @foreach (var (key, name) in AvailableResponsibles)
+                        {
+                            <option value="@key">@name</option>
+                        }
+                    </select>
+
+                    <label class="field-label" for="filter-meal">Maträtt</label>
+                    <select id="filter-meal" class="field" @bind="selectedMeal">
+                        <option value="">Alla</option>
+                        @foreach (var (key, title) in AvailableMeals)
+                        {
+                            <option value="@key">@title</option>
+                        }
+                    </select>
+                </div>
             }
         </div>
     }
@@ -89,7 +157,7 @@ else
             <ul class="items">
                 @foreach (var item in groupItems)
                 {
-                    <li class="item @(item.Checked ? "is-checked" : "")">
+                    <li class="item with-car @(item.Checked ? "is-checked" : "")">
                         <label>
                             <input type="checkbox"
                                    checked="@item.Checked"
@@ -98,12 +166,10 @@ else
                             <span class="item-body">
                                 <span class="item-name">@item.Name</span>
                                 <span class="item-amount">@FormatAmounts(item)</span>
-                                @if (item.UsedInMeals.Count > 0)
-                                {
-                                    <span class="item-meals">@string.Join(", ", item.UsedInMeals)</span>
-                                }
                             </span>
                         </label>
+
+                        @CarPicker(item)
                     </li>
                 }
             </ul>
@@ -128,7 +194,7 @@ else
             <ul class="items">
                 @foreach (var item in meals)
                 {
-                    <li class="item @(item.Checked ? "is-checked" : "")">
+                    <li class="item with-car @(item.Checked ? "is-checked" : "")">
                         <label>
                             <input type="checkbox"
                                    checked="@item.Checked"
@@ -137,12 +203,10 @@ else
                             <span class="item-body">
                                 <span class="item-name">@item.Name</span>
                                 <span class="item-amount">@FormatAmounts(item)</span>
-                                @if (item.UsedInMeals.Count > 0)
-                                {
-                                    <span class="item-meals">@string.Join(", ", item.UsedInMeals)</span>
-                                }
                             </span>
                         </label>
+
+                        @CarPicker(item)
                     </li>
                 }
                 @foreach (var item in categoryExtras)
@@ -162,11 +226,7 @@ else
                             </span>
                         </label>
 
-                        <button type="button"
-                                class="btn btn-icon btn-sm"
-                                aria-label="@($"Ta bort {item.Name}")"
-                                disabled="@isSaving"
-                                @onclick="() => DeleteExtraAsync(item)">✕</button>
+                        @CarPicker(item)
                     </li>
                 }
             </ul>
@@ -187,8 +247,44 @@ else
     }
 }
 
+@if (itemToShowMeals is not null)
+{
+    <div class="backdrop" @onclick="() => itemToShowMeals = null">
+        <div class="dialog card stack" role="dialog" aria-modal="true" aria-labelledby="meals-item-title" @onclick:stopPropagation="true">
+            <h3 id="meals-item-title">@itemToShowMeals.Name</h3>
+            <p class="muted">@FormatAmounts(itemToShowMeals)</p>
+            <p>Används i:</p>
+            <ul class="meals-list">
+                @foreach (var meal in itemToShowMeals.UsedInMeals)
+                {
+                    <li>@meal</li>
+                }
+            </ul>
+            <div class="row-inline">
+                <button type="button" class="btn btn-secondary" @onclick="() => itemToShowMeals = null">Stäng</button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (itemToDelete is not null)
+{
+    <div class="backdrop">
+        <div class="dialog card stack" role="dialog" aria-modal="true" aria-labelledby="delete-item-title">
+            <h3 id="delete-item-title">Ta bort @itemToDelete.Name?</h3>
+            <p>Varan tas bort från inköpslistan.</p>
+            <div class="row-inline">
+                <button type="button" class="btn btn-danger" disabled="@isSaving" @onclick="ConfirmDeleteAsync">Ta bort</button>
+                <button type="button" class="btn btn-secondary" @onclick="() => itemToDelete = null">Avbryt</button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     [Parameter] public string TripId { get; set; } = "";
+
+    [SupplyParameterFromQuery(Name = "bil")] public string? CarQuery { get; set; }
 
     private Trip? trip;
     private IReadOnlyList<ShoppingListItem> items = [];
@@ -204,11 +300,238 @@ else
 
     private string searchText = "";
     private string selectedTag = "";
+    private string selectedResponsible = "";
+    private string selectedMeal = "";
+    private bool showAdvanced;
+
+    private const string AllCars = "";
+    private const string MyCar = "mine";
+    private const string NoCar = "none";
+
+    private IReadOnlyList<Car> cars = [];
+    private IReadOnlyList<TripMember> members = [];
+    private bool showAdmin;
+    private string carFilter = AllCars;
+
+    private const string CarPrefix = "car:";
+
+    private IEnumerable<(string Key, string Label)> CarFilters
+    {
+        get
+        {
+            var myCarId = MyCarId;
+            IEnumerable<(string Key, string Label)> filters = myCarId is null
+                ? [(AllCars, "Allt")]
+                : [(AllCars, "Allt"), (MyCar, "Min bil")];
+
+            return filters
+                .Concat(cars.Where(c => c.Id != myCarId).Select(c => (CarPrefix + c.Id, c.Name)))
+                .Append((NoCar, "Utan bil"));
+        }
+    }
+
+    private string? MyCarId
+    {
+        get
+        {
+            var uid = AuthService.Current?.Uid;
+            return uid is null ? null : cars.FirstOrDefault(c => c.MemberUids.Contains(uid))?.Id;
+        }
+    }
+
+    // Assignments to deleted cars count as unassigned.
+    private string EffectiveCarId(ShoppingListItem item) =>
+        cars.Any(c => c.Id == item.CarId) ? item.CarId : "";
+
+    private string CarName(string carId) =>
+        cars.FirstOrDefault(c => c.Id == carId)?.Name ?? "";
+
+    private RenderFragment CarPicker(ShoppingListItem item) => __builder =>
+    {
+        var canDelete = item.ExtraIds.Count > 0;
+        var hasMeals = item.UsedInMeals.Count > 0;
+        if (cars.Count == 0 && !canDelete && !hasMeals)
+        {
+            return;
+        }
+
+        var current = EffectiveCarId(item);
+        var myCarId = MyCarId;
+        var takenByOther = current.Length > 0 && current != myCarId;
+        if (takenByOther)
+        {
+            <span class="tag car-tag" aria-label="@($"{item.Name} köps av {CarName(current)}")">@CarName(current)</span>
+        }
+        else if (myCarId is not null)
+        {
+            var inMyCar = current == myCarId;
+            <button type="button"
+                    class="btn btn-sm my-car-btn @(inMyCar ? "btn-primary" : "btn-secondary")"
+                    aria-pressed="@(inMyCar ? "true" : "false")"
+                    aria-label="@(inMyCar ? $"Ta bort {item.Name} från min bil" : $"Lägg {item.Name} i min bil")"
+                    @onclick="() => SetCarAsync(item, inMyCar ? null : myCarId)">@(inMyCar ? "✓ Min bil" : "+ Min bil")</button>
+        }
+        var isOpen = ReferenceEquals(openMenuItem, item);
+        <span class="item-menu">
+            <button type="button"
+                    class="btn btn-icon btn-sm menu-trigger"
+                    aria-label="@($"Fler val för {item.Name}")"
+                    aria-haspopup="menu"
+                    aria-expanded="@(isOpen ? "true" : "false")"
+                    @onclick="() => ToggleMenu(item)">⋮</button>
+            @if (isOpen)
+            {
+                <div class="menu-scrim" @onclick="CloseMenu"></div>
+                <div class="menu-popover" role="menu" @onkeydown="OnMenuKeyDown">
+                    @if (cars.Count > 0)
+                    {
+                        <div class="menu-heading">Bil</div>
+                        <button type="button" role="menuitemradio" class="menu-item"
+                                aria-checked="@(current == "" ? "true" : "false")"
+                                @onclick="() => PickCarAsync(item, null)">
+                            <span class="menu-check" aria-hidden="true">@(current == "" ? "✓" : "")</span>Ingen bil
+                        </button>
+                        @foreach (var car in cars)
+                        {
+                            var selected = current == car.Id;
+                            <button type="button" role="menuitemradio" class="menu-item"
+                                    aria-checked="@(selected ? "true" : "false")"
+                                    @onclick="() => PickCarAsync(item, car.Id)">
+                                <span class="menu-check" aria-hidden="true">@(selected ? "✓" : "")</span>@car.Name
+                            </button>
+                        }
+                    }
+                    @if (hasMeals)
+                    {
+                        @if (cars.Count > 0)
+                        {
+                            <div class="menu-divider" role="separator"></div>
+                        }
+                        <button type="button" role="menuitem" class="menu-item"
+                                @onclick="() => ShowMeals(item)">
+                            <span class="menu-check" aria-hidden="true">ⓘ</span>Visa måltider…
+                        </button>
+                    }
+                    @if (canDelete)
+                    {
+                        @if (cars.Count > 0 || hasMeals)
+                        {
+                            <div class="menu-divider" role="separator"></div>
+                        }
+                        <button type="button" role="menuitem" class="menu-item menu-item-danger"
+                                @onclick="() => RequestDelete(item)">
+                            <span class="menu-check" aria-hidden="true">🗑</span>Ta bort vara…
+                        </button>
+                    }
+                </div>
+            }
+        </span>
+    };
+
+    private ShoppingListItem? itemToDelete;
+    private ShoppingListItem? openMenuItem;
+
+    private void ToggleMenu(ShoppingListItem item) =>
+        openMenuItem = ReferenceEquals(openMenuItem, item) ? null : item;
+
+    private void CloseMenu() => openMenuItem = null;
+
+    private void OnMenuKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            CloseMenu();
+        }
+    }
+
+    private ShoppingListItem? itemToShowMeals;
+
+    private void ShowMeals(ShoppingListItem item)
+    {
+        CloseMenu();
+        itemToShowMeals = item;
+    }
+
+    private void RequestDelete(ShoppingListItem item)
+    {
+        CloseMenu();
+        itemToDelete = item;
+    }
+
+    private async Task PickCarAsync(ShoppingListItem item, string? carId)
+    {
+        CloseMenu();
+        await SetCarAsync(item, carId);
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (itemToDelete is not { } item)
+        {
+            return;
+        }
+
+        await DeleteExtraAsync(item);
+        itemToDelete = null;
+    }
+
+    private async Task SetCarAsync(ShoppingListItem item, string? carId)
+    {
+        var previous = item.CarId;
+        item.CarId = carId ?? "";
+
+        try
+        {
+            await ShoppingListService.SetCarAsync(TripId, item.IngredientId, string.IsNullOrEmpty(carId) ? null : carId);
+        }
+        catch (Exception)
+        {
+            item.CarId = previous;
+            errorMessage = "Kunde inte spara bilen för varan.";
+        }
+    }
 
     private int TotalCount => items.Count;
     private int CheckedCount => items.Count(i => i.Checked);
 
-    private bool IsFiltering => !string.IsNullOrWhiteSpace(searchText) || selectedTag.Length > 0;
+    private bool IsAdvancedFiltering => selectedResponsible.Length > 0 || selectedMeal.Length > 0;
+
+    private int AdvancedFilterCount =>
+        (carFilter != AllCars ? 1 : 0) + (selectedTag.Length > 0 ? 1 : 0);
+
+    private bool IsFiltering => !string.IsNullOrWhiteSpace(searchText) || selectedTag.Length > 0 || IsAdvancedFiltering || carFilter != AllCars;
+
+    private static readonly string[] ExtraTitles =
+        [ExtraCategories.Display(ExtraCategories.Snacks), ExtraCategories.Display(ExtraCategories.Other)];
+
+    private IEnumerable<(string Key, string Name)> AvailableResponsibles
+    {
+        get
+        {
+            var currentUid = AuthService.Current?.Uid;
+
+            return items
+                .SelectMany(i => i.Sources)
+                .SelectMany(s => s.Responsibles)
+                .Where(r => r.Key.Length > 0)
+                .GroupBy(r => r.Key)
+                .Select(g => (Key: g.Key, Name: g.Key == currentUid ? "Jag" : g.First().Name.Trim()))
+                .OrderBy(r => r.Key == currentUid ? 0 : 1)
+                .ThenBy(r => r.Name, StringComparer.CurrentCultureIgnoreCase);
+        }
+    }
+
+    private IEnumerable<(string Key, string Title)> AvailableMeals =>
+        items
+            .SelectMany(i => i.Sources)
+            .Where(s => !ExtraTitles.Contains(s.MealTitle) && !string.IsNullOrWhiteSpace(s.MealTitle))
+            .GroupBy(s => s.MealKey)
+            .Select(g => (Key: g.Key, Title: g.First().MealTitle))
+            .OrderBy(m => m.Title, StringComparer.CurrentCultureIgnoreCase);
+
+    private bool MatchesSource(ShoppingListSource source) =>
+        (selectedResponsible.Length == 0 || source.HasResponsible(selectedResponsible))
+        && (selectedMeal.Length == 0 || source.MealKey == selectedMeal);
 
     private IEnumerable<string> AvailableTags =>
         items.Select(i => i.PrimaryTag)
@@ -225,6 +548,18 @@ else
             return false;
         }
 
+        if (IsAdvancedFiltering && !item.Sources.Any(MatchesSource))
+        {
+            return false;
+        }
+
+        if (carFilter == NoCar && EffectiveCarId(item).Length > 0
+            || carFilter == MyCar && EffectiveCarId(item) != MyCarId
+            || carFilter.StartsWith(CarPrefix, StringComparison.Ordinal) && EffectiveCarId(item) != carFilter[CarPrefix.Length..])
+        {
+            return false;
+        }
+
         return selectedTag.Length == 0
             || string.Equals(item.PrimaryTag, selectedTag, StringComparison.OrdinalIgnoreCase)
             || item.Tags.Contains(selectedTag, StringComparer.OrdinalIgnoreCase);
@@ -234,6 +569,9 @@ else
     {
         searchText = "";
         selectedTag = "";
+        selectedResponsible = "";
+        selectedMeal = "";
+        carFilter = AllCars;
     }
 
     protected override async Task OnParametersSetAsync()
@@ -241,9 +579,16 @@ else
         isLoading = true;
         errorMessage = null;
 
+        if (CarQuery == "min")
+        {
+            carFilter = MyCar;
+            showAdvanced = true;
+        }
+
         try
         {
             trip = await TripService.GetAsync(TripId);
+            members = await TripService.GetMembersAsync(TripId);
             items = await ShoppingListService.BuildAsync(TripId);
             Regroup();
             await StartListeningAsync();
@@ -270,13 +615,35 @@ else
         {
             try
             {
-                await foreach (var state in ShoppingListService.ObserveCheckedState(TripId, token))
+                await foreach (var state in ShoppingListService.ObserveState(TripId, token))
                 {
                     foreach (var item in items)
                     {
-                        item.Checked = state.TryGetValue(item.IngredientId, out var value) && value;
+                        var found = state.TryGetValue(item.IngredientId, out var value);
+                        item.Checked = found && value!.Checked;
+                        item.CarId = found ? value!.CarId : "";
                     }
 
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception)
+            {
+                errorMessage = "Realtidsuppdateringen bröts.";
+                await InvokeAsync(StateHasChanged);
+            }
+        }, token);
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await foreach (var snapshot in CarService.ObserveCars(TripId, token))
+                {
+                    cars = snapshot;
                     await InvokeAsync(StateHasChanged);
                 }
             }
@@ -386,11 +753,28 @@ else
         await confetti.CelebrateAsync();
     }
 
-    private string FormatAmounts(ShoppingListItem item) =>
-        string.Join(" + ", item.Amounts.Select(a =>
-            string.IsNullOrWhiteSpace(a.Unit)
-                ? Format(a.Amount)
-                : $"{Format(a.Amount)} {IngredientService.FormatUnit(a.Unit, a.Amount)}"));
+    private string FormatAmounts(ShoppingListItem item)
+    {
+        if (!IsAdvancedFiltering)
+        {
+            return string.Join(" + ", item.Amounts.Select(a => FormatAmount(a.Amount, a.Unit)));
+        }
+
+        // Shown as "2 dl (av 5 dl)" so it is clear how much of the total the filter needs.
+        var filtered = item.Sources
+            .Where(MatchesSource)
+            .GroupBy(s => s.Unit, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.Sum(s => s.Amount), StringComparer.OrdinalIgnoreCase);
+
+        return string.Join(" + ", item.Amounts
+            .Where(a => filtered.GetValueOrDefault(a.Unit) > 0)
+            .Select(a => $"{FormatAmount(filtered[a.Unit], a.Unit)} (av {FormatAmount(a.Amount, a.Unit)})"));
+    }
+
+    private string FormatAmount(decimal amount, string unit) =>
+        string.IsNullOrWhiteSpace(unit)
+            ? Format(amount)
+            : $"{Format(amount)} {IngredientService.FormatUnit(unit, amount)}";
 
     private static string Format(decimal value) =>
         value == decimal.Truncate(value) ? ((long)value).ToString() : value.ToString("0.##");

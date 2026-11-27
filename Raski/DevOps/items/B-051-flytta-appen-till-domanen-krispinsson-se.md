@@ -1,9 +1,10 @@
 # B-051: Flytta appen till domänen krispinsson.se
 
-- **Status:** Pågår
+- **Status:** Klar
 - **Typ:** Utveckling
 - **Prioritet:** –
 - **Skapad:** 2026-10-22
+- **Klar:** 2026-11-15
 
 ## Beskrivning
 Appen ska flyttas från nuvarande domän till en domän under krispinsson.se, som ägs
@@ -14,10 +15,10 @@ Som användare vill jag nå appen via en adress under krispinsson.se så att den
 att komma ihåg och känns som en egen tjänst.
 
 ## Acceptanskriterier
-- [ ] Appen nås via en adress under krispinsson.se med giltigt HTTPS-certifikat.
-- [ ] Inloggning (e-post och Google, även på iOS) fungerar på den nya domänen.
-- [ ] Den gamla adressen skickar vidare till den nya, eller informerar om flytten.
-- [ ] PWA:n går att installera från den nya domänen.
+- [x] Appen nås via en adress under krispinsson.se med giltigt HTTPS-certifikat.
+- [x] Inloggning (e-post och Google, även på iOS) fungerar på den nya domänen.
+- [x] Den gamla adressen skickar vidare till den nya, eller informerar om flytten.
+- [x] PWA:n går att installera från den nya domänen.
 
 ## Öppna frågor
 Subdomän: `raski.krispinsson.se` (prod) och `test-raski.krispinsson.se` (test).

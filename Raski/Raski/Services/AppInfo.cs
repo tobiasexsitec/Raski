@@ -9,9 +9,10 @@ public static class AppInfo
         ?? typeof(AppInfo).Assembly.GetName().Version?.ToString()
         ?? "?";
 
-    /// <summary>The release version without build metadata (e.g. "0.21.0" from "0.21.0+abc123").</summary>
+    /// <summary>The release version without build metadata (e.g. "0.21.0" from "0.21.0+abc123", "1.1.0-rc.3" in test).</summary>
     public static readonly string Version = InformationalVersion.Split('+')[0];
 
+    // Prerelease suffixes (-rc.N) are ignored so a release candidate compares equal to its release.
     public static Version? Parse(string? version) =>
-        System.Version.TryParse(version?.Split('+')[0], out var parsed) ? parsed : null;
+        System.Version.TryParse(version?.Split('+')[0].Split('-')[0], out var parsed) ? parsed : null;
 }

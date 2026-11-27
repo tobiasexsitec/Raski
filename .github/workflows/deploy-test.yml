@@ -19,6 +19,8 @@ jobs:
       name: test
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -36,8 +38,21 @@ jobs:
           fi
           echo "PROJECT_ID=$PROJECT_ID" >> "$GITHUB_ENV"
 
+      # Test builds get <csproj version>-rc.N, where N is the number of commits since the latest release tag.
+      - name: Compute release candidate version
+        run: |
+          BASE=$(grep -oPm1 '(?<=<Version>)[^<]+' Raski/Raski/Raski.csproj)
+          LAST_TAG=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*-*' 2>/dev/null || true)
+          if [[ -n "$LAST_TAG" ]]; then
+            N=$(git rev-list --count "$LAST_TAG"..HEAD)
+          else
+            N=$(git rev-list --count HEAD)
+          fi
+          echo "RC_VERSION=$BASE-rc.$N" >> "$GITHUB_ENV"
+          echo "Version: $BASE-rc.$N (since ${LAST_TAG:-start})"
+
       - name: Publish
-        run: dotnet publish Raski/Raski/Raski.csproj -c Release
+        run: dotnet publish Raski/Raski/Raski.csproj -c Release -p:Version="$RC_VERSION"
 
       - name: Deploy hosting and Firestore rules/indexes
         env:
