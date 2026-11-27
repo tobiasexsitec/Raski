@@ -22,7 +22,7 @@
 
 | ID | Titel | Typ | Prioritet | Klar | Released |
 | --- | --- | --- | --- | --- | --- |
-| [B-092](items/B-092-en-rost-per-hushall-i-omrostningar.md) | En röst per hushåll i omröstningar | Patch | – | 2026-11-27 | |
+| [B-092](items/B-092-en-rost-per-hushall-i-omrostningar.md) | En röst per hushåll i omröstningar | Patch | – | 2026-11-27 | 1.1.1 |
 | [B-091](items/B-091-release-candidates-och-released-i-backloggen.md) | Release candidates i test och Released i backloggen | Utveckling | – | 2026-11-26 | 1.1.0 |
 | [B-086](items/B-086-sortera-anvandare-pa-registreringsdatum.md) | Sortera användare på registreringsdatum och senaste inloggning | Patch | – | 2026-11-25 | 1.1.0 |
 | [B-088](items/B-088-flera-ansvariga-pa-en-maltid.md) | Flera ansvariga på en måltid | Funktion | – | 2026-11-25 | 1.1.0 |

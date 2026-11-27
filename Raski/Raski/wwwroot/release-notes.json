@@ -1,4 +1,9 @@
 [
+  { "version": "1.1.1", "date": "2026-11-27",
+    "notes": [
+      "En omröstning kan ha en röst per hushåll. Alla i hushållet kan ändra hushållets röst."
+    ]
+  },
   { "version": "1.1.0", "date": "2026-11-27",
     "highlights": [
       "Att tänka på: överst på resans översikt ser du nedräkningen till resan och det som väntar på dig, till exempel omröstningar och sådant du eller ditt hushåll ansvarar för.",
