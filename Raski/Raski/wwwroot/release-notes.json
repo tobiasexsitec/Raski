@@ -1,4 +1,23 @@
 [
+  { "version": "1.1.0", "date": "2026-11-27",
+    "highlights": [
+      "Att tänka på: överst på resans översikt ser du nedräkningen till resan och det som väntar på dig, till exempel omröstningar och sådant du eller ditt hushåll ansvarar för.",
+      "Mat och måltider: lägg till förslag på mat utan dag eller ingredienser, och sätt flera ansvariga på en måltid. Ett hushåll kan också vara ansvarigt.",
+      "Inköp per bil: fördela varorna mellan bilarna och se bara det din bil ska handla.",
+      "Buggfixar och små förbättringar."
+    ],
+    "notes": [
+      "Förslag på mat: lägg till idéer på rätter utan att välja dag eller ingredienser.",
+      "En måltid kan ha flera ansvariga.",
+      "Ett hushåll kan ha ett namn och vara ansvarigt för något. Namnet ändrar du på profilen.",
+      "Kortet Att tänka på överst på översikten visar nedräkningen till resan och det som väntar på dig.",
+      "Fördela inköpen mellan bilar och filtrera inköpslistan på din bil. Bilens namn visas på varan.",
+      "Avancerad filtrering i inköpslistan.",
+      "Inköpslistan är kompaktare, så att fler varor får plats på skärmen.",
+      "Administratören kan ta bort en resa.",
+      "Användarlistan för admin visar registreringsdatum och senaste inloggning, kan sorteras och visar mer information när du trycker på en rad."
+    ]
+  },
   { "version": "1.0.1", "date": "2026-11-10",
     "notes": [
       "Onboardingen fokuserar nu på hushållet, med partner och barn.",

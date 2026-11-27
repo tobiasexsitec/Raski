@@ -22,17 +22,17 @@
 
 | ID | Titel | Typ | Prioritet | Klar | Released |
 | --- | --- | --- | --- | --- | --- |
-| [B-091](items/B-091-release-candidates-och-released-i-backloggen.md) | Release candidates i test och Released i backloggen | Utveckling | – | 2026-11-26 |  |
-| [B-086](items/B-086-sortera-anvandare-pa-registreringsdatum.md) | Sortera användare på registreringsdatum och senaste inloggning | Patch | – | 2026-11-25 |  |
-| [B-088](items/B-088-flera-ansvariga-pa-en-maltid.md) | Flera ansvariga på en måltid | Funktion | – | 2026-11-25 |  |
-| [B-089](items/B-089-kompaktare-inkopslista.md) | Kompaktare inköpslista | Patch | – | 2026-11-25 |  |
-| [B-085](items/B-085-att-tanka-pa-pa-oversikten.md) | "Att tänka på" på översikten | Funktion | – | 2026-11-25 |  |
-| [B-083](items/B-083-hushall-med-namn-som-ansvarig.md) | Hushåll med namn som ansvarig | Funktion | – | 2026-11-18 |  |
-| [B-087](items/B-087-forslag-pa-mat.md) | Förslag på mat | Funktion | – | 2026-11-16 |  |
-| [B-084](items/B-084-fordela-inkop-mellan-bilar.md) | Fördela inköp mellan bilar | Funktion | – | 2026-11-15 |  |
-| [B-051](items/B-051-flytta-appen-till-domanen-krispinsson-se.md) | Flytta appen till domänen krispinsson.se | Utveckling | – | 2026-11-15 |  |
-| [B-081](items/B-081-ta-bort-en-resa.md) | Ta bort en resa | Funktion | – | 2026-11-15 |  |
-| [B-082](items/B-082-avancerad-filtrering-i-inkopslistan.md) | Avancerad filtrering i inköpslistan | Patch | – | 2026-11-11 |  |
+| [B-091](items/B-091-release-candidates-och-released-i-backloggen.md) | Release candidates i test och Released i backloggen | Utveckling | – | 2026-11-26 | 1.1.0 |
+| [B-086](items/B-086-sortera-anvandare-pa-registreringsdatum.md) | Sortera användare på registreringsdatum och senaste inloggning | Patch | – | 2026-11-25 | 1.1.0 |
+| [B-088](items/B-088-flera-ansvariga-pa-en-maltid.md) | Flera ansvariga på en måltid | Funktion | – | 2026-11-25 | 1.1.0 |
+| [B-089](items/B-089-kompaktare-inkopslista.md) | Kompaktare inköpslista | Patch | – | 2026-11-25 | 1.1.0 |
+| [B-085](items/B-085-att-tanka-pa-pa-oversikten.md) | "Att tänka på" på översikten | Funktion | – | 2026-11-25 | 1.1.0 |
+| [B-083](items/B-083-hushall-med-namn-som-ansvarig.md) | Hushåll med namn som ansvarig | Funktion | – | 2026-11-18 | 1.1.0 |
+| [B-087](items/B-087-forslag-pa-mat.md) | Förslag på mat | Funktion | – | 2026-11-16 | 1.1.0 |
+| [B-084](items/B-084-fordela-inkop-mellan-bilar.md) | Fördela inköp mellan bilar | Funktion | – | 2026-11-15 | 1.1.0 |
+| [B-051](items/B-051-flytta-appen-till-domanen-krispinsson-se.md) | Flytta appen till domänen krispinsson.se | Utveckling | – | 2026-11-15 | 1.1.0 |
+| [B-081](items/B-081-ta-bort-en-resa.md) | Ta bort en resa | Funktion | – | 2026-11-15 | 1.1.0 |
+| [B-082](items/B-082-avancerad-filtrering-i-inkopslistan.md) | Avancerad filtrering i inköpslistan | Patch | – | 2026-11-11 | 1.1.0 |
 | [B-080](items/B-080-seg-laddning-av-data-fran-firestore.md) | Seg laddning av data från Firestore | Bugg | – | 2026-11-10 | 1.0.1 |
 | [B-079](items/B-079-hushallsfokus-i-onboarding-for-partner-och-barn.md) | Hushållsfokus i onboarding för partner och barn | Patch | – | 2026-11-10 | 1.0.1 |
 | [B-078](items/B-078-hojdpunkter-i-nyhetspopupen.md) | Höjdpunkter i nyhetspopupen | Patch | – | 2026-11-02 | 1.0.0 |
