@@ -239,7 +239,12 @@ service cloud.firestore {
 								  && request.auth.uid == voterUid
 								  && pollData(tripId, pollId).closed != true;
 		  allow delete: if (isTripMember(tripId) && request.auth.uid == voterUid)
-						  || isPollCreator(tripId, pollId);
+						  || isPollCreator(tripId, pollId)
+						  || (isTripMember(tripId)
+							  && pollData(tripId, pollId).get('oneVotePerHousehold', false) == true
+							  && pollData(tripId, pollId).closed != true
+							  && resource.data.get('householdId', '') != ''
+							  && request.auth.uid in get(/databases/$(database)/documents/households/$(resource.data.householdId)).data.memberUids);
 		}
 	  }
 

@@ -331,6 +331,7 @@ internal sealed class PollDocument
     [JsonPropertyName("allowMultiple")] public bool AllowMultiple { get; set; }
     [JsonPropertyName("maxChoices")] public int? MaxChoices { get; set; }
     [JsonPropertyName("allowCustomOptions")] public bool AllowCustomOptions { get; set; }
+    [JsonPropertyName("oneVotePerHousehold")] public bool OneVotePerHousehold { get; set; }
     [JsonPropertyName("deadline")] public string? Deadline { get; set; }
     [JsonPropertyName("closed")] public bool Closed { get; set; }
     [JsonPropertyName("createdByUid")] public string? CreatedByUid { get; set; }
@@ -345,6 +346,7 @@ internal sealed class PollDocument
         AllowMultiple = AllowMultiple,
         MaxChoices = Math.Max(0, MaxChoices ?? 0),
         AllowCustomOptions = AllowCustomOptions,
+        OneVotePerHousehold = OneVotePerHousehold,
         Deadline = DateTimeOffset.TryParse(Deadline, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var deadline)
             ? deadline
             : null,
@@ -398,12 +400,14 @@ internal sealed class PollVoteDocument
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";
     [JsonPropertyName("voterName")] public string? VoterName { get; set; }
+    [JsonPropertyName("householdId")] public string? HouseholdId { get; set; }
     [JsonPropertyName("optionIds")] public List<string>? OptionIds { get; set; }
 
     public PollVote ToModel() => new()
     {
         VoterUid = Id,
         VoterName = VoterName ?? "",
+        HouseholdId = HouseholdId ?? "",
         OptionIds = OptionIds ?? []
     };
 }

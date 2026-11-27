@@ -1,4 +1,5 @@
 @inject IPollService PollService
+@inject IHouseholdService HouseholdService
 
 <section class="card polls-intro" aria-labelledby="polls-intro-heading">
     <h2 id="polls-intro-heading">Omröstningar</h2>
@@ -42,7 +43,7 @@ else
 
     @foreach (var poll in polls)
     {
-        <PollCard @key="poll.Id" Poll="poll" OnDeleted="OnDeleted" />
+        <PollCard @key="poll.Id" Poll="poll" Households="households" OnDeleted="OnDeleted" />
     }
 }
 
@@ -50,6 +51,7 @@ else
     [Parameter, EditorRequired] public Trip Trip { get; set; } = default!;
 
     private List<Poll> polls = [];
+    private IReadOnlyList<Household> households = [];
     private PollDraft draft = PollDraft.CreateNew();
     private bool isCreating;
     private bool isLoading = true;
@@ -71,6 +73,7 @@ else
         try
         {
             polls = [.. await PollService.GetAsync(Trip.Id)];
+            households = await HouseholdService.GetForMembersAsync(Trip.MemberUids);
         }
         catch (Exception)
         {
@@ -105,6 +108,7 @@ else
                 AllowMultiple = draft.AllowMultiple,
                 MaxChoices = draft.MaxChoices,
                 AllowCustomOptions = draft.AllowCustomOptions,
+                OneVotePerHousehold = draft.OneVotePerHousehold,
                 Deadline = draft.Deadline
             };
 

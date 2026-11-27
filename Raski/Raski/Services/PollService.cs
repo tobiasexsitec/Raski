@@ -87,7 +87,7 @@ public sealed class PollService(FirebaseInterop interop, IAuthService authServic
             ["updatedAt"] = FirestoreFormat.UtcNow()
         }, ct: ct);
 
-    public async Task<PollVote?> VoteAsync(string tripId, string pollId, IReadOnlyCollection<string> optionIds, CancellationToken ct = default)
+    public async Task<PollVote?> VoteAsync(string tripId, string pollId, IReadOnlyCollection<string> optionIds, string? householdId = null, CancellationToken ct = default)
     {
         var uid = authService.Current?.Uid ?? throw new InvalidOperationException("Not signed in.");
         var path = $"{VotesPath(tripId, pollId)}/{uid}";
@@ -102,18 +102,29 @@ public sealed class PollService(FirebaseInterop interop, IAuthService authServic
         {
             VoterUid = uid,
             VoterName = authService.Current?.DisplayName ?? "",
+            HouseholdId = householdId ?? "",
             OptionIds = [.. optionIds.Distinct()]
         };
 
-        await interop.SetDocumentAsync(path, new Dictionary<string, object?>
+        var data = new Dictionary<string, object?>
         {
             ["voterName"] = vote.VoterName,
             ["optionIds"] = vote.OptionIds,
             ["updatedAt"] = FirestoreFormat.UtcNow()
-        }, merge: false, ct: ct);
+        };
+
+        if (!string.IsNullOrEmpty(householdId))
+        {
+            data["householdId"] = householdId;
+        }
+
+        await interop.SetDocumentAsync(path, data, merge: false, ct: ct);
 
         return vote;
     }
+
+    public Task DeleteVoteAsync(string tripId, string pollId, string voterUid, CancellationToken ct = default) =>
+        interop.DeleteDocumentAsync($"{VotesPath(tripId, pollId)}/{voterUid}", ct);
 
     public async Task DeleteAsync(Poll poll, CancellationToken ct = default)
     {
@@ -131,6 +142,7 @@ public sealed class PollService(FirebaseInterop interop, IAuthService authServic
         ["allowMultiple"] = poll.AllowMultiple,
         ["maxChoices"] = poll.AllowMultiple ? Math.Max(0, poll.MaxChoices) : 1,
         ["allowCustomOptions"] = poll.AllowCustomOptions,
+        ["oneVotePerHousehold"] = poll.OneVotePerHousehold,
         ["deadline"] = poll.Deadline?.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture),
         ["closed"] = poll.IsClosed,
         ["updatedAt"] = FirestoreFormat.UtcNow(),

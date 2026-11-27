@@ -9,6 +9,7 @@ public sealed class PollDraft
     public bool AllowMultiple { get; set; }
     public int MaxChoices { get; set; }
     public bool AllowCustomOptions { get; set; }
+    public bool OneVotePerHousehold { get; set; }
     public bool HasDeadline { get; set; }
     public DateTime? DeadlineLocal { get; set; }
     public List<PollDraftOption> Options { get; set; } = [];
@@ -37,11 +38,15 @@ public sealed class PollDraft
         AllowMultiple = poll.AllowMultiple,
         MaxChoices = poll.MaxChoices,
         AllowCustomOptions = poll.AllowCustomOptions,
+        OneVotePerHousehold = poll.OneVotePerHousehold,
         HasDeadline = poll.Deadline is not null,
         DeadlineLocal = poll.Deadline?.ToLocalTime().DateTime ?? DateTime.Today.AddDays(1).AddHours(18),
         Options = [.. poll.Options.Select(o => new PollDraftOption { Id = o.Id, Text = o.Text })]
     };
 }
+
+/// <summary>Message shown when one vote per household changes; Blocked prevents saving.</summary>
+public readonly record struct HouseholdVoteCheck(string? Message, bool Blocked);
 
 public sealed class PollDraftOption
 {

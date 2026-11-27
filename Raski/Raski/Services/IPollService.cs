@@ -18,7 +18,10 @@ public interface IPollService
     Task UpdateOptionAsync(string tripId, string pollId, PollOption option, CancellationToken ct = default);
 
     /// <summary>Replaces the current user's vote. An empty selection removes the vote.</summary>
-    Task<PollVote?> VoteAsync(string tripId, string pollId, IReadOnlyCollection<string> optionIds, CancellationToken ct = default);
+    Task<PollVote?> VoteAsync(string tripId, string pollId, IReadOnlyCollection<string> optionIds, string? householdId = null, CancellationToken ct = default);
+
+    /// <summary>Removes one voter's vote, e.g. another household member's or a merged duplicate.</summary>
+    Task DeleteVoteAsync(string tripId, string pollId, string voterUid, CancellationToken ct = default);
 
     Task DeleteAsync(Poll poll, CancellationToken ct = default);
 }
