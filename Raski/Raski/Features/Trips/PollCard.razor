@@ -7,6 +7,7 @@
         <PollForm Draft="draft"
                   IdPrefix="@($"edit-{Poll.Id}")"
                   IsSaving="isSaving"
+                  HouseholdCheck="CheckHousehold"
                   OnSubmit="SaveEditAsync"
                   OnCancel="() => draft = null" />
     }
@@ -46,6 +47,10 @@
         <p class="muted poll-meta">
             Skapad av @(string.IsNullOrWhiteSpace(Poll.CreatedByName) ? "okänd" : Poll.CreatedByName)
             · @ChoiceText
+            @if (Poll.OneVotePerHousehold)
+            {
+                <text> · En röst per hushåll</text>
+            }
             · @StatusText
         </p>
 
@@ -107,7 +112,7 @@
                 </button>
                 @if (MyVote is not null)
                 {
-                    <button type="button" class="btn btn-secondary btn-sm" disabled="@isSaving" @onclick="RemoveVoteAsync">Ta bort min röst</button>
+                    <button type="button" class="btn btn-secondary btn-sm" disabled="@isSaving" @onclick="RemoveVoteAsync">@(Poll.OneVotePerHousehold ? "Ta bort hushållets röst" : "Ta bort min röst")</button>
                 }
             </div>
         }
@@ -135,6 +140,7 @@
 
 @code {
     [Parameter, EditorRequired] public Poll Poll { get; set; } = default!;
+    [Parameter] public IReadOnlyList<Household> Households { get; set; } = [];
 
     private bool IsAdmin => CurrentUser?.IsGlobalAdmin == true;
     [Parameter] public EventCallback<Poll> OnDeleted { get; set; }
@@ -159,7 +165,15 @@
         : Poll.MaxChoices > 0 ? $"Upp till {Poll.MaxChoices} val"
         : "Valfritt antal val";
     private bool IsOpen => Poll.IsOpen(DateTimeOffset.Now);
-    private PollVote? MyVote => Poll.Votes.FirstOrDefault(v => v.VoterUid == CurrentUser?.Uid);
+    private IReadOnlyList<string> MyVoterUids =>
+        CurrentUser is null ? []
+        : Poll.OneVotePerHousehold ? Poll.HouseholdUids(CurrentUser.Uid, Households)
+        : [CurrentUser.Uid];
+    private string? MyHouseholdId =>
+        CurrentUser is null ? null : Households.FirstOrDefault(h => h.MemberUids.Contains(CurrentUser.Uid))?.Id;
+    private PollVote? MyVote =>
+        Poll.Votes.FirstOrDefault(v => v.VoterUid == CurrentUser?.Uid)
+        ?? Poll.Votes.FirstOrDefault(v => MyVoterUids.Contains(v.VoterUid));
     private bool HasChanges => !selected.SetEquals(MyVote?.OptionIds ?? []) && selected.Count > 0;
 
     private string StatusText =>
@@ -231,19 +245,31 @@
 
         await RunAsync(async () =>
         {
-            var vote = await PollService.VoteAsync(Poll.TripId, Poll.Id, optionIds);
+            var vote = await PollService.VoteAsync(Poll.TripId, Poll.Id, optionIds, MyHouseholdId);
             Poll.Votes.RemoveAll(v => v.VoterUid == CurrentUser?.Uid);
             if (vote is not null)
             {
                 Poll.Votes.Add(vote);
             }
+
+            await RemoveOtherHouseholdVotesAsync();
         }, "Kunde inte spara rösten.");
+    }
+
+    private async Task RemoveOtherHouseholdVotesAsync()
+    {
+        foreach (var other in Poll.Votes.Where(v => v.VoterUid != CurrentUser?.Uid && MyVoterUids.Contains(v.VoterUid)).ToList())
+        {
+            await PollService.DeleteVoteAsync(Poll.TripId, Poll.Id, other.VoterUid);
+            Poll.Votes.Remove(other);
+        }
     }
 
     private async Task RemoveVoteAsync()
     {
         if (await RunAsync(async () =>
         {
+            await RemoveOtherHouseholdVotesAsync();
             await PollService.VoteAsync(Poll.TripId, Poll.Id, []);
             Poll.Votes.RemoveAll(v => v.VoterUid == CurrentUser?.Uid);
         }, "Kunde inte ta bort rösten."))
@@ -302,13 +328,24 @@
             AllowMultiple = edit.AllowMultiple,
             MaxChoices = edit.MaxChoices,
             AllowCustomOptions = edit.AllowCustomOptions,
+            OneVotePerHousehold = edit.OneVotePerHousehold,
             Deadline = edit.Deadline,
             IsClosed = Poll.IsClosed
         };
 
+        var mergeVotes = updated.OneVotePerHousehold && !Poll.OneVotePerHousehold
+            ? Poll.DuplicateHouseholdVotes(Households)
+            : [];
+
         var ok = await RunAsync(async () =>
         {
             await PollService.UpdateAsync(updated);
+
+            foreach (var duplicate in mergeVotes)
+            {
+                await PollService.DeleteVoteAsync(Poll.TripId, Poll.Id, duplicate.VoterUid);
+                Poll.Votes.Remove(duplicate);
+            }
 
             var order = Poll.Options.Count == 0 ? 0 : Poll.Options.Max(o => o.Order) + 1;
 
@@ -334,9 +371,36 @@
             Poll.AllowMultiple = updated.AllowMultiple;
             Poll.MaxChoices = updated.MaxChoices;
             Poll.AllowCustomOptions = updated.AllowCustomOptions;
+            Poll.OneVotePerHousehold = updated.OneVotePerHousehold;
             Poll.Deadline = updated.Deadline;
             draft = null;
+            ResetSelection();
         }
+    }
+
+    private HouseholdVoteCheck CheckHousehold(PollDraft edit)
+    {
+        if (edit.OneVotePerHousehold == Poll.OneVotePerHousehold || Poll.Votes.Count == 0)
+        {
+            return default;
+        }
+
+        if (!edit.OneVotePerHousehold)
+        {
+            return new("Omröstningen har redan röster. Hushållens röster räknas som röster för den som lade dem, och övriga i hushållen kan sedan rösta själva.", false);
+        }
+
+        var conflicts = Poll.ConflictingHouseholds(Households);
+
+        if (conflicts.Count > 0)
+        {
+            var names = conflicts.Select(g => string.Join(" och ", g.Select(v => v.VoterName)));
+            return new($"Det går inte att slå på en röst per hushåll eftersom {string.Join(", ", names)} har röstat olika.", true);
+        }
+
+        return Poll.DuplicateHouseholdVotes(Households).Count > 0
+            ? new("Omröstningen har redan röster. Lika röster från samma hushåll slås ihop till en röst per hushåll.", false)
+            : new("Omröstningen har redan röster. Från och med nu räknas bara en röst per hushåll.", false);
     }
 
     private void OnDeleteDialogKeyDown(KeyboardEventArgs e)

@@ -54,6 +54,14 @@
             Resenärer får lägga till egna alternativ
         </label>
         <label class="poll-check">
+            <input type="checkbox" @bind="Draft.OneVotePerHousehold" />
+            En röst per hushåll
+        </label>
+        @if (HouseholdCheck?.Invoke(Draft) is { Message: { } message } check)
+        {
+            <div class="@(check.Blocked ? "error-banner" : "warning-banner")" role="alert">@message</div>
+        }
+        <label class="poll-check">
             <input type="checkbox" @bind="Draft.HasDeadline" />
             Stäng automatiskt vid en viss tid
         </label>
@@ -71,7 +79,7 @@
     </div>
 
     <div class="row-inline">
-        <button type="submit" class="btn btn-primary" disabled="@(IsSaving || !Draft.IsValid)">
+        <button type="submit" class="btn btn-primary" disabled="@(IsSaving || !CanSubmit)">
             @(IsSaving ? "Sparar…" : SubmitText)
         </button>
         <button type="button" class="btn btn-secondary" @onclick="OnCancel">Avbryt</button>
@@ -86,9 +94,14 @@
     [Parameter] public EventCallback OnSubmit { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
 
+    /// <summary>Warns about, or blocks, changing one vote per household on a poll that has votes.</summary>
+    [Parameter] public Func<PollDraft, HouseholdVoteCheck>? HouseholdCheck { get; set; }
+
+    private bool CanSubmit => Draft.IsValid && HouseholdCheck?.Invoke(Draft).Blocked != true;
+
     private async Task SubmitAsync()
     {
-        if (Draft.IsValid)
+        if (CanSubmit)
         {
             await OnSubmit.InvokeAsync();
         }

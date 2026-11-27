@@ -413,7 +413,15 @@ input[type="checkbox"] {
     padding: var(--space-3);
 }
 
-@media (prefers-reduced-motion: reduce) {
+.warning-banner {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    padding: var(--space-3);
+}
+
+@media (prefers-reduced-motion
     *,
     *::before,
     *::after {
